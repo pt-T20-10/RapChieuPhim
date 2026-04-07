@@ -1,0 +1,75 @@
+﻿@model RapChieuPhim.Models.Entities.Phim
+
+@{
+    ViewData["Title"] = "Chi tiết phim - " + Model.TenPhim;
+    var imgUrl = string.IsNullOrEmpty(Model.DuongDanAnh) ? "/images/default/no-image.jpg" : Model.DuongDanAnh;
+
+    // Tự động chuyển đổi Link YouTube thông thường sang định dạng Embed
+    var trailerUrl = Model.DuongDanTrailer ?? "";
+    if (trailerUrl.Contains("watch?v="))
+    {
+        trailerUrl = trailerUrl.Replace("watch?v=", "embed/");
+        // Xóa các tham số thừa phía sau (như &list=... hoặc &t=...)
+        var ampersandIndex = trailerUrl.IndexOf("&");
+        if (ampersandIndex > 0)
+        {
+            trailerUrl = trailerUrl.Substring(0, ampersandIndex);
+        }
+    }
+    else if (trailerUrl.Contains("youtu.be/"))
+    {
+        trailerUrl = trailerUrl.Replace("youtu.be/", "www.youtube.com/embed/");
+    }
+}
+
+<div class="container mt-4 mb-5">
+    <div class="card shadow-sm border-0 rounded-lg p-4">
+        <div class="row">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <img src="@imgUrl" class="img-fluid rounded shadow" alt="@Model.TenPhim" style="width: 100%; object-fit: cover;">
+            </div>
+
+            <div class="col-md-8">
+                <h2 class="fw-bold" style="color: #034ea2;">@Model.TenPhim</h2>
+                <hr />
+                <p class="mb-2"><strong><i class="bi bi-tags me-2"></i>Thể loại:</strong> @(Model.MaTheLoaiNavigation?.TenTheLoai ?? "Đang cập nhật")</p>
+                <p class="mb-2"><strong><i class="bi bi-clock me-2"></i>Thời lượng:</strong> @Model.ThoiLuong phút</p>
+                <p class="mb-2"><strong><i class="bi bi-calendar-event me-2"></i>Ngày khởi chiếu:</strong> @Model.NgayPhatHanh.ToString("dd/MM/yyyy")</p>
+                <p class="mb-4">
+                    <strong><i class="bi bi-shield-exclamation me-2"></i>Độ tuổi:</strong>
+                    <span class="badge bg-danger fs-6">@Model.PhanLoaiDoTuoi</span>
+                </p>
+
+                <div class="mb-4">
+                    <h5 class="fw-bold">NỘI DUNG PHIM</h5>
+                    <p class="text-justify text-muted" style="line-height: 1.6;">
+                        @(string.IsNullOrEmpty(Model.MoTa) ? "Đang cập nhật nội dung..." : Model.MoTa)
+                    </p>
+                </div>
+
+                @if (Model.TrangThai == "DangChieu")
+                {
+                    <a asp-area="NguoiDung" asp-controller="DatVe" asp-action="ChonSuatChieu" asp-route-maPhim="@Model.MaPhim" class="btn btn-lg fw-bold text-white px-5" style="background-color: #034ea2;">
+                        <i class="bi bi-ticket-perforated me-2"></i> MUA VÉ NGAY
+                    </a>
+                }
+                else
+                {
+                    <button class="btn btn-lg btn-secondary fw-bold px-5" disabled>PHIM SẮP CHIẾU</button>
+                }
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(trailerUrl))
+        {
+            <div class="row mt-5">
+                <div class="col-12">
+                    <h4 class="fw-bold mb-3 border-start border-4 ps-2" style="border-color: #034ea2 !important;">TRAILER</h4>
+                    <div class="ratio ratio-16x9 shadow-sm rounded overflow-hidden">
+                        <iframe src="@trailerUrl" title="YouTube video" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
