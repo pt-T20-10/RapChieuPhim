@@ -1,6 +1,7 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using RapChieuPhim.Models;
+using RapChieuPhim.Services;
 
 namespace RapChieuPhim.Areas.NguoiDung.Controllers
 {
@@ -8,15 +9,20 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly DatVeService _datVeService;
 
-        public HomeController(ILogger<HomeController> logger)
+        // Tiêm DatVeService vào Controller
+        public HomeController(ILogger<HomeController> logger, DatVeService datVeService)
         {
             _logger = logger;
+            _datVeService = datVeService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            // Lấy danh sách phim từ Service
+            var danhSachPhim = await _datVeService.LayDanhSachPhimAsync();
+            return View(danhSachPhim);
         }
 
         public IActionResult Privacy()

@@ -1,6 +1,249 @@
-﻿@{
+﻿@model IEnumerable<RapChieuPhim.Models.Entities.Phim>
+
+@{
     ViewData["Title"] = "Trang chủ";
+
+    // Phân loại danh sách phim
+    var phimDangChieu = Model?.Where(p => p.TrangThai == "DangChieu").ToList() ?? new List<RapChieuPhim.Models.Entities.Phim>();
+    var phimSapChieu = Model?.Where(p => p.TrangThai == "SapChieu").ToList() ?? new List<RapChieuPhim.Models.Entities.Phim>();
+
+    // Lấy 5 phim mới nhất cho Banner dựa trên Ngày phát hành
+    var bannerMovies = Model?.OrderByDescending(p => p.NgayPhatHanh).Take(5).ToList() ?? new List<RapChieuPhim.Models.Entities.Phim>();
 }
 
-<h2>@ViewData["Title"]</h2>
-<p>Đang phát triển...</p>
+<style>
+    .beta-blue-bg {
+        background-color: #034ea2;
+        color: white;
+        border: none;
+    }
+
+        .beta-blue-bg:hover {
+            background-color: #023670;
+            color: white;
+        }
+
+    .beta-blue-text {
+        color: #034ea2;
+    }
+
+    .beta-blue-outline {
+        border: 1px solid #034ea2;
+        color: #034ea2;
+        background: transparent;
+    }
+
+        .beta-blue-outline:hover {
+            background-color: #034ea2;
+            color: white;
+        }
+
+    .nav-tabs {
+        border-bottom: 2px solid #dee2e6;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+
+        .nav-tabs .nav-link {
+            color: #495057;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: none;
+            padding: 12px 24px;
+            text-transform: uppercase;
+        }
+
+            .nav-tabs .nav-link:hover {
+                color: #034ea2;
+            }
+
+            .nav-tabs .nav-link.active {
+                color: #034ea2;
+                border-bottom: 3px solid #034ea2;
+                background: transparent;
+            }
+
+    .movie-card {
+        border: none;
+        transition: transform 0.3s;
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
+    }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+    .card-img-wrapper {
+        position: relative;
+        overflow: hidden;
+        padding-top: 145%;
+    }
+
+        .card-img-wrapper img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .age-rating {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        border-radius: 4px;
+        padding: 3px 8px;
+        font-weight: bold;
+        font-size: 0.8rem;
+        z-index: 10;
+    }
+
+    .bg-t16 {
+        background-color: #f39c12;
+        color: white;
+    }
+
+    .bg-t18 {
+        background-color: #c0392b;
+        color: white;
+    }
+
+    .bg-p {
+        background-color: #27ae60;
+        color: white;
+    }
+
+    .hot-badge {
+        position: absolute;
+        top: 15px;
+        right: -25px;
+        background-color: #e74c3c;
+        color: white;
+        padding: 2px 30px;
+        transform: rotate(45deg);
+        font-size: 0.75rem;
+        font-weight: bold;
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+</style>
+
+<div id="homeBanner" class="carousel slide mb-5" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        @for (int i = 0; i < bannerMovies.Count; i++)
+        {
+            <button type="button" data-bs-target="#homeBanner" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")"></button>
+        }
+    </div>
+
+    <div class="carousel-inner" style="background-color: #111;">
+        @for (int i = 0; i < bannerMovies.Count; i++)
+        {
+            var phim = bannerMovies[i];
+
+            // Lấy đường dẫn poster gốc
+            var originalImg = string.IsNullOrEmpty(phim.DuongDanAnh) ? "/images/default/no-image.jpg" : phim.DuongDanAnh;
+
+            // Suy luận ra đường dẫn banner
+            var bannerImg = originalImg.Replace("/images/phim/", "/images/phim/banner/");
+
+            <div class="carousel-item @(i == 0 ? "active" : "")">
+                <img src="@bannerImg" class="d-block w-100" style="height: 50vh; min-height: 400px; max-height: 600px; object-fit: contain;" alt="@phim.TenPhim" onerror="this.src='@originalImg';">
+
+                @* <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded px-4 py-2" style="bottom: 10%;">
+                    <h3 class="fw-bold text-uppercase text-white mb-0" style="letter-spacing: 1px;">@phim.TenPhim</h3>
+                </div> *@
+            </div>
+        }
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#homeBanner" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#homeBanner" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    </button>
+</div>
+
+<div class="container mb-5 bg-white p-4 rounded shadow-sm">
+    <ul class="nav nav-tabs" id="movieTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="dangchieu-tab" data-bs-toggle="tab" data-bs-target="#dangchieu" type="button" role="tab">PHIM ĐANG CHIẾU</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="sapchieu-tab" data-bs-toggle="tab" data-bs-target="#sapchieu" type="button" role="tab">PHIM SẮP CHIẾU</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="movieTabsContent">
+        <div class="tab-pane fade show active" id="dangchieu" role="tabpanel">
+            <div class="row g-4">
+                @foreach (var phim in phimDangChieu)
+                {
+                    var imgUrl = string.IsNullOrEmpty(phim.DuongDanAnh) ? "/images/default/no-image.jpg" : phim.DuongDanAnh;
+                    var bgColor = phim.PhanLoaiDoTuoi == "T18" ? "bg-t18" : (phim.PhanLoaiDoTuoi == "T16" ? "bg-t16" : "bg-p");
+
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                        <div class="card movie-card h-100 shadow-sm">
+                            <div class="card-img-wrapper">
+                                @if (!string.IsNullOrEmpty(phim.PhanLoaiDoTuoi))
+                                {
+                                    <span class="age-rating @bgColor">@phim.PhanLoaiDoTuoi</span>
+                                }
+                                @if (phim.PhanLoaiDoTuoi == "T16" || phim.PhanLoaiDoTuoi == "T18")
+                                {
+                                    <div class="hot-badge">HOT</div>
+                                }
+                                <img src="@imgUrl" alt="@phim.TenPhim">
+                            </div>
+                            <div class="card-body d-flex flex-column text-center">
+                                <h5 class="card-title fw-bold beta-blue-text text-truncate" title="@phim.TenPhim">@phim.TenPhim</h5>
+                                <p class="card-text small text-muted mb-1"><strong>Thể loại:</strong> @(phim.MaTheLoaiNavigation?.TenTheLoai ?? "Đang cập nhật")</p>
+                                <p class="card-text small text-muted mb-3"><strong>Thời lượng:</strong> @phim.ThoiLuong phút</p>
+
+                                <div class="mt-auto d-flex gap-2">
+                                    <a asp-area="NguoiDung" asp-controller="DatVe" asp-action="ChiTietPhim" asp-route-maPhim="@phim.MaPhim" class="btn beta-blue-outline w-50 fw-bold py-2">CHI TIẾT</a>
+                                    <a asp-area="NguoiDung" asp-controller="DatVe" asp-action="ChonSuatChieu" asp-route-maPhim="@phim.MaPhim" class="btn beta-blue-bg w-50 fw-bold py-2">MUA VÉ</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="sapchieu" role="tabpanel">
+            <div class="row g-4">
+                @foreach (var phim in phimSapChieu)
+                {
+                    var imgUrl = string.IsNullOrEmpty(phim.DuongDanAnh) ? "/images/default/no-image.jpg" : phim.DuongDanAnh;
+                    var bgColor = phim.PhanLoaiDoTuoi == "T18" ? "bg-t18" : (phim.PhanLoaiDoTuoi == "T16" ? "bg-t16" : "bg-p");
+
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                        <div class="card movie-card h-100 shadow-sm">
+                            <div class="card-img-wrapper">
+                                @if (!string.IsNullOrEmpty(phim.PhanLoaiDoTuoi))
+                                {
+                                    <span class="age-rating @bgColor">@phim.PhanLoaiDoTuoi</span>
+                                }
+                                <img src="@imgUrl" alt="@phim.TenPhim">
+                            </div>
+                            <div class="card-body d-flex flex-column text-center">
+                                <h5 class="card-title fw-bold beta-blue-text text-truncate" title="@phim.TenPhim">@phim.TenPhim</h5>
+                                <p class="card-text small text-muted mb-1"><strong>Khởi chiếu:</strong> @phim.NgayPhatHanh.ToString("dd/MM/yyyy")</p>
+
+                                <div class="mt-auto d-flex gap-2">
+                                    <a asp-area="NguoiDung" asp-controller="DatVe" asp-action="ChiTietPhim" asp-route-maPhim="@phim.MaPhim" class="btn beta-blue-outline w-100 fw-bold py-2">CHI TIẾT</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
