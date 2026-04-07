@@ -1,0 +1,85 @@
+﻿@model IEnumerable<RapChieuPhim.Models.Entities.DonHang>
+
+@{
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.NgayTao)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TongTienBanDau)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TongTienSauGiam)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TrangThai)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DaXoa)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaKhachHangNavigation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaKhuyenMaiNavigation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaNhanVienNavigation)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.NgayTao)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TongTienBanDau)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TongTienSauGiam)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TrangThai)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DaXoa)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaKhachHangNavigation.MaKhachHang)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaKhuyenMaiNavigation.MaKhuyenMai)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaNhanVienNavigation.MaNhanVien)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.MaDonHang">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.MaDonHang">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.MaDonHang">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+</body>
+</html>
+

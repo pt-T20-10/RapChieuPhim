@@ -1,0 +1,110 @@
+﻿@model RapChieuPhim.Models.ViewModels.HoaDonViewModel
+@{
+    var dh = Model.DonHang;
+}
+
+<div class="invoice-wrap mx-auto" style="max-width:500px; font-family:'Courier New',monospace;">
+    <div class="card border shadow">
+
+        {{!-- Header --}}
+        <div class="text-center py-3 border-bottom bg-light">
+            <div class="fw-bold fs-5">HÓA ĐƠN BÁN HÀNG</div>
+            <small class="text-muted">Rạp Chiếu Phim — Nhóm 1</small>
+        </div>
+
+        <div class="px-3 py-2 small">
+
+            <div class="border-bottom pb-2 mb-2">
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Mã đơn:</span>
+                    <span class="fw-bold">@dh.MaDonHang</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Ngày:</span>
+                    <span>@dh.NgayTao.ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Khách hàng:</span>
+                    <span>@Model.TenKhachHang</span>
+                </div>
+                @if (Model.TenNhanVien != "—")
+                {
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Nhân viên:</span>
+                        <span>@Model.TenNhanVien</span>
+                    </div>
+                }
+            </div>
+
+     
+            @if (Model.CoVe)
+            {
+                <div class="fw-bold mb-1">VÉ XEM PHIM</div>
+                @foreach (var ve in Model.DanhSachVe)
+                {
+                    var phim = ve.MaSuatChieuNavigation?.MaPhimNavigation;
+                    var suat = ve.MaSuatChieuNavigation;
+                    var ghe = ve.MaGheNavigation;
+                    <div class="border-bottom pb-1 mb-1">
+                        <div class="fw-semibold">@phim?.TenPhim [@phim?.PhanLoaiDoTuoi]</div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">
+                                @suat?.ThoiGianBatDau.ToString("HH:mm dd/MM")
+                                — @suat?.MaPhongNavigation?.TenPhong
+                                — Ghế @ghe?.TenHang@ghe?.SoThu
+                            </span>
+                            <span class="fw-bold">@ve.GiaVe.ToString("N0") ₫</span>
+                        </div>
+                    </div>
+                }
+            }
+
+           
+            @if (Model.CoDichVu)
+            {
+                <div class="fw-bold mb-1 @(Model.CoVe ? "mt-2" : "")">DỊCH VỤ</div>
+                @foreach (var dv in Model.DanhSachDichVu)
+                {
+                    <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
+                        <span>
+                            @dv.MaDichVuNavigation?.TenDichVu
+                            <span class="text-muted">x@dv.SoLuong</span>
+                        </span>
+                        <span class="fw-bold">@dv.ThanhTien.ToString("N0") ₫</span>
+                    </div>
+                }
+            }
+
+          
+            <div class="mt-2">
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Tạm tính:</span>
+                    <span>@dh.TongTienBanDau.ToString("N0") ₫</span>
+                </div>
+                @if (Model.SoTienGiam > 0)
+                {
+                    <div class="d-flex justify-content-between text-success">
+                        <span>Giảm giá @(!string.IsNullOrEmpty(Model.MaKhuyenMai) ? $"({Model.MaKhuyenMai})" : ""):</span>
+                        <span>- @Model.SoTienGiam.ToString("N0") ₫</span>
+                    </div>
+                }
+                <div class="d-flex justify-content-between fw-bold border-top mt-1 pt-1">
+                    <span>TỔNG CỘNG:</span>
+                    <span class="fs-6">@dh.TongTienSauGiam.ToString("N0") ₫</span>
+                </div>
+                <div class="d-flex justify-content-between text-muted">
+                    <span>Thanh toán:</span>
+                    <span>@Model.PhuongThuc</span>
+                </div>
+            </div>
+
+        </div>
+
+    
+        <div class="text-center py-2 bg-light border-top small text-muted"
+             style="border-top-style:dashed !important;">
+            Cảm ơn quý khách! Chúc xem phim vui vẻ 🎬
+        </div>
+
+    </div>
+</div>

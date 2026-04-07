@@ -1,6 +1,6 @@
 ﻿# HƯỚNG DẪN ONBOARDING — Nhóm 1 RapChieuPhim
 
-> **Đọc kỹ từ đầu đến cuối trước khi bắt đầu.**  
+> **Đọc kỹ từ đầu đến cuối trước khi bắt đầu.**
 > Làm đúng thứ tự: Cài đặt → Database → Clone repo → Chạy thử → Bắt đầu code
 
 ---
@@ -10,16 +10,16 @@
 | | |
 |---|---|
 | **Repo** | https://github.com/pt-T20-10/RapChieuPhim.git |
-| **Tech Stack** | ASP.NET MVC .NET 8 + SQL Server + EF Core |
+| **Tech Stack** | ASP.NET MVC .NET 8 + SQL Server + EF Core 8 |
 | **Lead** | Phan Trọng Thoại (225669) |
 
-| MSSV | Họ tên | Nhánh làm việc |
-|------|--------|----------------|
-| 225669 | Phan Trọng Thoại | `feature/thanh-toan` |
-| 223546 | Bùi Minh Nhựt | `feature/quet-ve` |
-| 220996 | Nguyễn Hoàng Nghĩa | `feature/dat-ve` |
-| 226056 | Phan Trung Nghĩa | `feature/thong-ke` |
-| 226637 | Nguyễn Hoàng Lễ | `feature/quan-ly-danh-muc` |
+| MSSV | Họ tên | Nhánh làm việc | Module |
+|------|--------|----------------|--------|
+| 225669 | Phan Trọng Thoại | `feature/thanh-toan` | Lead + Thanh toán + Bán hàng |
+| 223546 | Bùi Minh Nhựt | `feature/quet-ve` | Quét mã vé |
+| 220996 | Nguyễn Hoàng Nghĩa | `feature/dat-ve` | Đặt vé + Xác thực |
+| 226056 | Phan Trung Nghĩa | `feature/thong-ke` | Thống kê + Báo cáo |
+| 226637 | Nguyễn Hoàng Lễ | `feature/quan-ly-danh-muc` | Quản lý danh mục |
 
 ---
 
@@ -27,107 +27,70 @@
 
 ### Phần mềm bắt buộc
 
-| Phần mềm | Link tải | Lưu ý |
-|----------|----------|-------|
-| Visual Studio 2022 Community | https://visualstudio.microsoft.com | Chọn workload **ASP.NET and web development** |
-| SQL Server 2019+ (bất kỳ edition) | https://www.microsoft.com/sql-server | Developer Edition miễn phí |
-| SQL Server Management Studio (SSMS) | https://aka.ms/ssmsfullsetup | Dùng để chạy script SQL |
-| Git | https://git-scm.com/downloads | Cài mặc định, next next finish |
+| Phần mềm | Lưu ý |
+|----------|-------|
+| Visual Studio 2022 Community | Chọn workload **ASP.NET and web development** |
+| SQL Server 2019+ (Developer Edition — miễn phí) | |
+| SQL Server Management Studio (SSMS) | Để chạy script SQL |
+| Git | Cài mặc định |
 
-### Kiểm tra sau khi cài
-
-Mở **Command Prompt**, chạy từng lệnh — phải thấy version hiện ra:
+### Kiểm tra sau khi cài — mở CMD chạy:
 
 ```cmd
-dotnet --version
-git --version
+dotnet --version   → phải thấy 8.x.x
+git --version      → phải thấy 2.x.x
 ```
 
 ---
 
 ## BƯỚC 2 — Setup Database
 
-> Thực hiện trong **SQL Server Management Studio (SSMS)**
+> Thực hiện trong **SSMS**
 
 ### 2.1 — Tải 2 file SQL từ repo
 
 ```
-RapChieuPhim_Schema.sql   ← tạo database + bảng + index
-RapChieuPhim_Data.sql     ← chèn dữ liệu mẫu
+Schema.sql   ← tạo database + 15 bảng + 7 index
+Data.sql     ← chèn dữ liệu mẫu
 ```
 
-Vào repo GitHub → tìm 2 file trên → tải về máy.
+### 2.2 — Chạy Schema.sql trước
 
-### 2.2 — Chạy file Schema trước
+1. Mở SSMS → kết nối SQL Server
+2. **File → Open → Schema.sql** → nhấn **F5**
+3. Thấy `✅ Schema tạo thành công!` là xong
 
-1. Mở **SSMS** → kết nối vào SQL Server của máy
-2. Nhấn **Open File** → chọn `RapChieuPhim_Schema.sql`
-3. Nhấn **F5** hoặc **Execute**
-4. Thấy thông báo `✅ RapChieuPhimDB tạo thành công!` là xong
+### 2.3 — Chạy Data.sql sau
 
-### 2.3 — Chạy file Data sau
+1. **File → Open → Data.sql** → nhấn **F5**
+2. Thấy `✅ Seed data hoàn tất!` là xong
 
-1. Nhấn **Open File** → chọn `RapChieuPhim_Data.sql`
-2. Nhấn **F5** hoặc **Execute**
-3. Thấy `✅ Seed data hoàn tất!` là xong
-
-### 2.4 — Lấy Connection String của máy mình
-
-Trong SSMS, chuột phải vào server → **Properties** → xem **Server name**.
-
-Connection string thường có dạng:
+### 2.4 — Lấy Connection String máy mình
 
 ```
-# Nếu dùng Windows Authentication (phổ biến nhất)
 Data Source=TEN_MAY\TEN_INSTANCE;Initial Catalog=RapChieuPhimDB;Integrated Security=True;Trust Server Certificate=True;
-
-# Ví dụ thực tế
-Data Source=ACER\MSSQLSERVER03;Initial Catalog=RapChieuPhimDB;Integrated Security=True;Trust Server Certificate=True;
-Data Source=LAPTOP-ABC\SQLEXPRESS;Initial Catalog=RapChieuPhimDB;Integrated Security=True;Trust Server Certificate=True;
-
-# Nếu dùng SQL Server Authentication
-Data Source=TEN_MAY;Initial Catalog=RapChieuPhimDB;User Id=sa;Password=mat_khau;Trust Server Certificate=True;
 ```
 
-**Ghi lại connection string này**, sẽ dùng ở Bước 4.
+**Ghi lại**, dùng ở Bước 4.
 
 ---
 
-## BƯỚC 3 — Clone Repo và Checkout nhánh
-
-Mở **Command Prompt** hoặc **Git Bash**, chạy lần lượt:
+## BƯỚC 3 — Clone repo và checkout nhánh
 
 ```bash
-# Clone repo về máy
 git clone https://github.com/pt-T20-10/RapChieuPhim.git
-
-# Di chuyển vào thư mục project
 cd RapChieuPhim
-
-# Tải về tất cả nhánh từ remote
 git fetch --all
-
-# Checkout đúng nhánh của mình (xem bảng ở trên)
 git checkout feature/ten-nhanh-cua-minh
-
-# Ví dụ — Bùi Minh Nhựt:
-git checkout feature/quet-ve
 ```
 
 ---
 
 ## BƯỚC 4 — Cấu hình Connection String
 
-> **QUAN TRỌNG:** Không sửa `appsettings.json` trong repo.  
-> Tạo file riêng cho máy của mình.
+> **KHÔNG sửa `appsettings.json`** — tạo file riêng cho máy mình.
 
-Trong thư mục `RapChieuPhim\RapChieuPhim\`, tạo file mới tên:
-
-```
-appsettings.Development.json
-```
-
-Nội dung file:
+Tạo file `appsettings.Development.json` trong thư mục `RapChieuPhim/`:
 
 ```json
 {
@@ -137,59 +100,213 @@ Nội dung file:
 }
 ```
 
-Ví dụ thực tế:
+File này đã có trong `.gitignore` — sẽ không bị commit lên repo.
 
-```json
+---
+
+## BƯỚC 5 — Mở project và chạy thử
+
+1. Mở **`RapChieuPhim.sln`** bằng Visual Studio 2022
+2. Chờ restore NuGet tự động (lần đầu 1-2 phút)
+3. Nhấn **Ctrl+F5**
+
+### Kết quả mong đợi
+
+```
+https://localhost:xxxx/          → Giao diện Người dùng
+https://localhost:xxxx/RapPhim   → Dashboard quản lý Rạp phim
+```
+
+---
+
+## CẤU TRÚC DỰ ÁN — ĐỌC KỸ TRƯỚC KHI CODE
+
+```
+RapChieuPhim/
+│
+├── Areas/
+│   ├── NguoiDung/                    ← giao diện web khách hàng
+│   │   ├── Controllers/
+│   │   │   ├── HomeController.cs
+│   │   │   ├── DatVeController.cs
+│   │   │   ├── ThanhToanController.cs
+│   │   │   └── TaiKhoanController.cs
+│   │   └── Views/
+│   │       ├── _ViewImports.cshtml
+│   │       ├── _ViewStart.cshtml     ← trỏ tới _LayoutNguoiDung
+│   │       ├── Shared/
+│   │       │   └── _LayoutNguoiDung.cshtml
+│   │       ├── Home/
+│   │       ├── DatVe/
+│   │       ├── ThanhToan/
+│   │       └── TaiKhoan/
+│   │
+│   └── RapPhim/                      ← giao diện quản lý + nghiệp vụ
+│       ├── Controllers/
+│       │   ├── DashboardController.cs
+│       │   ├── PhimController.cs
+│       │   ├── SuatChieuController.cs
+│       │   ├── PhongChieuController.cs
+│       │   ├── KhuyenMaiController.cs
+│       │   ├── NhanVienController.cs
+│       │   ├── BanHangController.cs
+│       │   ├── QuetVeController.cs
+│       │   └── ThongKeController.cs
+│       └── Views/
+│           ├── _ViewImports.cshtml
+│           ├── _ViewStart.cshtml     ← trỏ tới _LayoutRapPhim
+│           ├── Shared/
+│           │   └── _LayoutRapPhim.cshtml
+│           ├── Dashboard/            ← trang chào khi vào RapPhim
+│           ├── Phim/                 ← Index, Create, Edit, Delete, Details
+│           ├── SuatChieu/
+│           ├── PhongChieu/
+│           ├── KhuyenMai/
+│           ├── NhanVien/
+│           ├── BanHang/
+│           ├── QuetVe/
+│           └── ThongKe/
+│
+├── Models/
+│   ├── Entities/                     ← EF SCAFFOLD SINH RA — không sửa tay
+│   └── ViewModels/                   ← viết tay, dùng chung 2 Area
+│       ├── VeViewModel.cs
+│       ├── HoaDonViewModel.cs
+│       └── ...
+│
+├── Services/                         ← business logic, dùng chung 2 Area
+│
+├── Data/
+│   └── AppDbContext.cs               ← EF SCAFFOLD SINH RA — không sửa tay
+│
+└── Views/
+    └── Shared/
+        ├── _TicketPartial.cshtml     ← partial vé dùng chung 2 Area
+        └── _InvoicePartial.cshtml    ← partial hóa đơn dùng chung 2 Area
+```
+
+---
+
+## QUY TẮC CODE BẮT BUỘC
+
+### 1. Controller phải có `[Area]` và đúng namespace
+
+```csharp
+// Area NguoiDung
+namespace RapChieuPhim.Areas.NguoiDung.Controllers
 {
-  "ConnectionStrings": {
-    "DefaultConnection": "Data Source=LAPTOP-ABC\\SQLEXPRESS;Initial Catalog=RapChieuPhimDB;Integrated Security=True;Trust Server Certificate=True;"
-  }
+    [Area("NguoiDung")]
+    public class DatVeController : Controller { }
+}
+
+// Area RapPhim
+namespace RapChieuPhim.Areas.RapPhim.Controllers
+{
+    [Area("RapPhim")]
+    public class PhimController : Controller { }
 }
 ```
 
-> File này đã có trong `.gitignore` — sẽ **không bị commit lên repo**, thông tin máy mình chỉ ở local.
+### 2. ViewModel đúng namespace
 
----
-
-## BƯỚC 5 — Mở Project và Chạy thử
-
-1. Mở file **`RapChieuPhim.sln`** bằng Visual Studio 2022
-2. Chờ VS restore NuGet packages tự động (lần đầu mất 1-2 phút)
-3. Kiểm tra góc dưới VS — thấy **Ready** là restore xong
-4. Nhấn **Ctrl+F5** để chạy
-
-Nếu thấy trang Home của ASP.NET hiện ra trên trình duyệt là **setup thành công**.
-
-### Lỗi thường gặp
-
-| Lỗi | Nguyên nhân | Cách fix |
-|-----|-------------|----------|
-| `Cannot connect to database` | Connection string sai | Kiểm tra lại Bước 4 |
-| `NuGet restore failed` | Chưa có internet / chưa cấu hình nguồn | Vào Tools → NuGet → Package Sources → thêm `https://api.nuget.org/v3/index.json` |
-| `Build failed` | Thiếu package | Chuột phải Solution → Restore NuGet Packages |
-| Trang trắng / lỗi 500 | DB chưa có data | Chạy lại `RapChieuPhim_Data.sql` |
-
----
-
-## BƯỚC 6 — Quy trình làm việc hàng ngày
-
-### Buổi sáng — Trước khi code
-
-```bash
-# 1. Lấy code mới nhất từ develop
-git checkout develop
-git pull origin develop
-
-# 2. Merge develop vào nhánh của mình
-git checkout feature/ten-nhanh-cua-minh
-git merge develop
-
-# 3. Nếu có conflict → xử lý rồi commit
-git add .
-git commit -m "chore: merge develop vào nhánh"
+```csharp
+namespace RapChieuPhim.Models.ViewModels
+{
+    public class DatVeViewModel { }
+}
 ```
 
-### Trong ngày — Commit thường xuyên
+### 3. Service đúng namespace
+
+```csharp
+namespace RapChieuPhim.Services
+{
+    public class DatVeService { }
+}
+```
+
+### 4. View KHÔNG hardcode Layout
+
+```cshtml
+@* ❌ SAI *@
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+
+@* ✅ ĐÚNG — để _ViewStart.cshtml tự xử lý *@
+@{ ViewData["Title"] = "Tên trang"; }
+```
+
+### 5. Không sửa `Models/Entities/` và `Data/AppDbContext.cs`
+
+Các file này do EF Scaffold sinh ra. Nếu DB thay đổi thì báo Lead — Lead chạy Scaffold lại, commit, team pull về.
+
+### 6. Gọi đúng Area trong Tag Helper
+
+```cshtml
+@* Link trong NguoiDung Area *@
+<a asp-area="NguoiDung" asp-controller="DatVe" asp-action="Index">Đặt vé</a>
+
+@* Link trong RapPhim Area *@
+<a asp-area="RapPhim" asp-controller="Phim" asp-action="Index">Quản lý phim</a>
+
+@* Chuyển qua Area khác *@
+<a asp-area="RapPhim" asp-controller="Dashboard" asp-action="Index">⚙️ Vào quản lý</a>
+<a asp-area="NguoiDung" asp-controller="Home" asp-action="Index">🌐 Về trang chủ</a>
+```
+
+### 7. Include đủ navigation khi query EF
+
+```csharp
+// ✅ ĐÚNG
+var donHang = await _context.DonHangs
+    .Include(d => d.MaKhachHangNavigation)
+    .Include(d => d.ChiTietVes)
+        .ThenInclude(v => v.MaSuatChieuNavigation)
+            .ThenInclude(s => s.MaPhimNavigation)
+    .FirstOrDefaultAsync(d => d.MaDonHang == id);
+
+// ❌ SAI — navigation sẽ null, gây NullReferenceException
+var donHang = await _context.DonHangs.FindAsync(id);
+```
+
+### 8. Dùng Partial View cho vé và hóa đơn
+
+```cshtml
+@* Vé xem phim — model là VeViewModel *@
+<partial name="~/Views/Shared/_TicketPartial.cshtml" model="veViewModel" />
+
+@* Hóa đơn — model là HoaDonViewModel *@
+<partial name="~/Views/Shared/_InvoicePartial.cshtml" model="hoaDonViewModel" />
+```
+
+---
+
+## PHÂN CÔNG CHI TIẾT
+
+| Thành viên | Làm việc trong | Controller | Views tương ứng |
+|---|---|---|---|
+| Thoại (Lead) | Areas/RapPhim | BanHangController | BanHang/ |
+| Thoại (Lead) | Areas/NguoiDung | ThanhToanController | ThanhToan/ |
+| Nhựt | Areas/RapPhim | QuetVeController | QuetVe/ |
+| Nghĩa | Areas/NguoiDung | DatVeController, TaiKhoanController | DatVe/, TaiKhoan/ |
+| Trung Nghĩa | Areas/RapPhim | ThongKeController | ThongKe/ |
+| Lễ | Areas/RapPhim | Phim/SuatChieu/PhongChieu/KhuyenMai/NhanVienController | Views tương ứng |
+
+> Controllers CRUD (Index/Create/Edit/Delete) cho Phim, SuatChieu, PhongChieu, KhuyenMai, NhanVien đã được scaffold sẵn. Lễ chỉ cần thêm logic nghiệp vụ và hoàn thiện Views.
+
+---
+
+## QUY TRÌNH GIT HÀNG NGÀY
+
+### Buổi sáng — trước khi code
+
+```bash
+git checkout develop
+git pull origin develop
+git checkout feature/ten-nhanh-cua-minh
+git merge develop
+```
+
+### Trong ngày — commit thường xuyên
 
 ```bash
 git add .
@@ -197,32 +314,38 @@ git commit -m "feat: mô tả việc vừa làm"
 git push origin feature/ten-nhanh-cua-minh
 ```
 
-### Khi xong tính năng — Tạo Pull Request
+### Khi xong tính năng — tạo Pull Request
 
 1. Push lần cuối lên GitHub
-2. Vào **GitHub → Pull Requests → New Pull Request**
-3. Chọn:
-   - **base:** `develop`
-   - **compare:** `feature/ten-nhanh-cua-minh`
-4. Điền title và mô tả những gì đã làm
-5. Gán **Reviewer: pt-T20-10 (Thoại)**
-6. Nhắn Zalo cho Lead biết để review
+2. **GitHub → Pull Requests → New Pull Request**
+3. base: `develop` ← compare: `feature/ten-nhanh`
+4. Gán Reviewer: **pt-T20-10 (Thoại)**
+5. Nhắn Zalo cho Lead
+
+### Convention commit message
+
+```
+feat:     thêm tính năng mới
+fix:      sửa bug
+style:    sửa UI / View
+refactor: cải thiện code
+chore:    cấu hình, setup
+docs:     cập nhật tài liệu
+```
 
 ---
 
-## QUY TẮC BẮT BUỘC
+## LỖI THƯỜNG GẶP
 
-```
-✅  Luôn làm việc trên nhánh feature của mình
-✅  Commit message phải có type (feat/fix/style/chore...)
-✅  Pull code từ develop MỖI NGÀY trước khi code
-✅  Merge vào develop qua Pull Request, KHÔNG push thẳng
-
-✗   Không push thẳng vào main hoặc develop
-✗   Không dùng git push --force
-✗   Không commit appsettings.Development.json
-✗   Không commit thư mục bin/ obj/
-```
+| Lỗi | Nguyên nhân | Cách fix |
+|-----|-------------|----------|
+| `The view 'Index' was not found` | View chưa tạo hoặc sai thư mục | Kiểm tra file trong `Areas/TenArea/Views/TenController/` |
+| `NullReferenceException` navigation | Chưa `.Include()` khi query | Thêm đủ `.Include().ThenInclude()` |
+| Route 404 | Thiếu `[Area]` hoặc sai namespace | Kiểm tra attribute và namespace controller |
+| Layout null / trang trắng | View hardcode `Layout = null` | Xóa dòng đó |
+| `Cannot connect to database` | Connection string sai | Kiểm tra `appsettings.Development.json` |
+| Build failed sau khi pull | Entities hoặc ViewModels thay đổi | Rebuild Solution, kiểm tra namespace |
+| Tag Helper sinh URL sai | Thiếu `asp-area` | Luôn khai báo đủ `asp-area`, `asp-controller`, `asp-action` |
 
 ---
 
@@ -231,6 +354,6 @@ git push origin feature/ten-nhanh-cua-minh
 | Vấn đề | Liên hệ |
 |--------|---------|
 | Lỗi Git / conflict | Phan Trọng Thoại (Lead) |
-| Lỗi Database | Phan Trọng Thoại (Lead) |
-| Lỗi NuGet / build | Phan Trọng Thoại (Lead) |
-| Hỏi về logic nghiệp vụ | Thảo luận trong nhóm Zalo |
+| DB thay đổi / Schema mới | Lead chạy Scaffold → push → team pull |
+| Lỗi build / NuGet | Phan Trọng Thoại |
+| Hỏi về logic nghiệp vụ | Thảo luận nhóm Zalo |

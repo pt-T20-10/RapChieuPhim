@@ -25,6 +25,8 @@ public partial class Phim
 
     public bool DaXoa { get; set; }
 
+    public string? DuongDanTrailer { get; set; }
+
     public virtual TheLoaiPhim MaTheLoaiNavigation { get; set; } = null!;
 
     public virtual ICollection<SuatChieu> SuatChieus { get; set; } = new List<SuatChieu>();

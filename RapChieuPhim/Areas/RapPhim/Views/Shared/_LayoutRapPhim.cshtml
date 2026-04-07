@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Quản lý Rạp</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        body { background-color: #f4f6f9; }
+        .sidebar { min-height: calc(100vh - 56px); background-color: #343a40; }
+        .sidebar .nav-link { color: #adb5bd; }
+        .sidebar .nav-link:hover { color: #fff; background-color: #495057; border-radius: 4px; }
+        .sidebar .nav-link.active { color: #fff; background-color: #0d6efd; border-radius: 4px; }
+        .sidebar-heading { color: #6c757d; font-size: 0.75rem; text-transform: uppercase; }
+        .main-content { padding: 20px; }
+    </style>
+</head>
+<body>
+
+
+    <nav class="navbar navbar-expand-sm navbar-dark bg-primary">
+        <div class="container-fluid">
+            <span class="navbar-brand fw-bold">🎬 Quản lý Rạp Chiếu Phim</span>
+            <div class="ms-auto">
+                
+                <a class="btn btn-light btn-sm"
+                   asp-area="NguoiDung"
+                   asp-controller="Home"
+                   asp-action="Index">
+                    🌐 Về giao diện Người dùng
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+
+       
+            <nav class="col-md-2 sidebar pt-3">
+                <div class="mb-3">
+                    <p class="sidebar-heading px-3">Nghiệp vụ</p>
+                    <ul class="nav flex-column px-2">
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area="RapPhim"
+                               asp-controller="BanHang"
+                               asp-action="Index">🛒 Bán hàng</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area="RapPhim"
+                               asp-controller="QuetVe"
+                               asp-action="Index">📷 Quét vé</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area="RapPhim"
+                               asp-controller="ThongKe"
+                               asp-action="Index">📊 Thống kê</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="mb-3">
+                    <p class="sidebar-heading px-3">Danh mục</p>
+                    <ul class="nav flex-column px-2">
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area="RapPhim"
+                               asp-controller="Phim"
+                               asp-action="Index">🎥 Phim</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area="RapPhim"
+                               asp-controller="SuatChieu"
+                               asp-action="Index">🕐 Suất chiếu</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area="RapPhim"
+                               asp-controller="PhongChieu"
+                               asp-action="Index">🏠 Phòng chiếu</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area="RapPhim"
+                               asp-controller="KhuyenMai"
+                               asp-action="Index">🏷️ Khuyến mãi</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-area="RapPhim"
+                               asp-controller="NhanVien"
+                               asp-action="Index">👤 Nhân viên</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+          
+            <main class="col-md-10 main-content">
+                @RenderBody()
+            </main>
+
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

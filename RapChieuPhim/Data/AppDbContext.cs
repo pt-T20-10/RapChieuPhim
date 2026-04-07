@@ -129,6 +129,7 @@ public partial class AppDbContext : DbContext
             entity.ToTable("DichVu");
 
             entity.Property(e => e.MaDichVu).HasMaxLength(10);
+            entity.Property(e => e.DuongDanHinh).HasMaxLength(500);
             entity.Property(e => e.MaDanhMuc).HasMaxLength(10);
             entity.Property(e => e.TenDichVu).HasMaxLength(100);
 
@@ -299,6 +300,7 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.MaPhim).HasMaxLength(10);
             entity.Property(e => e.DuongDanAnh).HasMaxLength(500);
+            entity.Property(e => e.DuongDanTrailer).HasMaxLength(500);
             entity.Property(e => e.MaTheLoai).HasMaxLength(10);
             entity.Property(e => e.PhanLoaiDoTuoi).HasMaxLength(10);
             entity.Property(e => e.TenPhim).HasMaxLength(200);

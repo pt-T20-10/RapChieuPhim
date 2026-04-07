@@ -1,0 +1,73 @@
+﻿@model IEnumerable<RapChieuPhim.Models.Entities.DichVu>
+
+@{
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TenDichVu)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GiaBan)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SoLuongTon)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DaXoa)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DuongDanHinh)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaDanhMucNavigation)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.TenDichVu)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.GiaBan)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SoLuongTon)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DaXoa)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DuongDanHinh)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaDanhMucNavigation.MaDanhMuc)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.MaDichVu">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.MaDichVu">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.MaDichVu">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+</body>
+</html>
+
