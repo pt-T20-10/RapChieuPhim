@@ -48,7 +48,6 @@
 	  <Folder Include="Areas\NguoiDung\Views\ThanhToan\" />
 	  <Folder Include="Areas\RapPhim\Views\BanHang\" />
 	  <Folder Include="Areas\RapPhim\Views\QuetVe\" />
-	  <Folder Include="Areas\RapPhim\Views\ThongKe\" />
 	  <Folder Include="Data\" />
 	  <Folder Include="Models\Entities\" />
 	</ItemGroup>

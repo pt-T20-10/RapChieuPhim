@@ -28,6 +28,9 @@ builder.Services.AddHangfireServer();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<DatVeService>();
+builder.Services.AddScoped<ThongKeService>();
+
+//builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<AccountService>();
 
 var app = builder.Build();
