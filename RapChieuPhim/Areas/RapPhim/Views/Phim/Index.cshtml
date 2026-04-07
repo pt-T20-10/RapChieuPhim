@@ -1,0 +1,97 @@
+﻿@model IEnumerable<RapChieuPhim.Models.Entities.Phim>
+
+@{
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TenPhim)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ThoiLuong)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NgayPhatHanh)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MoTa)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PhanLoaiDoTuoi)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DuongDanAnh)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TrangThai)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DaXoa)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DuongDanTrailer)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaTheLoaiNavigation)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.TenPhim)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ThoiLuong)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NgayPhatHanh)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MoTa)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PhanLoaiDoTuoi)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DuongDanAnh)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TrangThai)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DaXoa)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DuongDanTrailer)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaTheLoaiNavigation.MaTheLoai)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.MaPhim">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.MaPhim">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.MaPhim">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+</body>
+</html>
+

@@ -1,0 +1,51 @@
+﻿@model RapChieuPhim.Models.Entities.LoaiKhachHang
+
+@{
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Details</title>
+</head>
+<body>
+
+<div>
+    <h4>LoaiKhachHang</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TenLoaiKh)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TenLoaiKh)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.NguongDiem)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.NguongDiem)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.PhanTramGiamGia)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.PhanTramGiamGia)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.DaXoa)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.DaXoa)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.MaLoaiKh">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
+</body>
+</html>
+

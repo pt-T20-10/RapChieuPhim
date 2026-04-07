@@ -1,0 +1,79 @@
+﻿@model IEnumerable<RapChieuPhim.Models.Entities.SuatChieu>
+
+@{
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ThoiGianBatDau)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ThoiGianKetThuc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GiaGoc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TrangThai)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DaXoa)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaPhimNavigation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaPhongNavigation)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ThoiGianBatDau)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ThoiGianKetThuc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.GiaGoc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TrangThai)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DaXoa)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaPhimNavigation.MaPhim)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaPhongNavigation.MaPhong)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.MaSuatChieu">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.MaSuatChieu">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.MaSuatChieu">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+</body>
+</html>
+

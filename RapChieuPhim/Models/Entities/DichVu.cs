@@ -17,6 +17,8 @@ public partial class DichVu
 
     public bool DaXoa { get; set; }
 
+    public string? DuongDanHinh { get; set; }
+
     public virtual ICollection<ChiTietDichVu> ChiTietDichVus { get; set; } = new List<ChiTietDichVu>();
 
     public virtual DanhMucDichVu MaDanhMucNavigation { get; set; } = null!;

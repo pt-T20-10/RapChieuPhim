@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Rạp Chiếu Phim</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark mb-3">
+            <div class="container">
+
+                <a class="navbar-brand fw-bold"
+                   asp-area="NguoiDung"
+                   asp-controller="Home"
+                   asp-action="Index">
+                    🎬 Rạp Chiếu Phim
+                </a>
+
+                <button class="navbar-toggler" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target=".navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link text-white"
+                               asp-area="NguoiDung"
+                               asp-controller="Home"
+                               asp-action="Index">Trang chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white"
+                               asp-area="NguoiDung"
+                               asp-controller="DatVe"
+                               asp-action="Index">Đặt vé</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white"
+                               asp-area="NguoiDung"
+                               asp-controller="TaiKhoan"
+                               asp-action="Index">Tài khoản</a>
+                        </li>
+                    </ul>
+
+                    {{!-- Nút chuyển sang giao diện Rạp Phim --}}
+                    <a class="btn btn-warning btn-sm"
+                       asp-area="RapPhim"
+                       asp-controller="Phim"
+                       asp-action="Index">
+                        ⚙️ Vào giao diện Quản lý
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted mt-4">
+        <div class="container py-2">
+            &copy; 2026 - Rạp Chiếu Phim - Nhóm 1
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

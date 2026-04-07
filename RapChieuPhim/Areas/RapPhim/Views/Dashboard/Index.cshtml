@@ -1,0 +1,99 @@
+﻿@{
+    ViewData["Title"] = "Trang quản lý";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="mb-0">Tổng quan hệ thống</h2>
+    <small class="text-muted">Rạp Chiếu Phim — Khu vực quản lý</small>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-4">
+                <div style="font-size:2rem">🎥</div>
+                <h5 class="mt-2 mb-1">Phim</h5>
+                <p class="text-muted small mb-3">Quản lý danh sách phim</p>
+                <a asp-area="RapPhim" asp-controller="Phim" asp-action="Index"
+                   class="btn btn-primary btn-sm">Vào quản lý</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-4">
+                <div style="font-size:2rem">🕐</div>
+                <h5 class="mt-2 mb-1">Suất chiếu</h5>
+                <p class="text-muted small mb-3">Lên lịch và quản lý suất</p>
+                <a asp-area="RapPhim" asp-controller="SuatChieu" asp-action="Index"
+                   class="btn btn-primary btn-sm">Vào quản lý</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-4">
+                <div style="font-size:2rem">🏠</div>
+                <h5 class="mt-2 mb-1">Phòng chiếu</h5>
+                <p class="text-muted small mb-3">Quản lý phòng và ghế</p>
+                <a asp-area="RapPhim" asp-controller="PhongChieu" asp-action="Index"
+                   class="btn btn-primary btn-sm">Vào quản lý</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-4">
+                <div style="font-size:2rem">🏷️</div>
+                <h5 class="mt-2 mb-1">Khuyến mãi</h5>
+                <p class="text-muted small mb-3">Tạo và quản lý mã giảm giá</p>
+                <a asp-area="RapPhim" asp-controller="KhuyenMai" asp-action="Index"
+                   class="btn btn-primary btn-sm">Vào quản lý</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-4">
+                <div style="font-size:2rem">👤</div>
+                <h5 class="mt-2 mb-1">Nhân viên</h5>
+                <p class="text-muted small mb-3">Quản lý tài khoản nhân viên</p>
+                <a asp-area="RapPhim" asp-controller="NhanVien" asp-action="Index"
+                   class="btn btn-primary btn-sm">Vào quản lý</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-4">
+                <div style="font-size:2rem">🛒</div>
+                <h5 class="mt-2 mb-1">Bán hàng</h5>
+                <p class="text-muted small mb-3">Bán vé và dịch vụ tại quầy</p>
+                <a asp-area="RapPhim" asp-controller="BanHang" asp-action="Index"
+                   class="btn btn-primary btn-sm">Vào quản lý</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-4">
+                <div style="font-size:2rem">📷</div>
+                <h5 class="mt-2 mb-1">Quét vé</h5>
+                <p class="text-muted small mb-3">Kiểm soát vé tại cửa rạp</p>
+                <a asp-area="RapPhim" asp-controller="QuetVe" asp-action="Index"
+                   class="btn btn-primary btn-sm">Vào quản lý</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-4">
+                <div style="font-size:2rem">📊</div>
+                <h5 class="mt-2 mb-1">Thống kê</h5>
+                <p class="text-muted small mb-3">Doanh thu và báo cáo</p>
+                <a asp-area="RapPhim" asp-controller="ThongKe" asp-action="Index"
+                   class="btn btn-primary btn-sm">Vào quản lý</a>
+            </div>
+        </div>
+    </div>
+</div>

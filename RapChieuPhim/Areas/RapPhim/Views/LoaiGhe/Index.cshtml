@@ -1,0 +1,55 @@
+﻿@model IEnumerable<RapChieuPhim.Models.Entities.LoaiGhe>
+
+@{
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TenLoaiGhe)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HeSoGia)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DaXoa)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.TenLoaiGhe)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HeSoGia)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DaXoa)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.MaLoaiGhe">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.MaLoaiGhe">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.MaLoaiGhe">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+</body>
+</html>
+

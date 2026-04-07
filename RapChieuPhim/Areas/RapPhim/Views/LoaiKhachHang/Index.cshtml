@@ -1,0 +1,61 @@
+﻿@model IEnumerable<RapChieuPhim.Models.Entities.LoaiKhachHang>
+
+@{
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TenLoaiKh)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NguongDiem)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PhanTramGiamGia)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DaXoa)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.TenLoaiKh)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NguongDiem)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PhanTramGiamGia)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DaXoa)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.MaLoaiKh">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.MaLoaiKh">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.MaLoaiKh">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+</body>
+</html>
+

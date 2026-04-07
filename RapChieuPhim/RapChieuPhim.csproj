@@ -7,30 +7,57 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Views\Admin\**" />
+	  <Compile Remove="Views\BanHang\**" />
+	  <Compile Remove="Views\DatVe\**" />
+	  <Compile Remove="Views\QuetVe\**" />
+	  <Compile Remove="Views\TaiKhoan\**" />
+	  <Compile Remove="Views\ThanhToan\**" />
+	  <Content Remove="Views\Admin\**" />
+	  <Content Remove="Views\BanHang\**" />
+	  <Content Remove="Views\DatVe\**" />
+	  <Content Remove="Views\QuetVe\**" />
+	  <Content Remove="Views\TaiKhoan\**" />
+	  <Content Remove="Views\ThanhToan\**" />
+	  <EmbeddedResource Remove="Views\Admin\**" />
+	  <EmbeddedResource Remove="Views\BanHang\**" />
+	  <EmbeddedResource Remove="Views\DatVe\**" />
+	  <EmbeddedResource Remove="Views\QuetVe\**" />
+	  <EmbeddedResource Remove="Views\TaiKhoan\**" />
+	  <EmbeddedResource Remove="Views\ThanhToan\**" />
+	  <None Remove="Views\Admin\**" />
+	  <None Remove="Views\BanHang\**" />
+	  <None Remove="Views\DatVe\**" />
+	  <None Remove="Views\QuetVe\**" />
+	  <None Remove="Views\TaiKhoan\**" />
+	  <None Remove="Views\ThanhToan\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="BCrypt.Net-Next" Version="4.1.0" />
 		<PackageReference Include="EPPlus" Version="8.5.1" />
 		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
 		<PackageReference Include="Hangfire.SqlServer" Version="1.8.23" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.13" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.13">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.23">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.23" />
 		<PackageReference Include="QRCoder" Version="1.6.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Views\Admin\KhuyenMai\" />
-	  <Folder Include="Views\Admin\NhanVien\" />
-	  <Folder Include="Views\Admin\Phim\" />
-	  <Folder Include="Views\Admin\PhongChieu\" />
-	  <Folder Include="Views\Admin\SuatChieu\" />
-	  <Folder Include="Views\Admin\ThongKe\" />
-	  <Folder Include="Views\BanHang\" />
-	  <Folder Include="Views\DatVe\" />
-	  <Folder Include="Views\QuetVe\" />
-	  <Folder Include="Views\TaiKhoan\" />
-	  <Folder Include="Views\ThanhToan\" />
+	  <Folder Include="Areas\NguoiDung\Controllers\" />
+	  <Folder Include="Areas\NguoiDung\Views\DatVe\" />
+	  <Folder Include="Areas\NguoiDung\Views\TaiKhoan\" />
+	  <Folder Include="Areas\NguoiDung\Views\ThanhToan\" />
+	  <Folder Include="Areas\RapPhim\Views\BanHang\" />
+	  <Folder Include="Areas\RapPhim\Views\QuetVe\" />
+	  <Folder Include="Areas\RapPhim\Views\ThongKe\" />
+	  <Folder Include="Data\" />
+	  <Folder Include="Models\Entities\" />
+	  <Folder Include="wwwroot\images\" />
 	</ItemGroup>
 
 </Project>
