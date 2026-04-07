@@ -1,0 +1,77 @@
+﻿@model RapChieuPhim.Models.ViewModels.DuBaoViewModel
+@{
+    ViewData["Title"] = "Dự báo doanh thu";
+}
+
+<div class="container-fluid mt-4">
+    <h2>Dự Báo Doanh Thu Kỳ Vọng</h2>
+
+    @if (ViewBag.WarningMessage != null)
+    {
+        <div class="alert alert-warning shadow-sm">
+            <i class="bi bi-exclamation-triangle-fill"></i> @ViewBag.WarningMessage
+        </div>
+    }
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-center">
+                <div class="col-auto">
+                    <label>Số ngày dự báo tương lai:</label>
+                </div>
+                <div class="col-auto">
+                    <input type="number" name="soNgay" class="form-control" value="@Model.SoNgayDuBao" min="1" max="365">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Áp dụng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.DuDieuKien)
+    {
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card bg-dark text-white shadow">
+                    <div class="card-body text-center">
+                        <h5>DOANH THU DỰ KIẾN TRONG @Model.SoNgayDuBao NGÀY TỚI</h5>
+                        <h1 class="display-4 text-warning">@Model.DoanhThuDuKien.ToString("N0") ₫</h1>
+                        <p class="mb-0 text-muted">* Tính toán dựa trên hiệu suất 7 ngày gần nhất</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header fw-bold">Biểu đồ xu hướng (Thực tế vs Dự báo)</div>
+            <div class="card-body">
+                <canvas id="chartDuBao" style="max-height: 400px;"></canvas>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('chartDuBao');
+        if(ctx) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", Model.DanhSachDuBao.Select(x => $"'{x.Ngay}'")))],
+                    datasets: [{
+                        label: 'Doanh thu (₫)',
+                        data: [@string.Join(",", Model.DanhSachDuBao.Select(x => x.DoanhThu))],
+                        borderColor: 'rgba(255, 193, 7, 1)',
+                        backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: [@Html.Raw(string.Join(",", Model.DanhSachDuBao.Select(x => x.LaDuBao ? "'red'" : "'blue'")))]
+                    }]
+                }
+            });
+        }
+    </script>
+}
