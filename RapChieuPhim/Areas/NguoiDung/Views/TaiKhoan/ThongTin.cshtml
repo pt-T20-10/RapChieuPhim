@@ -1,0 +1,77 @@
+﻿@model RapChieuPhim.Models.ViewModels.ThongTinViewModel
+
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h4 class="fw-bold mb-0" style="color: #034ea2;"><i class="bi bi-person-lines-fill me-2"></i>HỒ SƠ CỦA TÔI</h4>
+                </div>
+                <div class="card-body p-4">
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success rounded-3"><i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]</div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger rounded-3"><i class="bi bi-x-circle-fill me-2"></i>@TempData["ErrorMessage"]</div>
+                    }
+
+                    <form asp-action="ThongTin" method="post">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="HoTen" class="form-label fw-bold">Họ và tên <span class="text-danger">*</span></label>
+                                <input asp-for="HoTen" class="form-control" />
+                                <span asp-validation-for="HoTen" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label fw-bold">Email <span class="text-danger">*</span></label>
+                                <input asp-for="Email" class="form-control" />
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="SoDienThoai" class="form-label fw-bold">Số điện thoại</label>
+                                <input asp-for="SoDienThoai" class="form-control" placeholder="Bắt đầu bằng 0, gồm 10 số" />
+                                <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="NgaySinh" class="form-label fw-bold">Ngày sinh (Bắt buộc >= 15 tuổi)</label>
+                                <input asp-for="NgaySinh" type="date" class="form-control" max="@DateTime.Now.AddYears(-15).ToString("yyyy-MM-dd")" />
+                                <span asp-validation-for="NgaySinh" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Giới tính</label>
+                                <select asp-for="GioiTinh" class="form-select">
+                                    <option value="">-- Chọn giới tính --</option>
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <div class="text-end">
+                            <button type="submit" class="btn text-white fw-bold px-4 py-2" style="background-color: #034ea2;">
+                                <i class="bi bi-floppy me-1"></i> LƯU THAY ĐỔI
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
