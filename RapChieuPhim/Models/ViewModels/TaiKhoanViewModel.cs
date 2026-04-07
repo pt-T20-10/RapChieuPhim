@@ -40,4 +40,24 @@ namespace RapChieuPhim.Models.ViewModels
         [Compare("MatKhau", ErrorMessage = "Mật khẩu xác nhận không khớp.")]
         public string XacNhanMatKhau { get; set; } = null!;
     }
+
+    public class QuenMatKhauViewModel
+    {
+        [Required(ErrorMessage = "Vui lòng nhập Email.")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ.")]
+        public string Email { get; set; } = null!;
+    }
+
+    public class DatLaiMatKhauViewModel
+    {
+        [Required(ErrorMessage = "Vui lòng nhập mật khẩu mới.")]
+        [MinLength(6, ErrorMessage = "Mật khẩu tối thiểu 6 ký tự.")]
+        public string MatKhauMoi { get; set; } = null!;
+
+        [Compare("MatKhauMoi", ErrorMessage = "Mật khẩu xác nhận không khớp.")]
+        public string XacNhanMatKhau { get; set; } = null!;
+
+        [Required(ErrorMessage = "Vui lòng nhập mã Captcha.")]
+        public string CaptchaCode { get; set; } = null!;
+    }
 }

@@ -45,7 +45,6 @@
 
 	<ItemGroup>
 	  <Folder Include="Areas\NguoiDung\Controllers\" />
-	  <Folder Include="Areas\NguoiDung\Views\TaiKhoan\" />
 	  <Folder Include="Areas\NguoiDung\Views\ThanhToan\" />
 	  <Folder Include="Areas\RapPhim\Views\BanHang\" />
 	  <Folder Include="Areas\RapPhim\Views\QuetVe\" />
