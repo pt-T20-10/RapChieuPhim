@@ -1,7 +1,6 @@
 ﻿@model RapChieuPhim.Models.ViewModels.ThongKeViewModel
 @{
     ViewData["Title"] = "Thống kê hoạt động";
-    // Không hardcode Layout, hệ thống sẽ tự dùng _ViewStart.cshtml
 }
 
 <div class="container-fluid mt-4">
@@ -27,22 +26,64 @@
         <div class="card-body">
             <form method="get" action="/RapPhim/ThongKe/Index" class="row g-3 align-items-center">
                 <div class="col-auto">
-                    <label for="tuNgay" class="col-form-label">Từ ngày:</label>
+                    <label for="tuNgay" class="col-form-label fw-bold">Từ ngày:</label>
                 </div>
                 <div class="col-auto">
-                    <input type="date" id="tuNgay" name="tuNgay" class="form-control" value="@ViewBag.TuNgay" required>
+                    <input type="date" id="tuNgay" name="tuNgay" class="form-control form-control-sm" value="@ViewBag.TuNgay" required>
                 </div>
                 <div class="col-auto">
-                    <label for="denNgay" class="col-form-label">Đến ngày:</label>
+                    <label for="denNgay" class="col-form-label fw-bold">Đến ngày:</label>
                 </div>
                 <div class="col-auto">
-                    <input type="date" id="denNgay" name="denNgay" class="form-control" value="@ViewBag.DenNgay" required>
+                    <input type="date" id="denNgay" name="denNgay" class="form-control form-control-sm" value="@ViewBag.DenNgay" required>
                 </div>
+
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Lọc dữ liệu</button>
+                    <select id="maPhim" name="maPhim" class="form-select form-select-sm">
+                        <option value="">-- Tất cả Phim --</option>
+                        @if (ViewBag.PhimList != null)
+                        {
+                            foreach (var item in ViewBag.PhimList)
+                            {
+                                if (item.Value == ViewBag.SelectedPhim)
+                                {
+                                    <option value="@item.Value" selected>@item.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            }
+                        }
+                    </select>
                 </div>
+
+                <div class="col-auto">
+                    <select id="maPhong" name="maPhong" class="form-select form-select-sm">
+                        <option value="">-- Tất cả Phòng --</option>
+                        @if (ViewBag.PhongList != null)
+                        {
+                            foreach (var item in ViewBag.PhongList)
+                            {
+                                if (item.Value == ViewBag.SelectedPhong)
+                                {
+                                    <option value="@item.Value" selected>@item.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-funnel"></i> Lọc dữ liệu</button>
+                </div>
+
                 <div class="col-auto ms-auto">
-                    <a href="/RapPhim/ThongKe/XuatExcel?tuNgay=@ViewBag.TuNgay&denNgay=@ViewBag.DenNgay" class="btn btn-success">
+                    <a href="/RapPhim/ThongKe/XuatExcel?tuNgay=@ViewBag.TuNgay&denNgay=@ViewBag.DenNgay&maPhim=@ViewBag.SelectedPhim&maPhong=@ViewBag.SelectedPhong" class="btn btn-success btn-sm">
                         <i class="bi bi-file-earmark-excel"></i> Xuất báo cáo đối soát
                     </a>
                 </div>
@@ -69,7 +110,7 @@
         </div>
         <div class="col-md-4">
             <div class="card text-white bg-warning mb-3 shadow-sm">
-                <div class="card-header">Tổng Số Vé Bán Ra</div>
+                <div class="card-header text-dark">Tổng Số Vé Bán Ra</div>
                 <div class="card-body">
                     <h3 class="card-title text-dark">@Model.TongSoVe <small class="fs-6">vé</small></h3>
                 </div>
@@ -115,7 +156,7 @@
                             }
                             else
                             {
-                                <tr><td colspan="4" class="text-center text-muted">Chưa có dữ liệu</td></tr>
+                                <tr><td colspan="4" class="text-center text-muted py-3">Chưa có dữ liệu</td></tr>
                             }
                         </tbody>
                     </table>
@@ -160,7 +201,7 @@
                             }
                             else
                             {
-                                <tr><td colspan="4" class="text-center text-muted">Chưa có dữ liệu</td></tr>
+                                <tr><td colspan="4" class="text-center text-muted py-3">Chưa có dữ liệu</td></tr>
                             }
                         </tbody>
                     </table>
@@ -175,8 +216,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const ctx = document.getElementById('chartDoanhThu').getContext('2d');
-
-            // Xóa rỗng để tránh lỗi nếu không có dữ liệu
             const rawLabels = [@Html.Raw(string.Join(",", Model.DoanhThuTheoNgay.Select(x => $"'{x.Ngay}'")))];
             const rawData = [@string.Join(",", Model.DoanhThuTheoNgay.Select(x => x.DoanhThu))];
 
@@ -201,9 +240,7 @@
                             y: {
                                 beginAtZero: true,
                                 ticks: {
-                                    callback: function(value) {
-                                        return value.toLocaleString('vi-VN') + ' ₫';
-                                    }
+                                    callback: function(value) { return value.toLocaleString('vi-VN') + ' ₫'; }
                                 }
                             }
                         },
@@ -212,12 +249,8 @@
                                 callbacks: {
                                     label: function(context) {
                                         let label = context.dataset.label || '';
-                                        if (label) {
-                                            label += ': ';
-                                        }
-                                        if (context.parsed.y !== null) {
-                                            label += context.parsed.y.toLocaleString('vi-VN') + ' ₫';
-                                        }
+                                        if (label) { label += ': '; }
+                                        if (context.parsed.y !== null) { label += context.parsed.y.toLocaleString('vi-VN') + ' ₫'; }
                                         return label;
                                     }
                                 }
@@ -226,7 +259,6 @@
                     }
                 });
             } else {
-                // Nếu mảng dữ liệu rỗng, ẩn canvas đi
                 document.getElementById('chartDoanhThu').style.display = 'none';
             }
         });
