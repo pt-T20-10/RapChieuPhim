@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PayOS;        
-using PayOS.Models; 
+using PayOS;
+using PayOS.Models;
 using PayOS.Models.V2.PaymentRequests;
 using RapChieuPhim.Data;
 using RapChieuPhim.Extensions;
@@ -15,7 +15,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
     public class ThanhToanController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly PayOSClient _payOS; 
+        private readonly PayOSClient _payOS;
         private readonly AccountService _accountService;
 
         public ThanhToanController(AppDbContext context, PayOSClient payOS, AccountService accountService)
@@ -25,7 +25,6 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             _accountService = accountService;
         }
 
-        // 1. HIỂN THỊ TRANG CHECKOUT (Hợp nhất Đặt Vé & Bắp Nước)
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -33,12 +32,9 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             string loaiGiaoDich = HttpContext.Session.GetString("LoaiGiaoDich");
             string maDonHangTam = HttpContext.Session.GetString("DatVe_MaDonHang_Tam");
 
-            // Chỉ chặn không cho vào Checkout nếu KHÔNG PHẢI đặt vé VÀ giỏ bắp nước cũng trống
             if (loaiGiaoDich != "DatVe" && !gioHang.Any()) return RedirectToAction("Index", "DichVu");
 
             ViewBag.GioHang = gioHang;
-
-            // Lấy thông tin user
             string maKhachHang = HttpContext.Session.GetString("MaKhachHang");
             ViewBag.IsLogined = !string.IsNullOrEmpty(maKhachHang);
 
@@ -53,7 +49,6 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 }
             }
 
-            // Gộp tiền Vé (nếu có) và tiền Bắp nước
             double tongTienVe = 0;
             if (loaiGiaoDich == "DatVe" && !string.IsNullOrEmpty(maDonHangTam))
             {
@@ -62,9 +57,8 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             }
 
             double tongTienBapNuoc = gioHang.Sum(x => x.ThanhTien);
-            double tongTien = tongTienVe + tongTienBapNuoc; // Tổng tiền thực tế
+            double tongTien = tongTienVe + tongTienBapNuoc;
 
-            // Lấy thông tin Giảm giá
             string maKhuyenMai = HttpContext.Session.GetString("MaKhuyenMai");
             double tienGiam = 0;
             string strTienGiam = HttpContext.Session.GetString("SoTienGiam");
@@ -73,7 +67,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 tienGiam = double.Parse(strTienGiam);
             }
 
-            ViewBag.TongTienVe = tongTienVe; // Truyền ra để hiển thị riêng dòng Vé
+            ViewBag.TongTienVe = tongTienVe;
             ViewBag.TongTien = tongTien;
             ViewBag.TienGiam = tienGiam;
             ViewBag.TongTienSauGiam = tongTien - tienGiam;
@@ -82,7 +76,6 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             return View();
         }
 
-        // 2. XỬ LÝ GỬI THÔNG TIN VÀ TẠO LINK PAYOS
         [HttpPost]
         public async Task<IActionResult> TaoThanhToan(string hoTen, string email, string soDienThoai)
         {
@@ -96,16 +89,15 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             long orderCode;
             DonHang donHang;
 
-            // NẾU LÀ ĐẶT VÉ -> Tái sử dụng Đơn Hàng Tạm đã có
             if (loaiGiaoDich == "DatVe" && !string.IsNullOrEmpty(maDonHangTam))
             {
                 donHang = await _context.DonHang.Include(d => d.ChiTietVe).FirstOrDefaultAsync(d => d.MaDonHang == maDonHangTam);
                 if (donHang == null || donHang.TrangThai == "DaHuy") return BadRequest("Đơn hàng không hợp lệ hoặc đã lố 5 phút.");
 
                 orderCode = long.Parse(donHang.MaDonHang);
-                donHang.MaKhachHang = string.IsNullOrEmpty(maKhachHang) ? null : maKhachHang; // Gắn tên user nếu họ vừa login
+                donHang.MaKhachHang = string.IsNullOrEmpty(maKhachHang) ? null : maKhachHang;
             }
-            else // NẾU CHỈ MUA BẮP NƯỚC -> Tạo đơn hàng mới
+            else
             {
                 orderCode = long.Parse(DateTime.Now.ToString("yyMMddHHmmss"));
                 donHang = new DonHang
@@ -119,7 +111,6 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 _context.DonHang.Add(donHang);
             }
 
-            // Lưu Chi Tiết Bắp Nước vào đơn hàng
             foreach (var item in gioHang)
             {
                 var ct = new ChiTietDichVu
@@ -134,7 +125,6 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 _context.ChiTietDichVu.Add(ct);
             }
 
-            // Cập nhật lại tổng tiền (Vé + Bắp Nước)
             double tongTienVe = donHang.ChiTietVe?.Sum(v => v.GiaVe) ?? 0;
             double tongTienBapNuoc = gioHang.Sum(x => x.ThanhTien);
             double tongTienBanDau = tongTienVe + tongTienBapNuoc;
@@ -147,33 +137,26 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             donHang.TongTienBanDau = tongTienBanDau;
             donHang.TongTienSauGiam = tongTienSauGiam;
 
-            // ==========================================
-            // THỦ THUẬT ÉP GIÁ (DISCOUNT ALLOCATION)
-            // ==========================================
             if (tongTienBanDau > 0 && tongTienSauGiam < tongTienBanDau)
             {
-                // Tính tỷ lệ giá phải trả (Ví dụ: Giảm 20k trên tổng 100k -> Tỷ lệ trả là 0.8)
                 double tyLeTra = tongTienSauGiam / tongTienBanDau;
 
-                // 1. Ép giá vé
                 if (donHang.ChiTietVe != null)
                 {
                     foreach (var ve in donHang.ChiTietVe)
                     {
-                        ve.GiaVe = ve.GiaVe * tyLeTra; // Cập nhật lại giá vé thực thu
+                        ve.GiaVe = ve.GiaVe * tyLeTra;
                     }
                 }
 
-                // 2. Ép đơn giá bắp nước (Cột ThanhTien trong DB sẽ tự tính theo DonGia mới này)
                 if (donHang.ChiTietDichVu != null)
                 {
                     foreach (var dv in donHang.ChiTietDichVu)
                     {
-                        dv.DonGia = dv.DonGia * tyLeTra; // Cập nhật lại đơn giá bắp nước thực thu
+                        dv.DonGia = dv.DonGia * tyLeTra;
                     }
                 }
             }
-            // ==========================================
 
             await _context.SaveChangesAsync();
             HttpContext.Session.SetString("GuestEmail", email);
@@ -194,12 +177,10 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             return Redirect(paymentLink.CheckoutUrl);
         }
 
-        // 3. HÀM CHỜ CALLBACK TỪ PAYOS (PHIÊN BẢN CHỐNG 404 TUYỆT ĐỐI)
         [HttpGet]
         [Route("NguoiDung/ThanhToan/KetQua")]
         public async Task<IActionResult> KetQua()
         {
-            // 1. Lấy dữ liệu từ URL
             string orderCodeStr = HttpContext.Request.Query["orderCode"];
             string cancelStr = HttpContext.Request.Query["cancel"];
             string status = HttpContext.Request.Query["status"];
@@ -209,7 +190,6 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             long orderCode = long.Parse(orderCodeStr);
             bool isCancelled = cancelStr?.ToLower() == "true" || status == "CANCELLED";
 
-            // 2. Tìm đơn hàng (Load đủ Data để in Hóa đơn)
             var donHang = await _context.DonHang
                 .Include(d => d.MaKhachHangNavigation)
                 .Include(d => d.MaKhuyenMaiNavigation)
@@ -220,7 +200,9 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
 
             if (donHang == null) return Content("Không tìm thấy đơn hàng.");
 
-            // 3. XỬ LÝ KHI HỦY
+            // LẤY LOẠI GIAO DỊCH TRƯỚC KHI XÓA
+            string loaiGiaoDich = HttpContext.Session.GetString("LoaiGiaoDich");
+
             if (isCancelled)
             {
                 if (donHang.TrangThai == "ChoThanhToan")
@@ -232,12 +214,11 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                     }
                     await _context.SaveChangesAsync();
                 }
-                // Xóa session
+
                 DonDepSession();
                 return Content("<script>alert('Bạn đã hủy thanh toán.'); window.location.href='/';</script>", "text/html; charset=utf-8");
             }
 
-            // 4. XỬ LÝ KHI THÀNH CÔNG
             if (status == "PAID" && donHang.TrangThai == "ChoThanhToan")
             {
                 donHang.TrangThai = "DaThanhToan";
@@ -247,7 +228,6 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 }
                 await _context.SaveChangesAsync();
 
-                // Gửi mail (Nhớ thay mật khẩu ứng dụng của Nghĩa vào AccountService)
                 if (!string.IsNullOrEmpty(donHang.MaKhachHang))
                 {
                     var khach = await _context.KhachHang.FindAsync(donHang.MaKhachHang);
@@ -258,11 +238,24 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 }
             }
 
+            // GỌI HÀM DỌN DẸP
             DonDepSession();
+
+            // ĐIỀU HƯỚNG TẠI ĐÂY (Chỗ này mới biết donHang là ai)
+            if (loaiGiaoDich == "BanVeTrucTiep")
+            {
+                return RedirectToAction("InVe", "BanHang", new { area = "RapPhim", maDonHang = donHang.MaDonHang });
+            }
+
+            if (loaiGiaoDich == "BanDichVuTrucTiep")
+            {
+                return RedirectToAction("InHoaDon", "BanHang", new { area = "RapPhim", maDonHang = donHang.MaDonHang });
+            }
+
             return View(donHang);
         }
 
-        // Hàm phụ để code sạch hơn
+        // HÀM NÀY CHỈ ĐỂ XÓA RÁC, KHÔNG ĐƯỢC CHỨA RETURN!
         private void DonDepSession()
         {
             HttpContext.Session.Remove("GioHangBapNuoc");
@@ -271,25 +264,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             HttpContext.Session.Remove("MaKhuyenMai");
             HttpContext.Session.Remove("SoTienGiam");
             HttpContext.Session.Remove("TongTienSauGiam");
-
-            string loaiGiaoDich = HttpContext.Session.GetString("LoaiGiaoDich");
             HttpContext.Session.Remove("LoaiGiaoDich");
-
-            if (loaiGiaoDich == "BanVeTrucTiep")
-            {
-                return RedirectToAction("InVe", "BanHang",
-                    new { area = "RapPhim", maDonHang = donHang.MaDonHang });
-            }
-
-            if (loaiGiaoDich == "BanDichVuTrucTiep")
-            {
-                return RedirectToAction("InHoaDon", "BanHang",
-                    new { area = "RapPhim", maDonHang = donHang.MaDonHang });
-            }
-
-            return View(donHang);
         }
-
-
     }
 }
