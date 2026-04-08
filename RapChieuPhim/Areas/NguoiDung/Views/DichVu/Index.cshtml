@@ -131,7 +131,7 @@
                 <div class="mb-5 category-section" data-category="@danhMuc.MaDanhMuc">
                     <h4 class="fw-bold category-title mb-4 text-uppercase">@danhMuc.TenDanhMuc</h4>
                     <div class="row g-4">
-                        @foreach (var dv in danhMuc.DichVus)
+                        @foreach (var dv in danhMuc.DichVu)
                         {
                             var imgUrl = string.IsNullOrEmpty(dv.DuongDanHinh) ? "/images/default/no-image.jpg" : dv.DuongDanHinh;
 

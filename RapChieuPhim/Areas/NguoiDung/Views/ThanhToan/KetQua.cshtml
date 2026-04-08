@@ -20,9 +20,9 @@
                         <p class="small text-success fw-bold"><i class="bi bi-check-circle"></i> Đã thanh toán thành công</p>
                     </div>
 
-                    @if (Model.ChiTietVes != null && Model.ChiTietVes.Any())
+                    @if (Model.ChiTietVe != null && Model.ChiTietVe.Any())
                     {
-                        var suat = Model.ChiTietVes.First().MaSuatChieuNavigation;
+                        var suat = Model.ChiTietVe.First().MaSuatChieuNavigation;
                         <div class="card border-primary mb-4 shadow-sm">
                             <div class="card-header bg-primary text-white fw-bold">
                                 <i class="bi bi-ticket-perforated me-2"></i> THÔNG TIN VÉ XEM PHIM
@@ -38,7 +38,7 @@
                                     <p class="mb-1"><i class="bi bi-geo-alt text-muted"></i> Phòng chiếu: <strong class="text-dark">@suat?.MaPhongNavigation?.TenPhong</strong></p>
                                     <p class="mb-0">
                                         <i class="bi bi-ui-checks-grid text-muted"></i> Ghế:
-                                        @foreach (var ve in Model.ChiTietVes)
+                                        @foreach (var ve in Model.ChiTietVe)
                                         {
                                             <span class="badge bg-danger ms-1 fs-6">@(ve.MaGheNavigation?.TenHang + ve.MaGheNavigation?.SoThu)</span>
                                         }
@@ -46,20 +46,20 @@
                                 </div>
                                 <div class="text-end border-start ps-3">
                                     <span class="d-block text-muted small">Tiền vé</span>
-                                    <strong class="fs-5">@string.Format("{0:#,##0}", Model.ChiTietVes.Sum(v => v.GiaVe))đ</strong>
+                                    <strong class="fs-5">@string.Format("{0:#,##0}", Model.ChiTietVe.Sum(v => v.GiaVe))đ</strong>
                                 </div>
                             </div>
                         </div>
                     }
 
-                    @if (Model.ChiTietDichVus != null && Model.ChiTietDichVus.Any())
+                    @if (Model.ChiTietDichVu != null && Model.ChiTietDichVu.Any())
                     {
                         <div class="card border-warning mb-4 shadow-sm">
                             <div class="card-header bg-warning text-dark fw-bold">
                                 <i class="bi bi-cup-straw me-2"></i> DỊCH VỤ ẨM THỰC
                             </div>
                             <div class="card-body">
-                                @foreach (var item in Model.ChiTietDichVus)
+                                @foreach (var item in Model.ChiTietDichVu)
                                 {
                                     <div class="d-flex justify-content-between mb-2 border-bottom pb-2">
                                         <span>🍿 @item.MaDichVuNavigation?.TenDichVu <strong class="text-danger ms-2">x @item.SoLuong</strong></span>
@@ -68,7 +68,7 @@
                                 }
                                 <div class="text-end mt-2">
                                     <span class="text-muted small">Tổng tiền ẩm thực:</span>
-                                    <strong class="fs-5 text-warning ms-2">@string.Format("{0:#,##0}", Model.ChiTietDichVus.Sum(d => d.DonGia * d.SoLuong))đ</strong>
+                                    <strong class="fs-5 text-warning ms-2">@string.Format("{0:#,##0}", Model.ChiTietDichVu.Sum(d => d.DonGia * d.SoLuong))đ</strong>
                                 </div>
                             </div>
                         </div>

@@ -169,10 +169,10 @@ namespace RapChieuPhim.Services
 
                 // 1. Dựng HTML phần Vé Phim
                 StringBuilder htmlVe = new StringBuilder();
-                if (donHang.ChiTietVes != null && donHang.ChiTietVes.Any())
+                if (donHang.ChiTietVe != null && donHang.ChiTietVe.Any())
                 {
-                    var suat = donHang.ChiTietVes.First().MaSuatChieuNavigation;
-                    var danhSachGhe = string.Join(", ", donHang.ChiTietVes.Select(v => v.MaGheNavigation?.TenHang + v.MaGheNavigation?.SoThu));
+                    var suat = donHang.ChiTietVe.First().MaSuatChieuNavigation;
+                    var danhSachGhe = string.Join(", ", donHang.ChiTietVe.Select(v => v.MaGheNavigation?.TenHang + v.MaGheNavigation?.SoThu));
 
                     htmlVe.Append($@"
                     <div style='border: 1px solid #0d6efd; border-radius: 8px; margin-bottom: 20px; overflow: hidden;'>
@@ -192,14 +192,14 @@ namespace RapChieuPhim.Services
 
                 // 2. Dựng HTML phần Bắp nước
                 StringBuilder htmlBapNuoc = new StringBuilder();
-                if (donHang.ChiTietDichVus != null && donHang.ChiTietDichVus.Any())
+                if (donHang.ChiTietDichVu != null && donHang.ChiTietDichVu.Any())
                 {
                     htmlBapNuoc.Append(@"
                     <div style='border: 1px solid #ffc107; border-radius: 8px; margin-bottom: 20px; overflow: hidden;'>
                         <div style='background-color: #ffc107; color: #000; padding: 10px 15px; font-weight: bold;'>DỊCH VỤ ĐI KÈM</div>
                         <div style='padding: 15px; background-color: #fff;'>");
 
-                    foreach (var item in donHang.ChiTietDichVus)
+                    foreach (var item in donHang.ChiTietDichVu)
                     {
                         htmlBapNuoc.Append($@"
                             <div style='display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 8px 0;'>

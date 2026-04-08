@@ -4,11 +4,11 @@ using RapChieuPhim.Models.Entities;
 
 namespace RapChieuPhim.Services
 {
-    public class DichVuService
+    public class DichVuervice
     {
         private readonly AppDbContext _context;
 
-        public DichVuService(AppDbContext context)
+        public DichVuervice(AppDbContext context)
         {
             _context = context;
         }
@@ -16,9 +16,9 @@ namespace RapChieuPhim.Services
         public async Task<List<DanhMucDichVu>> LayDanhSachMenuAsync()
         {
             // Lấy danh mục, kèm theo danh sách dịch vụ của danh mục đó (bỏ qua những cái đã xóa)
-            return await _context.DanhMucDichVus
-                .Include(dm => dm.DichVus.Where(dv => dv.DaXoa == false))
-                .Where(dm => dm.DaXoa == false && dm.DichVus.Any(dv => dv.DaXoa == false))
+            return await _context.DanhMucDichVu
+                .Include(dm => dm.DichVu.Where(dv => dv.DaXoa == false))
+                .Where(dm => dm.DaXoa == false && dm.DichVu.Any(dv => dv.DaXoa == false))
                 .ToListAsync();
         }
     }
