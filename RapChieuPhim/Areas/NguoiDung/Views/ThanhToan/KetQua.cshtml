@@ -15,9 +15,14 @@
                 </div>
 
                 <div class="card-body p-5 bg-white">
-                    <div class="text-center mb-4">
-                        <p class="text-muted mb-1">Mã giao dịch: <span class="fw-bold text-dark">#@Model.MaDonHang</span></p>
-                        <p class="small text-success fw-bold"><i class="bi bi-check-circle"></i> Đã thanh toán thành công</p>
+                    <div class="text-center mb-5 border-bottom pb-4">
+                        <p class="text-muted mb-1">Mã giao dịch: <span class="fw-bold text-dark fs-5">#@Model.MaDonHang</span></p>
+                        <p class="small text-success fw-bold mb-4"><i class="bi bi-check-circle"></i> Đã thanh toán thành công</p>
+
+                        <div class="d-inline-block bg-white p-3 border rounded-4 shadow-sm mb-2">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=@Model.MaDonHang" alt="QR Code Kiosk" class="img-fluid">
+                        </div>
+                        <p class="small text-muted fw-bold mt-2"><i class="bi bi-upc-scan me-1"></i>Sử dụng mã QR này tại Kiosk để in vé và biên lai dịch vụ</p>
                     </div>
 
                     @if (Model.ChiTietVe != null && Model.ChiTietVe.Any())
@@ -27,11 +32,7 @@
                             <div class="card-header bg-primary text-white fw-bold">
                                 <i class="bi bi-ticket-perforated me-2"></i> THÔNG TIN VÉ XEM PHIM
                             </div>
-                            <div class="card-body d-flex gap-4 align-items-center">
-                                <div class="text-center">
-                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=@Model.MaDonHang" alt="QR Code" class="border p-1 rounded bg-white mb-2">
-                                    <div class="small text-muted">Mã quét vé</div>
-                                </div>
+                            <div class="card-body d-flex gap-3 align-items-center">
                                 <div class="flex-grow-1">
                                     <h5 class="fw-bold text-uppercase text-primary mb-2">@suat?.MaPhimNavigation?.TenPhim</h5>
                                     <p class="mb-1"><i class="bi bi-clock text-muted"></i> Suất chiếu: <strong class="text-dark">@suat?.ThoiGianBatDau.ToString("HH:mm - dd/MM/yyyy")</strong></p>
@@ -79,13 +80,13 @@
                             <span class="text-muted">Tạm tính:</span>
                             <span class="fw-bold">@string.Format("{0:#,##0}", Model.TongTienBanDau)đ</span>
                         </div>
-                        @if (Model.MaKhuyenMai != null)
+                        @* @if (Model.MaKhuyenMai != null)
                         {
                             <div class="d-flex justify-content-between mb-2 text-success">
                                 <span>Giảm giá (@Model.MaKhuyenMaiNavigation?.MaCode):</span>
                                 <span class="fw-bold">-@string.Format("{0:#,##0}", Model.TongTienBanDau - Model.TongTienSauGiam)đ</span>
                             </div>
-                        }
+                        } *@
                         <div class="d-flex justify-content-between pt-3 mt-2 border-top align-items-center">
                             <h5 class="fw-bold mb-0">ĐÃ THANH TOÁN:</h5>
                             <h3 class="fw-bold text-danger mb-0">@string.Format("{0:#,##0}", Model.TongTienSauGiam)đ</h3>

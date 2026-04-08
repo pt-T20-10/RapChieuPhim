@@ -153,9 +153,9 @@ namespace RapChieuPhim.Services
         {
             try
             {
-                var fromAddress = new MailAddress("nhnghia0501@gmail.com", "B E T A Cinemas");
+                var fromAddress = new MailAddress("nhoangnghia2104@gmail.com", "B E T A Cinemas");
                 var toAddress = new MailAddress(toEmail);
-                const string fromPassword = "xxxx xxxx xxxx xxxx"; // Mật khẩu ứng dụng của bạn
+                const string fromPassword = "ugjx sbps gcih arte"; 
 
                 var smtp = new SmtpClient
                 {
@@ -167,7 +167,7 @@ namespace RapChieuPhim.Services
                     Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
                 };
 
-                // 1. Dựng HTML phần Vé Phim
+                // 1. Dựng HTML phần Vé Phim (Đã bỏ QR)
                 StringBuilder htmlVe = new StringBuilder();
                 if (donHang.ChiTietVe != null && donHang.ChiTietVe.Any())
                 {
@@ -182,10 +182,6 @@ namespace RapChieuPhim.Services
                             <p style='margin: 5px 0;'><strong>Suất chiếu:</strong> {suat?.ThoiGianBatDau.ToString("HH:mm - dd/MM/yyyy")}</p>
                             <p style='margin: 5px 0;'><strong>Phòng:</strong> {suat?.MaPhongNavigation?.TenPhong}</p>
                             <p style='margin: 5px 0;'><strong>Ghế đã chọn:</strong> <span style='color: #dc3545; font-weight: bold;'>{danhSachGhe}</span></p>
-                            <div style='text-align: center; margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 15px;'>
-                                <img src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={donHang.MaDonHang}' alt='QR Code' />
-                                <p style='font-size: 12px; color: #666;'>Mã quét vé tại rạp</p>
-                            </div>
                         </div>
                     </div>");
                 }
@@ -211,8 +207,7 @@ namespace RapChieuPhim.Services
                 }
 
                 string giamGiaHtml = donHang.MaKhuyenMai != null ? $@"<div style='display: flex; justify-content: space-between; color: #28a745; margin-bottom: 5px;'><span>Giảm giá ({donHang.MaKhuyenMai}):</span><strong>-{string.Format("{0:#,##0}", donHang.TongTienBanDau - donHang.TongTienSauGiam)}đ</strong></div>" : "";
-
-                // 3. Ráp toàn bộ Email
+                // 3. Ráp toàn bộ Email (Đưa QR lên trên cùng)
                 string body = $@"
                 <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 10px; overflow: hidden;'>
                     <div style='background-color: #198754; color: white; text-align: center; padding: 20px;'>
@@ -220,6 +215,12 @@ namespace RapChieuPhim.Services
                         <p style='margin: 5px 0 0 0;'>Giao dịch #{donHang.MaDonHang}</p>
                     </div>
                     <div style='padding: 20px;'>
+                        
+                        <div style='text-align: center; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px dashed #ddd;'>
+                            <img src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={donHang.MaDonHang}' alt='QR Code' style='border: 1px solid #ddd; padding: 10px; border-radius: 10px;' />
+                            <p style='font-size: 14px; color: #555; margin-top: 10px; font-weight: bold;'>Quét mã này tại Kiosk để in vé và biên lai</p>
+                        </div>
+
                         {htmlVe.ToString()}
                         {htmlBapNuoc.ToString()}
                         

@@ -147,6 +147,34 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             donHang.TongTienBanDau = tongTienBanDau;
             donHang.TongTienSauGiam = tongTienSauGiam;
 
+            // ==========================================
+            // THỦ THUẬT ÉP GIÁ (DISCOUNT ALLOCATION)
+            // ==========================================
+            if (tongTienBanDau > 0 && tongTienSauGiam < tongTienBanDau)
+            {
+                // Tính tỷ lệ giá phải trả (Ví dụ: Giảm 20k trên tổng 100k -> Tỷ lệ trả là 0.8)
+                double tyLeTra = tongTienSauGiam / tongTienBanDau;
+
+                // 1. Ép giá vé
+                if (donHang.ChiTietVe != null)
+                {
+                    foreach (var ve in donHang.ChiTietVe)
+                    {
+                        ve.GiaVe = ve.GiaVe * tyLeTra; // Cập nhật lại giá vé thực thu
+                    }
+                }
+
+                // 2. Ép đơn giá bắp nước (Cột ThanhTien trong DB sẽ tự tính theo DonGia mới này)
+                if (donHang.ChiTietDichVu != null)
+                {
+                    foreach (var dv in donHang.ChiTietDichVu)
+                    {
+                        dv.DonGia = dv.DonGia * tyLeTra; // Cập nhật lại đơn giá bắp nước thực thu
+                    }
+                }
+            }
+            // ==========================================
+
             await _context.SaveChangesAsync();
             HttpContext.Session.SetString("GuestEmail", email);
 
@@ -168,36 +196,32 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
 
         // 3. HÀM CHỜ CALLBACK TỪ PAYOS (PHIÊN BẢN CHỐNG 404 TUYỆT ĐỐI)
         [HttpGet]
-        [Route("NguoiDung/ThanhToan/KetQua")] // Ép hệ thống phải nhận đúng URL này
+        [Route("NguoiDung/ThanhToan/KetQua")]
         public async Task<IActionResult> KetQua()
         {
-            // 1. Tự bóc tách tham số từ URL
+            // 1. Lấy dữ liệu từ URL
             string orderCodeStr = HttpContext.Request.Query["orderCode"];
             string cancelStr = HttpContext.Request.Query["cancel"];
             string status = HttpContext.Request.Query["status"];
 
-            if (string.IsNullOrEmpty(orderCodeStr)) return NotFound("Không có mã đơn hàng từ PayOS.");
+            if (string.IsNullOrEmpty(orderCodeStr)) return RedirectToAction("Index", "Home");
 
             long orderCode = long.Parse(orderCodeStr);
-            bool cancel = cancelStr == "true" || cancelStr == "True";
+            bool isCancelled = cancelStr?.ToLower() == "true" || status == "CANCELLED";
 
-            // 2. Tìm đơn hàng trong DB
+            // 2. Tìm đơn hàng (Load đủ Data để in Hóa đơn)
             var donHang = await _context.DonHang
                 .Include(d => d.MaKhachHangNavigation)
                 .Include(d => d.MaKhuyenMaiNavigation)
-                .Include(d => d.ChiTietVe)
-                    .ThenInclude(v => v.MaSuatChieuNavigation)
-                        .ThenInclude(s => s.MaPhimNavigation)
-                .Include(d => d.ChiTietVe)
-                    .ThenInclude(v => v.MaGheNavigation)
-                .Include(d => d.ChiTietDichVu)
-                    .ThenInclude(dv => dv.MaDichVuNavigation)
+                .Include(d => d.ChiTietVe).ThenInclude(v => v.MaSuatChieuNavigation).ThenInclude(s => s.MaPhimNavigation)
+                .Include(d => d.ChiTietVe).ThenInclude(v => v.MaGheNavigation)
+                .Include(d => d.ChiTietDichVu).ThenInclude(dv => dv.MaDichVuNavigation)
                 .FirstOrDefaultAsync(d => d.MaDonHang == orderCode.ToString());
 
-            if (donHang == null) return NotFound("Không tìm thấy đơn hàng trong CSDL.");
+            if (donHang == null) return Content("Không tìm thấy đơn hàng.");
 
-            // 3. XỬ LÝ NẾU HỦY HOẶC LỖI
-            if (cancel || status != "PAID")
+            // 3. XỬ LÝ KHI HỦY
+            if (isCancelled)
             {
                 if (donHang.TrangThai == "ChoThanhToan")
                 {
@@ -208,36 +232,39 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                     }
                     await _context.SaveChangesAsync();
                 }
-
-                HttpContext.Session.Remove("DatVe_MaDonHang_Tam");
-                HttpContext.Session.Remove("DatVe_GioHangBapNuocTam");
-
-                return Content("<script>alert('Thanh toán thất bại hoặc đã bị hủy!'); window.location.href='/';</script>", "text/html");
+                // Xóa session
+                DọnDẹpSession();
+                return Content("<script>alert('Bạn đã hủy thanh toán.'); window.location.href='/';</script>", "text/html; charset=utf-8");
             }
 
-            // 4. XỬ LÝ KHI THANH TOÁN THÀNH CÔNG
-            if (donHang.TrangThai == "ChoThanhToan")
+            // 4. XỬ LÝ KHI THÀNH CÔNG
+            if (status == "PAID" && donHang.TrangThai == "ChoThanhToan")
             {
                 donHang.TrangThai = "DaThanhToan";
                 if (donHang.ChiTietVe != null)
                 {
-                    foreach (var ve in donHang.ChiTietVe) ve.TrangThai = "ChuaSuDung"; // Vé sẵn sàng để quét mã
+                    foreach (var ve in donHang.ChiTietVe) ve.TrangThai = "ChuaSuDung";
                 }
                 await _context.SaveChangesAsync();
 
-                // 5. GỬI MAIL HÓA ĐƠN
+                // Gửi mail (Nhớ thay mật khẩu ứng dụng của Nghĩa vào AccountService)
                 if (!string.IsNullOrEmpty(donHang.MaKhachHang))
                 {
                     var khach = await _context.KhachHang.FindAsync(donHang.MaKhachHang);
                     if (khach != null && !string.IsNullOrEmpty(khach.Email))
                     {
-                        // Lệnh gửi mail chạy ngầm
                         _ = _accountService.GuiEmailHoaDonAsync(donHang, khach.Email);
                     }
                 }
             }
 
-            // 6. DỌN DẸP TOÀN BỘ SESSION GIỎ HÀNG
+            DọnDẹpSession();
+            return View(donHang);
+        }
+
+        // Hàm phụ để code sạch hơn
+        private void DọnDẹpSession()
+        {
             HttpContext.Session.Remove("GioHangBapNuoc");
             HttpContext.Session.Remove("DatVe_MaDonHang_Tam");
             HttpContext.Session.Remove("DatVe_GioHangBapNuocTam");
