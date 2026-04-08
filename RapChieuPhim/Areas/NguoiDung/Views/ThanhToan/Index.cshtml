@@ -1,6 +1,140 @@
 ﻿@{
     ViewData["Title"] = "Thanh toán";
+    var gioHang = ViewBag.GioHang as List<RapChieuPhim.Models.ViewModels.CartItem>;
+    double tongTien = gioHang?.Sum(x => x.ThanhTien) ?? 0;
+    bool isLogined = ViewBag.IsLogined;
 }
 
-<h2>@ViewData["Title"]</h2>
-<p>Đang phát triển...</p>
+<div class="container py-5">
+    <div class="row g-5">
+        <div class="col-lg-7">
+            <h4 class="fw-bold mb-4" style="color: #034ea2;"><i class="bi bi-shield-check me-2"></i>THÔNG TIN THANH TOÁN</h4>
+
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body p-4">
+                    @if (!isLogined)
+                    {
+                        <div class="alert alert-warning mb-4 rounded-3 border-0">
+                            <i class="bi bi-info-circle-fill me-2"></i> Bạn đang mua hàng với tư cách <strong>Khách vãng lai</strong>.
+                            <a asp-controller="TaiKhoan" asp-action="DangNhap" asp-route-returnUrl="/NguoiDung/ThanhToan/Index" class="alert-link">Đăng nhập</a> để nhận điểm thưởng!
+                        </div>
+                    }
+
+                    <form asp-action="TaoThanhToan" method="post" id="checkoutForm">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Họ và tên <span class="text-danger">*</span></label>
+                                <input type="text" name="hoTen" class="form-control" value="@ViewBag.HoTen" required placeholder="Nhập họ tên người nhận" @(isLogined ? "readonly bg-light" : "")>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Email nhận Hóa Đơn <span class="text-danger">*</span></label>
+                                <input type="email" name="email" class="form-control" value="@ViewBag.Email" required placeholder="example@gmail.com" @(isLogined ? "readonly bg-light" : "")>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Số điện thoại <span class="text-danger">*</span></label>
+                                <input type="text" name="soDienThoai" class="form-control" value="@ViewBag.SoDienThoai" required placeholder="Bắt đầu bằng 0..." pattern="^0\d{9}$" @(isLogined ? "readonly bg-light" : "")>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-lg text-white fw-bold shadow-sm" style="background-color: #034ea2; border-radius: 10px;">
+                                XÁC NHẬN & CHUYỂN ĐẾN PAYOS <i class="bi bi-qr-code-scan ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <h4 class="fw-bold mb-4" style="color: #034ea2;"><i class="bi bi-receipt me-2"></i>TÓM TẮT ĐƠN HÀNG</h4>
+
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-ticket-perforated me-2"></i>MÃ GIẢM GIÁ</h6>
+                    <div class="input-group">
+                        <input type="text" id="voucherCode" class="form-control text-uppercase" placeholder="Nhập mã voucher" value="@ViewBag.MaKhuyenMai">
+                        <button class="btn btn-outline-secondary fw-bold" type="button" onclick="apDungVoucher()">ÁP DỤNG</button>
+                    </div>
+                    <small id="voucherMessage" class="d-block mt-2 fw-bold"></small>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4 bg-light rounded-4">
+                    <ul class="list-group list-group-flush mb-3 bg-transparent">
+                        @foreach (var item in gioHang)
+                        {
+                            @if (ViewBag.TongTienVe != null && ViewBag.TongTienVe > 0)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 border-bottom mb-2">
+                                    <div><h6 class="my-0 fw-bold">Vé xem phim</h6></div>
+                                    <span class="text-dark fw-bold">@string.Format("{0:#,##0}", ViewBag.TongTienVe)đ</span>
+                                </li>
+                            }
+                        }
+                    </ul>
+
+                    <div class="border-top pt-3">
+                        <div class="d-flex justify-content-between mb-2 text-muted">
+                            <span class="lbl-tam-tinh">Tạm tính</span>
+                            <span class="fw-bold val-tam-tinh">@string.Format("{0:#,##0}", ViewBag.TongTien)đ</span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-3 text-success @(ViewBag.TienGiam > 0 ? "" : "d-none")" id="rowGiamGia">
+                            <span>Giảm giá Voucher</span>
+                            <span class="fw-bold val-giam-gia">-@string.Format("{0:#,##0}", ViewBag.TienGiam)đ</span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
+                            <span class="fs-5 fw-bold">TỔNG CỘNG</span>
+                            <strong class="fs-3 text-danger val-thanh-tien">@string.Format("{0:#,##0}", ViewBag.TongTienSauGiam)đ</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function formatVND(amount) {
+            return amount.toLocaleString('vi-VN') + 'đ';
+        }
+
+        function apDungVoucher() {
+            var code = $('#voucherCode').val().trim();
+            if(!code) return;
+
+            // API này nằm bên DichVuController, ta mượn dùng luôn
+            $.ajax({
+                url: '@Url.Action("ApDungKhuyenMai", "DichVu", new { area = "NguoiDung" })',
+                type: 'POST',
+                data: { maCode: code },
+                success: function (res) {
+                    var msgEl = $('#voucherMessage');
+                    if (res.success) {
+                        msgEl.removeClass('text-danger').addClass('text-success').text(res.message);
+
+                        // Cập nhật giao diện
+                        $('#rowGiamGia').removeClass('d-none');
+                        $('.val-giam-gia').text('-' + formatVND(res.tienGiam));
+                        $('.val-thanh-tien').text(formatVND(res.tongTienMoi));
+                    } else {
+                        msgEl.removeClass('text-success').addClass('text-danger').text(res.message);
+
+                        // Ẩn giảm giá nếu lỗi, reset về giá gốc
+                        $('#rowGiamGia').addClass('d-none');
+                        var tongCu = parseFloat($('.val-tam-tinh').text().replace(/[^0-9]/g, ''));
+                        $('.val-thanh-tien').text(formatVND(tongCu));
+                    }
+                }
+            });
+        }
+    </script>
+}

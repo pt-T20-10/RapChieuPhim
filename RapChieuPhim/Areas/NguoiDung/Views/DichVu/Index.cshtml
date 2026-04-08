@@ -1,0 +1,274 @@
+﻿@model List<RapChieuPhim.Models.Entities.DanhMucDichVu>
+
+@{
+    ViewData["Title"] = "Bắp nước & Combo";
+}
+
+<style>
+    .dv-card {
+        transition: 0.3s;
+        border-radius: 15px;
+        border: 1px solid #e0e0e0;
+        overflow: hidden;
+    }
+
+        .dv-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-color: #034ea2;
+        }
+
+    .dv-img-wrapper {
+        height: 200px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+    }
+
+        .dv-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .btn-add-cart {
+        border: 2px solid #034ea2;
+        color: #034ea2;
+        font-weight: bold;
+        background: transparent;
+        transition: 0.2s;
+    }
+
+        .btn-add-cart:hover {
+            background-color: #034ea2;
+            color: white;
+        }
+
+    .btn-buy-now {
+        background-color: #f39c12 !important;
+        color: white !important;
+        font-weight: bold;
+        border: none;
+        transition: 0.3s;
+    }
+
+        .btn-buy-now:hover {
+            background-color: #e67e22 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(243, 156, 18, 0.4);
+        }
+
+    .category-title {
+        border-bottom: 3px solid #034ea2;
+        display: inline-block;
+        padding-bottom: 5px;
+        color: #034ea2;
+    }
+
+    /* Nút Giỏ hàng nổi (Floating Button) */
+    .floating-cart {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 65px;
+        height: 65px;
+        background-color: #f39c12;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        z-index: 1000;
+        transition: 0.3s;
+    }
+
+        .floating-cart:hover {
+            transform: scale(1.1);
+            color: white;
+            background-color: #e67e22;
+        }
+</style>
+
+<div class="container py-5 position-relative">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-uppercase" style="color: #034ea2;">Menu Bắp Nước & Combo</h2>
+        <p class="text-muted">Lựa chọn món ăn vặt yêu thích để tận hưởng bộ phim trọn vẹn nhất!</p>
+    </div>
+
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-5 mb-2">
+            <div class="input-group shadow-sm">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Tìm tên món ăn, thức uống..." onkeyup="filterMenu()">
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <select id="categoryFilter" class="form-select shadow-sm fw-bold text-secondary" onchange="filterMenu()">
+                <option value="ALL">-- Tất cả danh mục --</option>
+                @if (Model != null)
+                {
+                    foreach (var dm in Model)
+                    {
+                        <option value="@dm.MaDanhMuc">@dm.TenDanhMuc</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-warning text-center">Hiện tại chưa có menu bắp nước.</div>
+    }
+    else
+    {
+        <div id="menuContainer">
+            @foreach (var danhMuc in Model)
+            {
+                <div class="mb-5 category-section" data-category="@danhMuc.MaDanhMuc">
+                    <h4 class="fw-bold category-title mb-4 text-uppercase">@danhMuc.TenDanhMuc</h4>
+                    <div class="row g-4">
+                        @foreach (var dv in danhMuc.DichVus)
+                        {
+                            var imgUrl = string.IsNullOrEmpty(dv.DuongDanHinh) ? "/images/default/no-image.jpg" : dv.DuongDanHinh;
+
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 item-card" data-name="@dv.TenDichVu.ToLower()">
+                                <div class="card dv-card h-100 shadow-sm">
+                                    <div class="dv-img-wrapper">
+                                        <img src="@imgUrl" alt="@dv.TenDichVu" onerror="this.src='/images/default/no-image.jpg';">
+                                    </div>
+                                    <div class="card-body d-flex flex-column text-center p-3">
+                                        <h6 class="fw-bold mb-2 text-truncate" title="@dv.TenDichVu">@dv.TenDichVu</h6>
+                                        <h5 class="fw-bold text-danger mb-3">@string.Format("{0:#,##0}", dv.GiaBan) VNĐ</h5>
+
+                                        <div class="mt-auto d-flex gap-2">
+                                            <button class="btn btn-add-cart w-50 py-2" onclick="themVaoGio('@dv.MaDichVu')" title="Thêm vào giỏ">
+                                                <i class="bi bi-cart-plus fs-5"></i>
+                                            </button>
+                                            <button class="btn btn-buy-now w-50 py-2 fw-bold" onclick="muaNgay('@dv.MaDichVu')">
+                                                MUA NGAY
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div id="noResultMessage" class="text-center text-muted py-5 d-none">
+            <i class="bi bi-emoji-frown fs-1"></i>
+            <h5 class="mt-3">Không tìm thấy món nào phù hợp!</h5>
+        </div>
+    }
+
+    <a asp-action="GioHang" class="floating-cart text-decoration-none">
+        <i class="bi bi-cart3 fs-3"></i>
+        <span id="cartBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="display: none;">0</span>
+    </a>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+    <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body fw-bold">
+                <i class="bi bi-check-circle-fill me-2"></i> Đã thêm vào giỏ hàng!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Sử dụng Url.Action để C# tự sinh link chuẩn xác, tránh lỗi 404
+        var addToCartUrl = '@Url.Action("ThemVaoGio", "DichVu", new { area = "NguoiDung" })';
+        var checkoutUrl = '@Url.Action("Index", "ThanhToan", new { area = "NguoiDung" })';
+
+        // Hàm Lọc & Tìm kiếm
+        function filterMenu() {
+            var searchText = $('#searchInput').val().toLowerCase().trim();
+            var categoryVal = $('#categoryFilter').val();
+            var hasAnyVisibleItem = false;
+
+            $('.category-section').each(function () {
+                var categoryId = $(this).data('category');
+                var matchCategory = (categoryVal === 'ALL' || categoryVal === categoryId);
+                var hasVisibleItemInCategory = false;
+
+                $(this).find('.item-card').each(function () {
+                    var itemName = $(this).data('name');
+                    var matchSearch = itemName.includes(searchText);
+
+                    if (matchCategory && matchSearch) {
+                        $(this).removeClass('d-none');
+                        hasVisibleItemInCategory = true;
+                        hasAnyVisibleItem = true;
+                    } else {
+                        $(this).addClass('d-none');
+                    }
+                });
+
+                if (hasVisibleItemInCategory) {
+                    $(this).removeClass('d-none');
+                } else {
+                    $(this).addClass('d-none');
+                }
+            });
+
+            if(hasAnyVisibleItem) {
+                $('#noResultMessage').addClass('d-none');
+            } else {
+                $('#noResultMessage').removeClass('d-none');
+            }
+        }
+
+        // Action 1: Thêm vào giỏ (Ở lại trang)
+        function themVaoGio(maDichVu) {
+            $.ajax({
+                url: addToCartUrl,
+                type: 'POST',
+                data: { maDichVu: maDichVu, soLuong: 1 },
+                success: function (res) {
+                    if (res.success) {
+                        // Hiện Toast
+                        var toastEl = document.getElementById('successToast');
+                        var toast = new bootstrap.Toast(toastEl, { delay: 2000 });
+                        toast.show();
+
+                        // Cập nhật số lượng
+                        $('#cartBadge').text(res.totalItems).fadeIn();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                    alert("Không thể thêm vào giỏ. Vui lòng thử lại!");
+                }
+            });
+        }
+
+        // Action 2: Mua Ngay (Thêm vào giỏ rồi qua thẳng Trang Thanh Toán)
+        function muaNgay(maDichVu) {
+            $.ajax({
+                url: addToCartUrl,
+                type: 'POST',
+                data: { maDichVu: maDichVu, soLuong: 1 },
+                success: function (res) {
+                    if (res.success) {
+                        // Chuyển hướng thẳng sang trang Thanh Toán
+                        window.location.href = checkoutUrl;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                    alert("Có lỗi xảy ra khi xử lý. Vui lòng thử lại!");
+                }
+            });
+        }
+    </script>
+}

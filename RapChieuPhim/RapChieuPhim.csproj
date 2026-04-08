@@ -40,12 +40,11 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.23" />
+		<PackageReference Include="payOS" Version="2.1.0" />
 		<PackageReference Include="QRCoder" Version="1.6.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Areas\NguoiDung\Controllers\" />
-	  <Folder Include="Areas\NguoiDung\Views\ThanhToan\" />
 	  <Folder Include="Areas\RapPhim\Views\BanHang\" />
 	  <Folder Include="Areas\RapPhim\Views\QuetVe\" />
 	  <Folder Include="Data\" />

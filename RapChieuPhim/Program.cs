@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Hangfire;
 using Hangfire.SqlServer;
 using RapChieuPhim.Services;
+using PayOS;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,8 +28,18 @@ builder.Services.AddHangfire(config => config
 builder.Services.AddHangfireServer();
 
 builder.Services.AddControllersWithViews();
+
+// Đăng ký PayOS
+PayOSClient payOSClient = new PayOSClient(
+    builder.Configuration["PayOS:ClientId"] ?? "",
+    builder.Configuration["PayOS:ApiKey"] ?? "",
+    builder.Configuration["PayOS:ChecksumKey"] ?? ""
+);
+builder.Services.AddSingleton(payOSClient);
+
 builder.Services.AddScoped<DatVeService>();
 builder.Services.AddScoped<ThongKeService>();
+builder.Services.AddScoped<DichVuService>();
 
 //builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<AccountService>();
