@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RapChieuPhim.Data;
 using RapChieuPhim.Extensions; // Dùng lại thư viện Session Json
 using RapChieuPhim.Models.Entities;
+using RapChieuPhim.Services;
 
 namespace RapChieuPhim.Areas.NguoiDung.Controllers
 {
@@ -10,10 +11,21 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
     public class DatVeController : Controller
     {
         private readonly AppDbContext _context;
-
-        public DatVeController(AppDbContext context)
+        private readonly DatVeService _datVeService;
+        public DatVeController(AppDbContext context, DatVeService datVeService)
         {
             _context = context;
+            _datVeService = datVeService;
+        }  
+        
+        public async Task<IActionResult> ChiTietPhim(string maPhim)
+        {
+            var phim = await _datVeService.LayChiTietPhimAsync(maPhim);
+            if (phim == null)
+            {
+                return NotFound("Không tìm thấy phim này!");
+            }
+            return View(phim);
         }
 
         // 0. TRANG CHI TIẾT PHIM (Thêm hàm này vào để hết lỗi 404)
