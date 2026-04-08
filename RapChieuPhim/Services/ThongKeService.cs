@@ -34,7 +34,7 @@ namespace RapChieuPhim.Services
                 .ToListAsync();
         }
 
-        // Cập nhật: Thêm tham số maPhim, maPhong
+       
         public async Task<ThongKeViewModel> LayThongKeAsync(DateTime tuNgay, DateTime denNgay, string maPhim = null, string maPhong = null)
         {
             var viewModel = new ThongKeViewModel
