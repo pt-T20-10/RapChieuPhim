@@ -20,14 +20,16 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             _context = context;
         }
 
-        // GET: RapPhim/Phims
+        // GET: RapPhim/Phim
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Phims.Include(p => p.MaTheLoaiNavigation);
+            var appDbContext = _context.Phim
+                .Include(p => p.MaTheLoaiNavigation)
+                .Where(p => !p.DaXoa);
             return View(await appDbContext.ToListAsync());
         }
 
-        // GET: RapPhim/Phims/Details/5
+        // GET: RapPhim/Phim/Details/5
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -35,7 +37,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var phim = await _context.Phims
+            var phim = await _context.Phim
                 .Include(p => p.MaTheLoaiNavigation)
                 .FirstOrDefaultAsync(m => m.MaPhim == id);
             if (phim == null)
@@ -46,31 +48,51 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(phim);
         }
 
-        // GET: RapPhim/Phims/Create
         public IActionResult Create()
         {
-            ViewData["MaTheLoai"] = new SelectList(_context.TheLoaiPhims, "MaTheLoai", "MaTheLoai");
-            return View();
+            // Set giá trị mặc định trước khi trả về View
+            var phim = new Phim
+            {
+                TrangThai = "SapChieu",
+                DaXoa = false
+            };
+
+                ViewData["MaTheLoai"] = new SelectList(
+                _context.TheLoaiPhim.Where(t => !t.DaXoa),
+                "MaTheLoai", "TenTheLoai");
+
+            return View(phim);   
         }
 
-        // POST: RapPhim/Phims/Create
+        // POST: RapPhim/Phim/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("MaPhim,TenPhim,MaTheLoai,ThoiLuong,NgayPhatHanh,MoTa,PhanLoaiDoTuoi,DuongDanAnh,TrangThai,DaXoa,DuongDanTrailer")] Phim phim)
         {
+            // Xóa navigation properties khỏi ModelState
+            // vì chúng không có trong form — EF tự load sau
+            ModelState.Remove("MaTheLoaiNavigation");
+            ModelState.Remove("SuatChieu");
+
+            if (string.IsNullOrEmpty(phim.MaTheLoai))
+                ModelState.AddModelError("MaTheLoai", "Vui lòng chọn thể loại phim");
+
             if (ModelState.IsValid)
             {
                 _context.Add(phim);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaTheLoai"] = new SelectList(_context.TheLoaiPhims, "MaTheLoai", "MaTheLoai", phim.MaTheLoai);
+
+            ViewData["MaTheLoai"] = new SelectList(
+                _context.TheLoaiPhim.Where(t => !t.DaXoa),
+                "MaTheLoai", "TenTheLoai", phim.MaTheLoai);
             return View(phim);
         }
 
-        // GET: RapPhim/Phims/Edit/5
+        // GET: RapPhim/Phim/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -78,16 +100,16 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var phim = await _context.Phims.FindAsync(id);
+            var phim = await _context.Phim.FindAsync(id);
             if (phim == null)
             {
                 return NotFound();
             }
-            ViewData["MaTheLoai"] = new SelectList(_context.TheLoaiPhims, "MaTheLoai", "MaTheLoai", phim.MaTheLoai);
+            ViewData["MaTheLoai"] = new SelectList(_context.TheLoaiPhim, "MaTheLoai", "TenTheLoai", phim.MaTheLoai);
             return View(phim);
         }
 
-        // POST: RapPhim/Phims/Edit/5
+        // POST: RapPhim/Phim/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -119,11 +141,11 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaTheLoai"] = new SelectList(_context.TheLoaiPhims, "MaTheLoai", "MaTheLoai", phim.MaTheLoai);
+            ViewData["MaTheLoai"] = new SelectList(_context.TheLoaiPhim, "MaTheLoai", "TenTheLoai", phim.MaTheLoai);
             return View(phim);
         }
 
-        // GET: RapPhim/Phims/Delete/5
+        // GET: RapPhim/Phim/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -131,7 +153,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var phim = await _context.Phims
+            var phim = await _context.Phim
                 .Include(p => p.MaTheLoaiNavigation)
                 .FirstOrDefaultAsync(m => m.MaPhim == id);
             if (phim == null)
@@ -142,15 +164,16 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(phim);
         }
 
-        // POST: RapPhim/Phims/Delete/5
+        // POST: RapPhim/Phim/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var phim = await _context.Phims.FindAsync(id);
+            var phim = await _context.Phim.FindAsync(id);
             if (phim != null)
             {
-                _context.Phims.Remove(phim);
+                phim.DaXoa = true;             
+                _context.Update(phim);
             }
 
             await _context.SaveChangesAsync();
@@ -159,7 +182,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
 
         private bool PhimExists(string id)
         {
-            return _context.Phims.Any(e => e.MaPhim == id);
+            return _context.Phim.Any(e => e.MaPhim == id);
         }
     }
 }

@@ -20,14 +20,14 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             _context = context;
         }
 
-        // GET: RapPhim/TaiKhoans
+        // GET: RapPhim/TaiKhoan
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.TaiKhoans.Include(t => t.MaKhachHangNavigation).Include(t => t.MaNhanVienNavigation);
+            var appDbContext = _context.TaiKhoan.Include(t => t.MaKhachHangNavigation).Include(t => t.MaNhanVienNavigation);
             return View(await appDbContext.ToListAsync());
         }
 
-        // GET: RapPhim/TaiKhoans/Details/5
+        // GET: RapPhim/TaiKhoan/Details/5
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -35,7 +35,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var taiKhoan = await _context.TaiKhoans
+            var taiKhoan = await _context.TaiKhoan
                 .Include(t => t.MaKhachHangNavigation)
                 .Include(t => t.MaNhanVienNavigation)
                 .FirstOrDefaultAsync(m => m.TenDangNhap == id);
@@ -47,15 +47,15 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(taiKhoan);
         }
 
-        // GET: RapPhim/TaiKhoans/Create
+        // GET: RapPhim/TaiKhoan/Create
         public IActionResult Create()
         {
-            ViewData["MaKhachHang"] = new SelectList(_context.KhachHangs, "MaKhachHang", "MaKhachHang");
-            ViewData["MaNhanVien"] = new SelectList(_context.NhanViens, "MaNhanVien", "MaNhanVien");
+            ViewData["MaKhachHang"] = new SelectList(_context.KhachHang, "MaKhachHang", "MaKhachHang");
+            ViewData["MaNhanVien"] = new SelectList(_context.NhanVien, "MaNhanVien", "MaNhanVien");
             return View();
         }
 
-        // POST: RapPhim/TaiKhoans/Create
+        // POST: RapPhim/TaiKhoan/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -68,12 +68,12 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaKhachHang"] = new SelectList(_context.KhachHangs, "MaKhachHang", "MaKhachHang", taiKhoan.MaKhachHang);
-            ViewData["MaNhanVien"] = new SelectList(_context.NhanViens, "MaNhanVien", "MaNhanVien", taiKhoan.MaNhanVien);
+            ViewData["MaKhachHang"] = new SelectList(_context.KhachHang, "MaKhachHang", "MaKhachHang", taiKhoan.MaKhachHang);
+            ViewData["MaNhanVien"] = new SelectList(_context.NhanVien, "MaNhanVien", "MaNhanVien", taiKhoan.MaNhanVien);
             return View(taiKhoan);
         }
 
-        // GET: RapPhim/TaiKhoans/Edit/5
+        // GET: RapPhim/TaiKhoan/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -81,17 +81,17 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var taiKhoan = await _context.TaiKhoans.FindAsync(id);
+            var taiKhoan = await _context.TaiKhoan.FindAsync(id);
             if (taiKhoan == null)
             {
                 return NotFound();
             }
-            ViewData["MaKhachHang"] = new SelectList(_context.KhachHangs, "MaKhachHang", "MaKhachHang", taiKhoan.MaKhachHang);
-            ViewData["MaNhanVien"] = new SelectList(_context.NhanViens, "MaNhanVien", "MaNhanVien", taiKhoan.MaNhanVien);
+            ViewData["MaKhachHang"] = new SelectList(_context.KhachHang, "MaKhachHang", "MaKhachHang", taiKhoan.MaKhachHang);
+            ViewData["MaNhanVien"] = new SelectList(_context.NhanVien, "MaNhanVien", "MaNhanVien", taiKhoan.MaNhanVien);
             return View(taiKhoan);
         }
 
-        // POST: RapPhim/TaiKhoans/Edit/5
+        // POST: RapPhim/TaiKhoan/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -123,12 +123,12 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaKhachHang"] = new SelectList(_context.KhachHangs, "MaKhachHang", "MaKhachHang", taiKhoan.MaKhachHang);
-            ViewData["MaNhanVien"] = new SelectList(_context.NhanViens, "MaNhanVien", "MaNhanVien", taiKhoan.MaNhanVien);
+            ViewData["MaKhachHang"] = new SelectList(_context.KhachHang, "MaKhachHang", "MaKhachHang", taiKhoan.MaKhachHang);
+            ViewData["MaNhanVien"] = new SelectList(_context.NhanVien, "MaNhanVien", "MaNhanVien", taiKhoan.MaNhanVien);
             return View(taiKhoan);
         }
 
-        // GET: RapPhim/TaiKhoans/Delete/5
+        // GET: RapPhim/TaiKhoan/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -136,7 +136,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var taiKhoan = await _context.TaiKhoans
+            var taiKhoan = await _context.TaiKhoan
                 .Include(t => t.MaKhachHangNavigation)
                 .Include(t => t.MaNhanVienNavigation)
                 .FirstOrDefaultAsync(m => m.TenDangNhap == id);
@@ -148,15 +148,15 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(taiKhoan);
         }
 
-        // POST: RapPhim/TaiKhoans/Delete/5
+        // POST: RapPhim/TaiKhoan/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var taiKhoan = await _context.TaiKhoans.FindAsync(id);
+            var taiKhoan = await _context.TaiKhoan.FindAsync(id);
             if (taiKhoan != null)
             {
-                _context.TaiKhoans.Remove(taiKhoan);
+                _context.TaiKhoan.Remove(taiKhoan);
             }
 
             await _context.SaveChangesAsync();
@@ -165,7 +165,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
 
         private bool TaiKhoanExists(string id)
         {
-            return _context.TaiKhoans.Any(e => e.TenDangNhap == id);
+            return _context.TaiKhoan.Any(e => e.TenDangNhap == id);
         }
     }
 }

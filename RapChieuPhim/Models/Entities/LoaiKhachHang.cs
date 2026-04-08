@@ -15,5 +15,5 @@ public partial class LoaiKhachHang
 
     public bool DaXoa { get; set; }
 
-    public virtual ICollection<KhachHang> KhachHangs { get; set; } = new List<KhachHang>();
+    public virtual ICollection<KhachHang> KhachHang { get; set; } = new List<KhachHang>();
 }

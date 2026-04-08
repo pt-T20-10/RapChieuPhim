@@ -17,9 +17,9 @@ public partial class PhongChieu
 
     public bool DaXoa { get; set; }
 
-    public virtual ICollection<Ghe> Ghes { get; set; } = new List<Ghe>();
+    public virtual ICollection<Ghe> Ghe { get; set; } = new List<Ghe>();
 
     public virtual LoaiPhong MaLoaiPhongNavigation { get; set; } = null!;
 
-    public virtual ICollection<SuatChieu> SuatChieus { get; set; } = new List<SuatChieu>();
+    public virtual ICollection<SuatChieu> SuatChieu { get; set; } = new List<SuatChieu>();
 }

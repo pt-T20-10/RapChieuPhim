@@ -23,9 +23,9 @@ public partial class DonHang
 
     public bool DaXoa { get; set; }
 
-    public virtual ICollection<ChiTietDichVu> ChiTietDichVus { get; set; } = new List<ChiTietDichVu>();
+    public virtual ICollection<ChiTietDichVu> ChiTietDichVu { get; set; } = new List<ChiTietDichVu>();
 
-    public virtual ICollection<ChiTietVe> ChiTietVes { get; set; } = new List<ChiTietVe>();
+    public virtual ICollection<ChiTietVe> ChiTietVe { get; set; } = new List<ChiTietVe>();
 
     public virtual KhachHang? MaKhachHangNavigation { get; set; }
 
@@ -33,5 +33,5 @@ public partial class DonHang
 
     public virtual NhanVien? MaNhanVienNavigation { get; set; }
 
-    public virtual ICollection<ThanhToan> ThanhToans { get; set; } = new List<ThanhToan>();
+    public virtual ICollection<ThanhToan> ThanhToan { get; set; } = new List<ThanhToan>();
 }

@@ -23,7 +23,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
         // GET: RapPhim/SuatChieu
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.SuatChieus.Include(s => s.MaPhimNavigation).Include(s => s.MaPhongNavigation);
+            var appDbContext = _context.SuatChieu.Include(s => s.MaPhimNavigation).Include(s => s.MaPhongNavigation);
             return View(await appDbContext.ToListAsync());
         }
 
@@ -35,7 +35,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var suatChieu = await _context.SuatChieus
+            var suatChieu = await _context.SuatChieu
                 .Include(s => s.MaPhimNavigation)
                 .Include(s => s.MaPhongNavigation)
                 .FirstOrDefaultAsync(m => m.MaSuatChieu == id);
@@ -50,8 +50,8 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
         // GET: RapPhim/SuatChieu/Create
         public IActionResult Create()
         {
-            ViewData["MaPhim"] = new SelectList(_context.Phims, "MaPhim", "MaPhim");
-            ViewData["MaPhong"] = new SelectList(_context.PhongChieus, "MaPhong", "MaPhong");
+            ViewData["MaPhim"] = new SelectList(_context.Phim, "MaPhim", "MaPhim");
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu, "MaPhong", "MaPhong");
             return View();
         }
 
@@ -68,8 +68,8 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaPhim"] = new SelectList(_context.Phims, "MaPhim", "MaPhim", suatChieu.MaPhim);
-            ViewData["MaPhong"] = new SelectList(_context.PhongChieus, "MaPhong", "MaPhong", suatChieu.MaPhong);
+            ViewData["MaPhim"] = new SelectList(_context.Phim, "MaPhim", "MaPhim", suatChieu.MaPhim);
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu, "MaPhong", "MaPhong", suatChieu.MaPhong);
             return View(suatChieu);
         }
 
@@ -81,13 +81,13 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var suatChieu = await _context.SuatChieus.FindAsync(id);
+            var suatChieu = await _context.SuatChieu.FindAsync(id);
             if (suatChieu == null)
             {
                 return NotFound();
             }
-            ViewData["MaPhim"] = new SelectList(_context.Phims, "MaPhim", "MaPhim", suatChieu.MaPhim);
-            ViewData["MaPhong"] = new SelectList(_context.PhongChieus, "MaPhong", "MaPhong", suatChieu.MaPhong);
+            ViewData["MaPhim"] = new SelectList(_context.Phim, "MaPhim", "MaPhim", suatChieu.MaPhim);
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu, "MaPhong", "MaPhong", suatChieu.MaPhong);
             return View(suatChieu);
         }
 
@@ -123,8 +123,8 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaPhim"] = new SelectList(_context.Phims, "MaPhim", "MaPhim", suatChieu.MaPhim);
-            ViewData["MaPhong"] = new SelectList(_context.PhongChieus, "MaPhong", "MaPhong", suatChieu.MaPhong);
+            ViewData["MaPhim"] = new SelectList(_context.Phim, "MaPhim", "MaPhim", suatChieu.MaPhim);
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu, "MaPhong", "MaPhong", suatChieu.MaPhong);
             return View(suatChieu);
         }
 
@@ -136,7 +136,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var suatChieu = await _context.SuatChieus
+            var suatChieu = await _context.SuatChieu
                 .Include(s => s.MaPhimNavigation)
                 .Include(s => s.MaPhongNavigation)
                 .FirstOrDefaultAsync(m => m.MaSuatChieu == id);
@@ -153,10 +153,10 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var suatChieu = await _context.SuatChieus.FindAsync(id);
+            var suatChieu = await _context.SuatChieu.FindAsync(id);
             if (suatChieu != null)
             {
-                _context.SuatChieus.Remove(suatChieu);
+                _context.SuatChieu.Remove(suatChieu);
             }
 
             await _context.SaveChangesAsync();
@@ -165,7 +165,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
 
         private bool SuatChieuExists(string id)
         {
-            return _context.SuatChieus.Any(e => e.MaSuatChieu == id);
+            return _context.SuatChieu.Any(e => e.MaSuatChieu == id);
         }
     }
 }
