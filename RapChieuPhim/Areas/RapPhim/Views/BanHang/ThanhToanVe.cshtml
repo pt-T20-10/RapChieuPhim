@@ -1,0 +1,214 @@
+﻿@model RapChieuPhim.Models.Entities.DonHang
+@{
+    ViewData["Title"] = "Thanh toán vé";
+    var ve0 = Model.ChiTietVe.First();
+    var suat = ve0.MaSuatChieuNavigation;
+}
+
+<div class="row g-4">
+   
+    <div class="col-lg-7">
+        <h5 class="fw-bold text-primary mb-3">
+            <i class="bi bi-receipt me-1"></i> Tóm tắt đơn hàng
+        </h5>
+
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body p-4">
+                <div class="d-flex gap-3 mb-3">
+                    <img src="@(suat.MaPhimNavigation.DuongDanAnh ?? "/images/default/no-poster.jpg")"
+                         class="rounded" style="width:80px;height:110px;object-fit:cover;"
+                         onerror="this.src='/images/default/no-poster.jpg'">
+                    <div>
+                        <h6 class="fw-bold">@suat.MaPhimNavigation.TenPhim</h6>
+                        <div class="small text-muted">
+                            <i class="bi bi-clock me-1"></i>
+                            @suat.ThoiGianBatDau.ToString("HH:mm — dd/MM/yyyy")
+                        </div>
+                        <div class="small text-muted">
+                            <i class="bi bi-building me-1"></i>
+                            @suat.MaPhongNavigation.TenPhong
+                        </div>
+                        <div class="mt-2 d-flex flex-wrap gap-1">
+                            @foreach (var ve in Model.ChiTietVe)
+                            {
+                                <span class="badge bg-primary fs-6 px-3">
+                                    @(ve.MaGheNavigation.TenHang + ve.MaGheNavigation.SoThu)
+                                    <small class="fw-normal">
+                                        @ve.MaGheNavigation.MaLoaiGheNavigation.TenLoaiGhe
+                                    </small>
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <table class="table table-sm small mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Ghế</th>
+                            <th>Loại</th>
+                            <th class="text-end">Giá vé</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ve in Model.ChiTietVe)
+                        {
+                            <tr>
+                                <td>@(ve.MaGheNavigation.TenHang + ve.MaGheNavigation.SoThu)</td>
+                                <td>@ve.MaGheNavigation.MaLoaiGheNavigation.TenLoaiGhe</td>
+                                <td class="text-end fw-semibold">
+                                    @ve.GiaVe.ToString("N0") ₫
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="fw-bold">
+                            <td colspan="2">Tổng cộng</td>
+                            <td class="text-end text-danger fs-6">
+                                @Model.TongTienSauGiam.ToString("N0") ₫
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+   
+    <div class="col-lg-5">
+        <h5 class="fw-bold text-primary mb-3">
+            <i class="bi bi-credit-card me-1"></i> Thanh toán
+        </h5>
+
+     
+        <ul class="nav nav-pills mb-3" id="payTab">
+            <li class="nav-item">
+                <button class="nav-link active fw-bold px-4"
+                        data-bs-toggle="pill" data-bs-target="#tabTienMat">
+                    <i class="bi bi-cash-coin me-1"></i> Tiền mặt
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link fw-bold px-4"
+                        data-bs-toggle="pill" data-bs-target="#tabQR">
+                    <i class="bi bi-qr-code me-1"></i> QR / Chuyển khoản
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+
+          
+            <div class="tab-pane fade show active" id="tabTienMat">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                Số tiền khách đưa (₫)
+                            </label>
+                            <input type="number" id="tienNhan" class="form-control form-control-lg"
+                                   placeholder="Nhập số tiền"
+                                   oninput="tinhTienThua()"
+                                   min="@Model.TongTienSauGiam">
+                        </div>
+                        <div class="p-3 bg-light rounded mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Cần thanh toán:</span>
+                                <strong>@Model.TongTienSauGiam.ToString("N0") ₫</strong>
+                            </div>
+                            <div class="d-flex justify-content-between text-success fw-bold">
+                                <span>Tiền thừa trả lại:</span>
+                                <span id="tienThua">0 ₫</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-success w-100 fw-bold btn-lg"
+                                onclick="xacNhanTienMat()">
+                            <i class="bi bi-check-lg me-1"></i> Xác nhận thanh toán
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+         
+            <div class="tab-pane fade" id="tabQR">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body p-4">
+                        <p class="text-muted mb-3">
+                            Nhấn nút bên dưới để tạo mã QR chuyển khoản.
+                            Khách quét mã và thanh toán trực tiếp.
+                        </p>
+                        <div id="qrContainer" class="mb-3 d-none">
+                            <img id="qrImage" src="" alt="QR" class="img-fluid mb-2"
+                                 style="max-width:220px;">
+                            <div class="text-muted small">
+                                Đang chờ khách quét mã...
+                            </div>
+                        </div>
+                        <button class="btn btn-primary w-100 fw-bold btn-lg"
+                                id="btnTaoQR" onclick="taoQR()">
+                            <i class="bi bi-qr-code-scan me-1"></i> Tạo mã QR thanh toán
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var tongTien = @Model.TongTienSauGiam;
+        var maDonHang = '@Model.MaDonHang';
+
+        function tinhTienThua() {
+            var nhan = parseFloat($('#tienNhan').val()) || 0;
+            var thua = nhan - tongTien;
+            $('#tienThua').text(thua >= 0
+                ? thua.toLocaleString('vi-VN') + ' ₫'
+                : '⚠ Chưa đủ tiền');
+            $('#tienThua').toggleClass('text-danger', thua < 0)
+                         .toggleClass('text-success', thua >= 0);
+        }
+
+        function xacNhanTienMat() {
+            var tienNhan = parseFloat($('#tienNhan').val()) || 0;
+            if (tienNhan < tongTien) {
+                alert('Số tiền nhận chưa đủ!');
+                return;
+            }
+
+            $.post('@Url.Action("XuLyTienMat", "BanHang", new { area = "RapPhim" })',
+                { maDonHang, tienNhan },
+                function(res) {
+                    if (res.success) {
+                        var thua = res.tienThua.toLocaleString('vi-VN');
+                        if (confirm(`Tiền thừa trả lại: ${thua} ₫\n\nXác nhận và in vé?`)) {
+                            window.location.href = res.redirectUrl;
+                        }
+                    } else {
+                        alert(res.message);
+                    }
+                });
+        }
+
+        function taoQR() {
+            $('#btnTaoQR').prop('disabled', true).text('Đang tạo mã...');
+            $.post('@Url.Action("TaoThanhToanQR", "BanHang", new { area = "RapPhim" })',
+                { maDonHang },
+                function(res) {
+                    if (res.success) {
+                        // Mở trang PayOS trong tab mới
+                        // Màn hình quầy hiện QR, khách dùng điện thoại quét
+                        window.open(res.checkoutUrl, '_blank');
+                        $('#btnTaoQR').text('Đã mở trang thanh toán — chờ khách quét');
+                    } else {
+                        alert('Không thể tạo mã QR. Vui lòng thử lại!');
+                        $('#btnTaoQR').prop('disabled', false)
+                                     .text('Tạo mã QR thanh toán');
+                    }
+                });
+        }
+    </script>
+}

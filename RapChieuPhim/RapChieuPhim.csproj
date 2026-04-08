@@ -45,7 +45,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Areas\RapPhim\Views\BanHang\" />
 	  <Folder Include="Areas\RapPhim\Views\QuetVe\" />
 	  <Folder Include="Data\" />
 	  <Folder Include="Models\Entities\" />
