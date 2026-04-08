@@ -233,7 +233,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                     await _context.SaveChangesAsync();
                 }
                 // Xóa session
-                DọnDẹpSession();
+                DonDepSession();
                 return Content("<script>alert('Bạn đã hủy thanh toán.'); window.location.href='/';</script>", "text/html; charset=utf-8");
             }
 
@@ -258,12 +258,12 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 }
             }
 
-            DọnDẹpSession();
+            DonDepSession();
             return View(donHang);
         }
 
         // Hàm phụ để code sạch hơn
-        private void DọnDẹpSession()
+        private void DonDepSession()
         {
             HttpContext.Session.Remove("GioHangBapNuoc");
             HttpContext.Session.Remove("DatVe_MaDonHang_Tam");
