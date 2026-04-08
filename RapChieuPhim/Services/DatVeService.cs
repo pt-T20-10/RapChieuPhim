@@ -16,7 +16,7 @@ namespace RapChieuPhim.Services
         // Lấy danh sách phim đang chiếu + sắp chiếu (Không lấy phim đã xóa)
         public async Task<List<Phim>> LayDanhSachPhimAsync()
         {
-            return await _context.Phims
+            return await _context.Phim
                 .Include(p => p.MaTheLoaiNavigation) // Lấy thông tin Thể loại
                 .Where(p => p.DaXoa == false && (p.TrangThai == "DangChieu" || p.TrangThai == "SapChieu"))
                 .ToListAsync();
@@ -25,7 +25,7 @@ namespace RapChieuPhim.Services
         //truy xuất phim theo ID
         public async Task<Phim?> LayChiTietPhimAsync(string maPhim)
         {
-            return await _context.Phims
+            return await _context.Phim
                 .Include(p => p.MaTheLoaiNavigation)
                 .FirstOrDefaultAsync(p => p.MaPhim == maPhim && p.DaXoa == false);
         }

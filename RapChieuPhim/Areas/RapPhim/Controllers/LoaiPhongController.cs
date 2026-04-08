@@ -20,13 +20,13 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             _context = context;
         }
 
-        // GET: RapPhim/LoaiPhongs
+        // GET: RapPhim/LoaiPhong
         public async Task<IActionResult> Index()
         {
-            return View(await _context.LoaiPhongs.ToListAsync());
+            return View(await _context.LoaiPhong.ToListAsync());
         }
 
-        // GET: RapPhim/LoaiPhongs/Details/5
+        // GET: RapPhim/LoaiPhong/Details/5
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -34,7 +34,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var loaiPhong = await _context.LoaiPhongs
+            var loaiPhong = await _context.LoaiPhong
                 .FirstOrDefaultAsync(m => m.MaLoaiPhong == id);
             if (loaiPhong == null)
             {
@@ -44,13 +44,13 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(loaiPhong);
         }
 
-        // GET: RapPhim/LoaiPhongs/Create
+        // GET: RapPhim/LoaiPhong/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: RapPhim/LoaiPhongs/Create
+        // POST: RapPhim/LoaiPhong/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -66,7 +66,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(loaiPhong);
         }
 
-        // GET: RapPhim/LoaiPhongs/Edit/5
+        // GET: RapPhim/LoaiPhong/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -74,7 +74,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var loaiPhong = await _context.LoaiPhongs.FindAsync(id);
+            var loaiPhong = await _context.LoaiPhong.FindAsync(id);
             if (loaiPhong == null)
             {
                 return NotFound();
@@ -82,7 +82,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(loaiPhong);
         }
 
-        // POST: RapPhim/LoaiPhongs/Edit/5
+        // POST: RapPhim/LoaiPhong/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -117,7 +117,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(loaiPhong);
         }
 
-        // GET: RapPhim/LoaiPhongs/Delete/5
+        // GET: RapPhim/LoaiPhong/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -125,7 +125,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var loaiPhong = await _context.LoaiPhongs
+            var loaiPhong = await _context.LoaiPhong
                 .FirstOrDefaultAsync(m => m.MaLoaiPhong == id);
             if (loaiPhong == null)
             {
@@ -135,15 +135,15 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(loaiPhong);
         }
 
-        // POST: RapPhim/LoaiPhongs/Delete/5
+        // POST: RapPhim/LoaiPhong/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var loaiPhong = await _context.LoaiPhongs.FindAsync(id);
+            var loaiPhong = await _context.LoaiPhong.FindAsync(id);
             if (loaiPhong != null)
             {
-                _context.LoaiPhongs.Remove(loaiPhong);
+                _context.LoaiPhong.Remove(loaiPhong);
             }
 
             await _context.SaveChangesAsync();
@@ -152,7 +152,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
 
         private bool LoaiPhongExists(string id)
         {
-            return _context.LoaiPhongs.Any(e => e.MaLoaiPhong == id);
+            return _context.LoaiPhong.Any(e => e.MaLoaiPhong == id);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace RapChieuPhim.Services
         // 1. Hàm xử lý đăng nhập
         public async Task<TaiKhoan?> DangNhapAsync(string tenDangNhap, string matKhau)
         {
-            var taiKhoan = await _context.TaiKhoans
+            var taiKhoan = await _context.TaiKhoan
                 .Include(t => t.MaKhachHangNavigation)
                 .FirstOrDefaultAsync(t =>
                     (t.TenDangNhap == tenDangNhap || (t.MaKhachHangNavigation != null && t.MaKhachHangNavigation.Email == tenDangNhap))
@@ -35,7 +35,7 @@ namespace RapChieuPhim.Services
             {
                 // Tự động tạo hash chuẩn từ thư viện BCrypt.Net-Next 4.1.0 và ghi đè vào CSDL
                 taiKhoan.MatKhau = BCrypt.Net.BCrypt.HashPassword("123456");
-                _context.TaiKhoans.Update(taiKhoan);
+                _context.TaiKhoan.Update(taiKhoan);
                 await _context.SaveChangesAsync();
             }
             // ------------------------------------------------------------
@@ -57,13 +57,13 @@ namespace RapChieuPhim.Services
 
         public async Task<(bool ThanhCong, string ThongBao)> CapNhatThongTinAsync(string maKhachHang, ThongTinViewModel model)
         {
-            var khachHang = await _context.KhachHangs.FindAsync(maKhachHang);
+            var khachHang = await _context.KhachHang.FindAsync(maKhachHang);
             if (khachHang == null) return (false, "Không tìm thấy khách hàng.");
 
             // Kiểm tra trùng Email nếu user đổi sang Email khác
             if (khachHang.Email != model.Email)
             {
-                bool emailTonTai = await _context.KhachHangs.AnyAsync(k => k.Email == model.Email);
+                bool emailTonTai = await _context.KhachHang.AnyAsync(k => k.Email == model.Email);
                 if (emailTonTai) return (false, "Email này đã được sử dụng bởi tài khoản khác.");
             }
 
@@ -74,7 +74,7 @@ namespace RapChieuPhim.Services
             khachHang.NgaySinh = model.NgaySinh.Value;
             if (!string.IsNullOrEmpty(model.GioiTinh)) khachHang.GioiTinh = model.GioiTinh;
 
-            _context.KhachHangs.Update(khachHang);
+            _context.KhachHang.Update(khachHang);
             await _context.SaveChangesAsync();
 
             return (true, "Cập nhật thông tin thành công!");
@@ -123,16 +123,16 @@ namespace RapChieuPhim.Services
         public async Task<bool> DatLaiMatKhauAsync(string email, string matKhauMoi)
         {
             // Tìm Khách hàng qua Email
-            var khachHang = await _context.KhachHangs.FirstOrDefaultAsync(k => k.Email == email);
+            var khachHang = await _context.KhachHang.FirstOrDefaultAsync(k => k.Email == email);
             if (khachHang == null) return false;
 
             // Tìm Tài khoản liên kết với Khách hàng đó
-            var taiKhoan = await _context.TaiKhoans.FirstOrDefaultAsync(t => t.MaKhachHang == khachHang.MaKhachHang);
+            var taiKhoan = await _context.TaiKhoan.FirstOrDefaultAsync(t => t.MaKhachHang == khachHang.MaKhachHang);
             if (taiKhoan == null) return false;
 
             // Hash mật khẩu mới bằng BCrypt
             taiKhoan.MatKhau = BCrypt.Net.BCrypt.HashPassword(matKhauMoi);
-            _context.TaiKhoans.Update(taiKhoan);
+            _context.TaiKhoan.Update(taiKhoan);
             await _context.SaveChangesAsync();
             return true;
         }
@@ -140,7 +140,7 @@ namespace RapChieuPhim.Services
         // Hàm kiểm tra Email có tồn tại trong hệ thống không
         public async Task<bool> KiemTraEmailTonTaiAsync(string email)
         {
-            return await _context.KhachHangs.AnyAsync(k => k.Email == email);
+            return await _context.KhachHang.AnyAsync(k => k.Email == email);
         }
 
         // Hàm Đăng xuất (Làm luôn cho tiện)

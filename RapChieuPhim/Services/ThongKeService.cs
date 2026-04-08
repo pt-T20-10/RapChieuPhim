@@ -26,11 +26,11 @@ namespace RapChieuPhim.Services
             };
 
             // Lọc vé chưa xóa ngay từ DB (Chuẩn Query của sếp)
-            var donHangs = await _context.DonHangs
-                .Include(d => d.ChiTietVes.Where(v => !v.DaXoa))
+            var DonHang = await _context.DonHang
+                .Include(d => d.ChiTietVe.Where(v => !v.DaXoa))
                     .ThenInclude(v => v.MaSuatChieuNavigation)
                         .ThenInclude(s => s.MaPhimNavigation)
-                .Include(d => d.ChiTietVes.Where(v => !v.DaXoa))
+                .Include(d => d.ChiTietVe.Where(v => !v.DaXoa))
                     .ThenInclude(v => v.MaSuatChieuNavigation)
                         .ThenInclude(s => s.MaPhongNavigation)
                 .Where(d => d.TrangThai == "DaThanhToan"
@@ -40,22 +40,22 @@ namespace RapChieuPhim.Services
                 .AsNoTracking()
                 .ToListAsync();
 
-            viewModel.TongDoanhThu = donHangs.Sum(d => d.TongTienSauGiam);
-            viewModel.TongSoDonHang = donHangs.Count;
-            viewModel.TongSoVe = donHangs.Sum(d => d.ChiTietVes.Count);
+            viewModel.TongDoanhThu = DonHang.Sum(d => d.TongTienSauGiam);
+            viewModel.TongSoDonHang = DonHang.Count;
+            viewModel.TongSoVe = DonHang.Sum(d => d.ChiTietVe.Count);
 
-            viewModel.DoanhThuTheoNgay = donHangs
+            viewModel.DoanhThuTheoNgay = DonHang
                 .GroupBy(d => d.NgayTao.Date)
                 .Select(g => new DoanhThuNgayItem
                 {
                     Ngay = g.Key.ToString("dd/MM"),
                     DoanhThu = g.Sum(d => d.TongTienSauGiam),
-                    SoVe = g.Sum(d => d.ChiTietVes.Count)
+                    SoVe = g.Sum(d => d.ChiTietVe.Count)
                 })
                 .OrderBy(x => x.Ngay)
                 .ToList();
 
-            var tatCaVe = donHangs.SelectMany(d => d.ChiTietVes).ToList();
+            var tatCaVe = DonHang.SelectMany(d => d.ChiTietVe).ToList();
 
             viewModel.TopPhim = tatCaVe
                 .Where(v => v.MaSuatChieuNavigation != null && v.MaSuatChieuNavigation.MaPhimNavigation != null)
@@ -70,19 +70,19 @@ namespace RapChieuPhim.Services
                 .Take(5)
                 .ToList();
 
-            var phongChieus = await _context.PhongChieus.Where(p => !p.DaXoa && p.TrangThai == "HoatDong").AsNoTracking().ToListAsync();
+            var PhongChieu = await _context.PhongChieu.Where(p => !p.DaXoa && p.TrangThai == "HoatDong").AsNoTracking().ToListAsync();
 
             var lapDayList = new List<LapDayPhongItem>();
-            foreach (var phong in phongChieus)
+            foreach (var phong in PhongChieu)
             {
-                var suatChieusCuaPhong = await _context.SuatChieus
+                var SuatChieuCuaPhong = await _context.SuatChieu
                     .Where(s => s.MaPhong == phong.MaPhong && !s.DaXoa
                              && s.ThoiGianBatDau.Date >= tuNgay.Date
                              && s.ThoiGianBatDau.Date <= denNgay.Date)
                     .AsNoTracking()
                     .ToListAsync();
 
-                int tongGhePhucVu = suatChieusCuaPhong.Count * phong.SoGhe;
+                int tongGhePhucVu = SuatChieuCuaPhong.Count * phong.SoGhe;
 
                 if (tongGhePhucVu > 0)
                 {
@@ -110,7 +110,7 @@ namespace RapChieuPhim.Services
             var ngayKetThuc = DateTime.Now.Date.AddDays(-1);
             var ngayBatDau = ngayKetThuc.AddDays(-6);
 
-            var duLieuQuaKhu = await _context.DonHangs
+            var duLieuQuaKhu = await _context.DonHang
                 .Where(d => d.TrangThai == "DaThanhToan" && !d.DaXoa
                          && d.NgayTao.Date >= ngayBatDau && d.NgayTao.Date <= ngayKetThuc)
                 .GroupBy(d => d.NgayTao.Date)

@@ -27,9 +27,9 @@ public partial class KhachHang
 
     public bool DaXoa { get; set; }
 
-    public virtual ICollection<DonHang> DonHangs { get; set; } = new List<DonHang>();
+    public virtual ICollection<DonHang> DonHang { get; set; } = new List<DonHang>();
 
     public virtual LoaiKhachHang MaLoaiKhNavigation { get; set; } = null!;
 
-    public virtual ICollection<TaiKhoan> TaiKhoans { get; set; } = new List<TaiKhoan>();
+    public virtual ICollection<TaiKhoan> TaiKhoan { get; set; } = new List<TaiKhoan>();
 }

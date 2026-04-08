@@ -257,15 +257,15 @@ Các file này do EF Scaffold sinh ra. Nếu DB thay đổi thì báo Lead — L
 
 ```csharp
 // ✅ ĐÚNG
-var donHang = await _context.DonHangs
+var donHang = await _context.DonHang
     .Include(d => d.MaKhachHangNavigation)
-    .Include(d => d.ChiTietVes)
+    .Include(d => d.ChiTietVe)
         .ThenInclude(v => v.MaSuatChieuNavigation)
             .ThenInclude(s => s.MaPhimNavigation)
     .FirstOrDefaultAsync(d => d.MaDonHang == id);
 
 // ❌ SAI — navigation sẽ null, gây NullReferenceException
-var donHang = await _context.DonHangs.FindAsync(id);
+var donHang = await _context.DonHang.FindAsync(id);
 ```
 
 ### 8. Dùng Partial View cho vé và hóa đơn

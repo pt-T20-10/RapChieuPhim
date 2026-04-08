@@ -25,5 +25,5 @@ public partial class KhuyenMai
 
     public bool DaXoa { get; set; }
 
-    public virtual ICollection<DonHang> DonHangs { get; set; } = new List<DonHang>();
+    public virtual ICollection<DonHang> DonHang { get; set; } = new List<DonHang>();
 }

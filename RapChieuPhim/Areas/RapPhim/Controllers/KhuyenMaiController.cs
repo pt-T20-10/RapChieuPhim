@@ -20,13 +20,13 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             _context = context;
         }
 
-        // GET: RapPhim/KhuyenMais
+        // GET: RapPhim/KhuyenMai
         public async Task<IActionResult> Index()
         {
-            return View(await _context.KhuyenMais.ToListAsync());
+            return View(await _context.KhuyenMai.ToListAsync());
         }
 
-        // GET: RapPhim/KhuyenMais/Details/5
+        // GET: RapPhim/KhuyenMai/Details/5
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -34,7 +34,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var khuyenMai = await _context.KhuyenMais
+            var khuyenMai = await _context.KhuyenMai
                 .FirstOrDefaultAsync(m => m.MaKhuyenMai == id);
             if (khuyenMai == null)
             {
@@ -44,13 +44,13 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(khuyenMai);
         }
 
-        // GET: RapPhim/KhuyenMais/Create
+        // GET: RapPhim/KhuyenMai/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: RapPhim/KhuyenMais/Create
+        // POST: RapPhim/KhuyenMai/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -66,7 +66,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(khuyenMai);
         }
 
-        // GET: RapPhim/KhuyenMais/Edit/5
+        // GET: RapPhim/KhuyenMai/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -74,7 +74,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var khuyenMai = await _context.KhuyenMais.FindAsync(id);
+            var khuyenMai = await _context.KhuyenMai.FindAsync(id);
             if (khuyenMai == null)
             {
                 return NotFound();
@@ -82,7 +82,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(khuyenMai);
         }
 
-        // POST: RapPhim/KhuyenMais/Edit/5
+        // POST: RapPhim/KhuyenMai/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -117,7 +117,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(khuyenMai);
         }
 
-        // GET: RapPhim/KhuyenMais/Delete/5
+        // GET: RapPhim/KhuyenMai/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -125,7 +125,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var khuyenMai = await _context.KhuyenMais
+            var khuyenMai = await _context.KhuyenMai
                 .FirstOrDefaultAsync(m => m.MaKhuyenMai == id);
             if (khuyenMai == null)
             {
@@ -135,15 +135,15 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(khuyenMai);
         }
 
-        // POST: RapPhim/KhuyenMais/Delete/5
+        // POST: RapPhim/KhuyenMai/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var khuyenMai = await _context.KhuyenMais.FindAsync(id);
+            var khuyenMai = await _context.KhuyenMai.FindAsync(id);
             if (khuyenMai != null)
             {
-                _context.KhuyenMais.Remove(khuyenMai);
+                _context.KhuyenMai.Remove(khuyenMai);
             }
 
             await _context.SaveChangesAsync();
@@ -152,7 +152,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
 
         private bool KhuyenMaiExists(string id)
         {
-            return _context.KhuyenMais.Any(e => e.MaKhuyenMai == id);
+            return _context.KhuyenMai.Any(e => e.MaKhuyenMai == id);
         }
     }
 }

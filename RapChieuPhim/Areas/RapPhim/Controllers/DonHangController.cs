@@ -20,14 +20,14 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             _context = context;
         }
 
-        // GET: RapPhim/DonHangs
+        // GET: RapPhim/DonHang
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.DonHangs.Include(d => d.MaKhachHangNavigation).Include(d => d.MaKhuyenMaiNavigation).Include(d => d.MaNhanVienNavigation);
+            var appDbContext = _context.DonHang.Include(d => d.MaKhachHangNavigation).Include(d => d.MaKhuyenMaiNavigation).Include(d => d.MaNhanVienNavigation);
             return View(await appDbContext.ToListAsync());
         }
 
-        // GET: RapPhim/DonHangs/Details/5
+        // GET: RapPhim/DonHang/Details/5
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -35,7 +35,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var donHang = await _context.DonHangs
+            var donHang = await _context.DonHang
                 .Include(d => d.MaKhachHangNavigation)
                 .Include(d => d.MaKhuyenMaiNavigation)
                 .Include(d => d.MaNhanVienNavigation)
@@ -48,16 +48,16 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(donHang);
         }
 
-        // GET: RapPhim/DonHangs/Create
+        // GET: RapPhim/DonHang/Create
         public IActionResult Create()
         {
-            ViewData["MaKhachHang"] = new SelectList(_context.KhachHangs, "MaKhachHang", "MaKhachHang");
-            ViewData["MaKhuyenMai"] = new SelectList(_context.KhuyenMais, "MaKhuyenMai", "MaKhuyenMai");
-            ViewData["MaNhanVien"] = new SelectList(_context.NhanViens, "MaNhanVien", "MaNhanVien");
+            ViewData["MaKhachHang"] = new SelectList(_context.KhachHang, "MaKhachHang", "MaKhachHang");
+            ViewData["MaKhuyenMai"] = new SelectList(_context.KhuyenMai, "MaKhuyenMai", "MaKhuyenMai");
+            ViewData["MaNhanVien"] = new SelectList(_context.NhanVien, "MaNhanVien", "MaNhanVien");
             return View();
         }
 
-        // POST: RapPhim/DonHangs/Create
+        // POST: RapPhim/DonHang/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -70,13 +70,13 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaKhachHang"] = new SelectList(_context.KhachHangs, "MaKhachHang", "MaKhachHang", donHang.MaKhachHang);
-            ViewData["MaKhuyenMai"] = new SelectList(_context.KhuyenMais, "MaKhuyenMai", "MaKhuyenMai", donHang.MaKhuyenMai);
-            ViewData["MaNhanVien"] = new SelectList(_context.NhanViens, "MaNhanVien", "MaNhanVien", donHang.MaNhanVien);
+            ViewData["MaKhachHang"] = new SelectList(_context.KhachHang, "MaKhachHang", "MaKhachHang", donHang.MaKhachHang);
+            ViewData["MaKhuyenMai"] = new SelectList(_context.KhuyenMai, "MaKhuyenMai", "MaKhuyenMai", donHang.MaKhuyenMai);
+            ViewData["MaNhanVien"] = new SelectList(_context.NhanVien, "MaNhanVien", "MaNhanVien", donHang.MaNhanVien);
             return View(donHang);
         }
 
-        // GET: RapPhim/DonHangs/Edit/5
+        // GET: RapPhim/DonHang/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -84,18 +84,18 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var donHang = await _context.DonHangs.FindAsync(id);
+            var donHang = await _context.DonHang.FindAsync(id);
             if (donHang == null)
             {
                 return NotFound();
             }
-            ViewData["MaKhachHang"] = new SelectList(_context.KhachHangs, "MaKhachHang", "MaKhachHang", donHang.MaKhachHang);
-            ViewData["MaKhuyenMai"] = new SelectList(_context.KhuyenMais, "MaKhuyenMai", "MaKhuyenMai", donHang.MaKhuyenMai);
-            ViewData["MaNhanVien"] = new SelectList(_context.NhanViens, "MaNhanVien", "MaNhanVien", donHang.MaNhanVien);
+            ViewData["MaKhachHang"] = new SelectList(_context.KhachHang, "MaKhachHang", "MaKhachHang", donHang.MaKhachHang);
+            ViewData["MaKhuyenMai"] = new SelectList(_context.KhuyenMai, "MaKhuyenMai", "MaKhuyenMai", donHang.MaKhuyenMai);
+            ViewData["MaNhanVien"] = new SelectList(_context.NhanVien, "MaNhanVien", "MaNhanVien", donHang.MaNhanVien);
             return View(donHang);
         }
 
-        // POST: RapPhim/DonHangs/Edit/5
+        // POST: RapPhim/DonHang/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -127,13 +127,13 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaKhachHang"] = new SelectList(_context.KhachHangs, "MaKhachHang", "MaKhachHang", donHang.MaKhachHang);
-            ViewData["MaKhuyenMai"] = new SelectList(_context.KhuyenMais, "MaKhuyenMai", "MaKhuyenMai", donHang.MaKhuyenMai);
-            ViewData["MaNhanVien"] = new SelectList(_context.NhanViens, "MaNhanVien", "MaNhanVien", donHang.MaNhanVien);
+            ViewData["MaKhachHang"] = new SelectList(_context.KhachHang, "MaKhachHang", "MaKhachHang", donHang.MaKhachHang);
+            ViewData["MaKhuyenMai"] = new SelectList(_context.KhuyenMai, "MaKhuyenMai", "MaKhuyenMai", donHang.MaKhuyenMai);
+            ViewData["MaNhanVien"] = new SelectList(_context.NhanVien, "MaNhanVien", "MaNhanVien", donHang.MaNhanVien);
             return View(donHang);
         }
 
-        // GET: RapPhim/DonHangs/Delete/5
+        // GET: RapPhim/DonHang/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -141,7 +141,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var donHang = await _context.DonHangs
+            var donHang = await _context.DonHang
                 .Include(d => d.MaKhachHangNavigation)
                 .Include(d => d.MaKhuyenMaiNavigation)
                 .Include(d => d.MaNhanVienNavigation)
@@ -154,15 +154,15 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(donHang);
         }
 
-        // POST: RapPhim/DonHangs/Delete/5
+        // POST: RapPhim/DonHang/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var donHang = await _context.DonHangs.FindAsync(id);
+            var donHang = await _context.DonHang.FindAsync(id);
             if (donHang != null)
             {
-                _context.DonHangs.Remove(donHang);
+                _context.DonHang.Remove(donHang);
             }
 
             await _context.SaveChangesAsync();
@@ -171,7 +171,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
 
         private bool DonHangExists(string id)
         {
-            return _context.DonHangs.Any(e => e.MaDonHang == id);
+            return _context.DonHang.Any(e => e.MaDonHang == id);
         }
     }
 }

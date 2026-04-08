@@ -25,15 +25,15 @@ namespace RapChieuPhim.Models.ViewModels
             => DonHang.TongTienBanDau - DonHang.TongTienSauGiam;
 
         public string PhuongThuc
-            => DonHang.ThanhToans.FirstOrDefault()?.PhuongThuc ?? "—";
+            => DonHang.ThanhToan.FirstOrDefault()?.PhuongThuc ?? "—";
 
         // Danh sách vé — đọc thẳng từ navigation
         public IEnumerable<ChiTietVe> DanhSachVe
-            => DonHang.ChiTietVes.Where(v => !v.DaXoa);
+            => DonHang.ChiTietVe.Where(v => !v.DaXoa);
 
         // Danh sách dịch vụ — đọc thẳng từ navigation
         public IEnumerable<ChiTietDichVu> DanhSachDichVu
-            => DonHang.ChiTietDichVus.Where(d => !d.DaXoa);
+            => DonHang.ChiTietDichVu.Where(d => !d.DaXoa);
 
         public bool CoVe => DanhSachVe.Any();
         public bool CoDichVu => DanhSachDichVu.Any();

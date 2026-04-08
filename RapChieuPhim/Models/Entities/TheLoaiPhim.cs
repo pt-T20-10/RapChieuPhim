@@ -11,5 +11,5 @@ public partial class TheLoaiPhim
 
     public bool DaXoa { get; set; }
 
-    public virtual ICollection<Phim> Phims { get; set; } = new List<Phim>();
+    public virtual ICollection<Phim> Phim { get; set; } = new List<Phim>();
 }
