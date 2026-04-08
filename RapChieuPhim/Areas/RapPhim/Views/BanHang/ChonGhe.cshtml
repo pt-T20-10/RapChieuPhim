@@ -1,0 +1,301 @@
+﻿@{
+    ViewData["Title"] = "Chọn suất chiếu & Ghế";
+    var phim = ViewBag.Phim as RapChieuPhim.Models.Entities.Phim;
+    var nhomSuatChieu = ViewBag.SuatChieu as
+        List<IGrouping<DateTime, RapChieuPhim.Models.Entities.SuatChieu>>;
+}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <h5 class="fw-bold text-primary mb-3">
+            <i class="bi bi-calendar-event me-1"></i> @phim?.TenPhim — Chọn suất chiếu
+        </h5>
+
+        @if (nhomSuatChieu != null && nhomSuatChieu.Any())
+        {
+            <ul class="nav nav-pills mb-3" id="dateTab">
+                @for (int i = 0; i < nhomSuatChieu.Count; i++)
+                {
+                    <li class="nav-item">
+                        <button class="nav-link @(i == 0 ? "active" : "") fw-bold px-4"
+                                data-bs-toggle="tab"
+                                data-bs-target="#date-@i">
+                            @nhomSuatChieu[i].Key.ToString("dd/MM")
+                        </button>
+                    </li>
+                }
+            </ul>
+
+            <div class="tab-content mb-4">
+                @for (int i = 0; i < nhomSuatChieu.Count; i++)
+                {
+                    <div class="tab-pane fade @(i == 0 ? "show active" : "")"
+                         id="date-@i">
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            @foreach (var suat in nhomSuatChieu[i])
+                            {
+                                <button class="btn btn-outline-primary fw-bold px-4 time-btn"
+                                        data-date="@nhomSuatChieu[i].Key.ToString("dd/MM/yyyy")"
+                                        onclick="chonSuatChieu('@suat.MaSuatChieu', this)">
+                                    @suat.ThoiGianBatDau.ToString("HH:mm")
+                                    <small class="d-block text-muted fw-normal">
+                                        @suat.MaPhongNavigation.TenPhong
+                                    </small>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">Không có suất chiếu nào sắp tới.</div>
+        }
+
+       
+        <div id="khuVucGhe" class="d-none">
+            <h6 class="fw-bold mb-3">
+                Phòng: <span id="lblTenPhong" class="text-danger"></span>
+            </h6>
+            <div class="screen-curve mb-4">MÀN HÌNH</div>
+            <div id="seatMapContainer" class="mb-4"></div>
+
+            <div class="d-flex flex-wrap gap-3 small fw-semibold border-top pt-3">
+                <span><span class="legend-box status-1"></span> Trống</span>
+                <span><span class="legend-box selected-box"></span> Đang chọn</span>
+                <span><span class="legend-box status-3"></span> Đang giữ (online)</span>
+                <span><span class="legend-box status-2"></span> Đã đặt</span>
+                <span><span class="legend-box status-4"></span> Bảo trì</span>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm sticky-top" style="top:20px;">
+            <div class="card-body p-4">
+                <img src="@(phim?.DuongDanAnh ?? "/images/default/no-poster.jpg")"
+                     class="w-100 rounded mb-3"
+                     style="height:160px; object-fit:cover;"
+                     onerror="this.src='/images/default/no-poster.jpg'">
+                <h6 class="fw-bold">@phim?.TenPhim</h6>
+                <hr>
+                <div class="small mb-1 text-muted">Suất chiếu:</div>
+                <div class="fw-bold text-danger mb-3" id="infoSuat">Chưa chọn</div>
+
+                <div class="small mb-1 text-muted">Ghế đã chọn:</div>
+                <div class="fw-semibold mb-3" id="infoGhe">—</div>
+
+                <div class="d-flex justify-content-between fw-bold fs-5 border-top pt-3">
+                    <span>Tạm tính:</span>
+                    <span class="text-danger" id="infoTong">0đ</span>
+                </div>
+
+                <button id="btnXacNhan"
+                        class="btn btn-primary w-100 mt-3 fw-bold disabled"
+                        onclick="xacNhan()">
+                    <i class="bi bi-check-circle me-1"></i> Xác nhận chọn ghế
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<form id="formXacNhan"
+      asp-action="XacNhanVe"
+      asp-controller="BanHang"
+      asp-area="RapPhim"
+      method="post">
+    <input type="hidden" name="maSuatChieu" id="hidSuatChieu">
+</form>
+
+<style>
+    .screen-curve {
+        height: 50px;
+        background: linear-gradient(to bottom,#e0e0e0,#f8f9fa);
+        border-top: 4px solid #034ea2;
+        border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #aaa;
+        letter-spacing: 4px;
+    }
+
+    .seat {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px 8px 4px 4px;
+        margin: 3px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: bold;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+
+        .seat.status-1 {
+            background: #fff;
+            border-color: #adb5bd;
+            color: #495057;
+        }
+
+            .seat.status-1:hover {
+                border-color: #0d6efd;
+                transform: scale(1.1);
+            }
+
+        .seat.status-2 {
+            background: #6c757d;
+            color: #fff;
+            cursor: not-allowed;
+        }
+
+        .seat.status-3 {
+            background: #ffc107;
+            color: #fff;
+            cursor: not-allowed;
+        }
+
+        .seat.status-4 {
+            background: #dc3545;
+            color: #fff;
+            cursor: not-allowed;
+        }
+
+        .seat.selected {
+            background: #0d6efd !important;
+            border-color: #0d6efd !important;
+            color: #fff !important;
+            transform: scale(1.1);
+        }
+
+    .time-btn.active {
+        background-color: #034ea2;
+        color: #fff;
+    }
+
+    .legend-box {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        margin-right: 4px;
+        vertical-align: middle;
+        border: 2px solid #adb5bd;
+    }
+
+        .legend-box.status-1 {
+            background: #fff;
+        }
+
+        .legend-box.selected-box {
+            background: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        .legend-box.status-2 {
+            background: #6c757d;
+            border-color: #6c757d;
+        }
+
+        .legend-box.status-3 {
+            background: #ffc107;
+            border-color: #ffc107;
+        }
+
+        .legend-box.status-4 {
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+</style>
+
+@section Scripts {
+    <script>
+        var currentSuatChieu = '';
+        var selectedSeats = [], selectedNames = [], totalAmount = 0;
+
+        function fmt(n) { return n.toLocaleString('vi-VN') + 'đ'; }
+
+        function chonSuatChieu(maSuatChieu, btn) {
+            $('.time-btn').removeClass('active');
+            $(btn).addClass('active');
+            $('#infoSuat').text($(btn).text().trim() + ' — ' + $(btn).data('date'));
+            currentSuatChieu = maSuatChieu;
+            selectedSeats = []; selectedNames = []; totalAmount = 0;
+            updateUI();
+
+            $.get('@Url.Action("LaySoDoGhe", "BanHang", new { area = "RapPhim" })',
+                { maSuatChieu }, function(res) {
+                    if (res.success) {
+                        $('#lblTenPhong').text(res.tenPhong);
+                        renderGhe(res.dsGhe);
+                        $('#khuVucGhe').removeClass('d-none').hide().fadeIn(400);
+                    }
+                });
+        }
+
+        function renderGhe(dsGhe) {
+            var html = '<div class="d-flex flex-column align-items-center gap-1">';
+            var currentRow = '';
+
+            dsGhe.forEach(function(g) {
+                var row = g.tenGhe.charAt(0);
+                if (row !== currentRow) {
+                    if (currentRow) html += '</div>';
+                    html += '<div class="d-flex justify-content-center gap-1">';
+                    currentRow = row;
+                }
+                var click = g.trangThai === 1
+                    ? `onclick="toggleSeat('${g.maGhe}','${g.tenGhe}',${g.giaVe},this)"`
+                    : '';
+                html += `<div class="seat status-${g.trangThai}" id="seat-${g.maGhe}" ${click}
+                              title="${g.loaiGhe} — ${fmt(g.giaVe)}">${g.tenGhe}</div>`;
+            });
+            html += '</div></div>';
+            $('#seatMapContainer').html(html);
+        }
+
+        function toggleSeat(maGhe, tenGhe, giaVe, el) {
+            var $s = $(el);
+            if ($s.hasClass('selected')) {
+                $s.removeClass('selected');
+                selectedSeats = selectedSeats.filter(x => x !== maGhe);
+                selectedNames = selectedNames.filter(x => x !== tenGhe);
+                totalAmount -= giaVe;
+            } else {
+                if (selectedSeats.length >= 8) {
+                    alert('Tối đa 8 ghế mỗi lần bán.');
+                    return;
+                }
+                $s.addClass('selected');
+                selectedSeats.push(maGhe);
+                selectedNames.push(tenGhe);
+                totalAmount += giaVe;
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            $('#infoGhe').text(selectedNames.length ? selectedNames.join(', ') : '—');
+            $('#infoTong').text(fmt(totalAmount));
+            $('#btnXacNhan').toggleClass('disabled', selectedSeats.length === 0);
+        }
+
+        function xacNhan() {
+            if (!selectedSeats.length || !currentSuatChieu) return;
+            var form = $('#formXacNhan');
+            form.find('[name="dsGhe"]').remove();
+            $('#hidSuatChieu').val(currentSuatChieu);
+            selectedSeats.forEach(function(id) {
+                form.append($('<input>', { type:'hidden', name:'dsGhe', value:id }));
+            });
+            form.submit();
+        }
+    </script>
+}

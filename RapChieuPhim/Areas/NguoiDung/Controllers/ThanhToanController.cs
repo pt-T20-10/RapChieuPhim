@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PayOS;        // Dùng cho PayOSClient
-using PayOS.Models; // Dùng cho các object như CreatePaymentLinkRequest, ItemData
+using PayOS;        
+using PayOS.Models; 
 using PayOS.Models.V2.PaymentRequests;
 using RapChieuPhim.Data;
 using RapChieuPhim.Extensions;
@@ -268,10 +268,26 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             HttpContext.Session.Remove("GioHangBapNuoc");
             HttpContext.Session.Remove("DatVe_MaDonHang_Tam");
             HttpContext.Session.Remove("DatVe_GioHangBapNuocTam");
-            HttpContext.Session.Remove("LoaiGiaoDich");
             HttpContext.Session.Remove("MaKhuyenMai");
             HttpContext.Session.Remove("SoTienGiam");
             HttpContext.Session.Remove("TongTienSauGiam");
+
+            string loaiGiaoDich = HttpContext.Session.GetString("LoaiGiaoDich");
+            HttpContext.Session.Remove("LoaiGiaoDich");
+
+            if (loaiGiaoDich == "BanVeTrucTiep")
+            {
+                return RedirectToAction("InVe", "BanHang",
+                    new { area = "RapPhim", maDonHang = donHang.MaDonHang });
+            }
+
+            if (loaiGiaoDich == "BanDichVuTrucTiep")
+            {
+                return RedirectToAction("InHoaDon", "BanHang",
+                    new { area = "RapPhim", maDonHang = donHang.MaDonHang });
+            }
+
+            return View(donHang);
         }
 
 
