@@ -46,10 +46,13 @@ builder.Services.AddScoped<AccountService>();
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
 {
     app.UseExceptionHandler("/NguoiDung/Home/Error");
-    app.UseDeveloperExceptionPage();
     app.UseHsts();
 }
 
@@ -64,7 +67,10 @@ app.MapAreaControllerRoute(
     name: "RapPhim",
     areaName: "RapPhim",
     pattern: "RapPhim/{controller=Dashboard}/{action=Index}/{id?}");
-
+app.MapAreaControllerRoute(
+    name: "RapPhim",
+    areaName: "RapPhim",
+    pattern: "RapPhim/{controller=Dashboard}/{action=Index}/{id?}");
 app.MapAreaControllerRoute(
     name: "NguoiDung",
     areaName: "NguoiDung",

@@ -1,0 +1,136 @@
+﻿@model RapChieuPhim.Models.Entities.DonHang
+@{
+    ViewData["Title"] = "In hóa đơn";
+    Layout = null;
+    var tt = Model.ThanhToan.FirstOrDefault();
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>Hóa đơn — @Model.MaDonHang</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <style>
+        body {
+            background: #f0f0f0;
+            font-family: 'Courier New',monospace;
+        }
+
+        .wrap {
+            max-width: 480px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 24px;
+            border-radius: 8px;
+        }
+
+        .divider {
+            border-top: 1px dashed #dee2e6;
+            margin: 10px 0;
+        }
+
+        @@media print {
+            body {
+                background: #fff;
+            }
+
+            .wrap {
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+
+        <div class="text-center no-print mb-3">
+            <button onclick="window.print()"
+                    class="btn btn-warning fw-bold px-5">
+                🖨️ In hóa đơn
+            </button>
+            <a asp-action="BanDichVu" asp-controller="BanHang" asp-area="RapPhim"
+               class="btn btn-outline-secondary ms-2">Bán tiếp</a>
+        </div>
+
+        <div class="text-center mb-3">
+            <div class="fw-bold fs-5">🎬 RẠP CHIẾU PHIM</div>
+            <div class="small text-muted">HÓA ĐƠN BÁN HÀNG</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row small mb-2">
+            <div class="col-6">
+                <span class="text-muted">Mã đơn:</span>
+                <span class="fw-semibold"> @Model.MaDonHang</span>
+            </div>
+            <div class="col-6 text-end">
+                <span class="text-muted">Ngày:</span>
+                <span> @Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</span>
+            </div>
+            @if (Model.MaNhanVienNavigation != null)
+            {
+                <div class="col-12 mt-1">
+                    <span class="text-muted">Nhân viên:</span>
+                    <span class="fw-semibold"> @Model.MaNhanVienNavigation.HoTen</span>
+                </div>
+            }
+        </div>
+
+        <div class="divider"></div>
+
+        <table class="table table-sm small mb-0">
+            <thead>
+                <tr class="table-light">
+                    <th>Sản phẩm</th>
+                    <th class="text-center">SL</th>
+                    <th class="text-end">Đơn giá</th>
+                    <th class="text-end">T.tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ct in Model.ChiTietDichVu)
+                {
+                    <tr>
+                        <td>@ct.MaDichVuNavigation.TenDichVu</td>
+                        <td class="text-center">@ct.SoLuong</td>
+                        <td class="text-end">@ct.DonGia.ToString("N0")</td>
+                        <td class="text-end fw-semibold">@ct.ThanhTien.ToString("N0")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="divider"></div>
+
+        <div class="d-flex justify-content-between small">
+            <span class="text-muted">Tổng tiền:</span>
+            <span>@Model.TongTienBanDau.ToString("N0") ₫</span>
+        </div>
+        <div class="d-flex justify-content-between fw-bold">
+            <span>TỔNG CỘNG:</span>
+            <span class="text-danger">@Model.TongTienSauGiam.ToString("N0") ₫</span>
+        </div>
+        <div class="d-flex justify-content-between small text-muted">
+            <span>Thanh toán:</span>
+            <span>@(tt?.PhuongThuc ?? "—")</span>
+        </div>
+
+        <div class="divider"></div>
+        <div class="text-center small text-muted">
+            Cảm ơn quý khách! 🎉
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() { setTimeout(function() { window.print(); }, 500); };
+    </script>
+</body>
+</html>
