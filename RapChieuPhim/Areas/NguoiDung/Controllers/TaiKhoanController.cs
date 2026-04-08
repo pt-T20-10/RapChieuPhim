@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RapChieuPhim.Data;
 using RapChieuPhim.Models.ViewModels;
 using RapChieuPhim.Services;
+using RapChieuPhim.Models.Entities;
 
 namespace RapChieuPhim.Areas.NguoiDung.Controllers
 {
@@ -9,29 +11,33 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
     public class TaiKhoanController : Controller
     {
         private readonly AccountService _accountService;
+        private readonly AppDbContext _context;
 
-        public TaiKhoanController(AccountService accountService)
+        public TaiKhoanController(AccountService accountService, AppDbContext context)
         {
             _accountService = accountService;
+            _context = context; 
         }
 
         // GET: Hiển thị form Đăng nhập
         [HttpGet]
-        public IActionResult DangNhap()
+        public IActionResult DangNhap(string returnUrl = null)
         {
-            // Nếu đã đăng nhập rồi thì đá về trang chủ, không cho vào trang đăng nhập nữa
-            if (!string.IsNullOrEmpty(HttpContext.Session.GetString("TenDangNhap")))
-            {
-                return RedirectToAction("Index", "Home");
-            }
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
         // POST: Xử lý submit form
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DangNhap(DangNhapViewModel model)
+        public async Task<IActionResult> DangNhap(DangNhapViewModel model, string returnUrl = null)
         {
+            // Đăng nhập thành công -> Xử lý ReturnUrl
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
             if (ModelState.IsValid)
             {
                 var tk = await _accountService.DangNhapAsync(model.TenDangNhap, model.MatKhau);
@@ -44,7 +50,29 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                     // Điều hướng dựa theo Role (VaiTro) chính xác theo thiết kế hệ thống
                     if (tk.VaiTro == "KhachHang")
                     {
-                        // Khách hàng -> Trang chủ
+                        // KIỂM TRA ĐƠN HÀNG TẠM TRONG 5 PHÚT
+                        var pendingOrderMa = HttpContext.Session.GetString("DatVe_MaDonHang_Tam");
+                        if (!string.IsNullOrEmpty(pendingOrderMa))
+                        {
+                            var pendingOrder = await _context.DonHangs.FirstOrDefaultAsync(d => d.MaDonHang == pendingOrderMa && d.TrangThai == "ChoThanhToan");
+
+                            // Nếu đơn hàng còn hạn
+                            if (pendingOrder != null && pendingOrder.NgayTao.AddMinutes(5) > DateTime.Now)
+                            {
+                                // Cập nhật đơn hàng là của user này (Để lát có thanh toán thì được tích điểm)
+                                pendingOrder.MaKhachHang = tk.MaKhachHang;
+                                await _context.SaveChangesAsync();
+
+                                // Đẩy tín hiệu ra Layout để bật Popup
+                                TempData["PendingOrder"] = pendingOrderMa;
+                            }
+                            else
+                            {
+                                HttpContext.Session.Remove("DatVe_MaDonHang_Tam"); // Hết hạn thì xóa rác
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)) return Redirect(returnUrl);
                         return RedirectToAction("Index", "Home", new { area = "NguoiDung" });
                     }
                     else if (tk.VaiTro == "NhanVien")
