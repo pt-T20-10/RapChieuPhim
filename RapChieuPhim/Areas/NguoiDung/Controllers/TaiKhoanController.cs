@@ -87,7 +87,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             if (string.IsNullOrEmpty(maKh)) return RedirectToAction("DangNhap");
 
             // Lấy thông tin cũ từ DB đưa lên Form
-            var kh = await context.KhachHangs.FindAsync(maKh);
+            var kh = await context.KhachHang.FindAsync(maKh);
             if (kh == null) return NotFound();
 
             var model = new ThongTinViewModel

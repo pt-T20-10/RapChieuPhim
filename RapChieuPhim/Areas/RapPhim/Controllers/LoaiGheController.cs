@@ -20,13 +20,13 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             _context = context;
         }
 
-        // GET: RapPhim/LoaiGhes
+        // GET: RapPhim/LoaiGhe
         public async Task<IActionResult> Index()
         {
-            return View(await _context.LoaiGhes.ToListAsync());
+            return View(await _context.LoaiGhe.ToListAsync());
         }
 
-        // GET: RapPhim/LoaiGhes/Details/5
+        // GET: RapPhim/LoaiGhe/Details/5
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -34,7 +34,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var loaiGhe = await _context.LoaiGhes
+            var loaiGhe = await _context.LoaiGhe
                 .FirstOrDefaultAsync(m => m.MaLoaiGhe == id);
             if (loaiGhe == null)
             {
@@ -44,13 +44,13 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(loaiGhe);
         }
 
-        // GET: RapPhim/LoaiGhes/Create
+        // GET: RapPhim/LoaiGhe/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: RapPhim/LoaiGhes/Create
+        // POST: RapPhim/LoaiGhe/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -66,7 +66,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(loaiGhe);
         }
 
-        // GET: RapPhim/LoaiGhes/Edit/5
+        // GET: RapPhim/LoaiGhe/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -74,7 +74,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var loaiGhe = await _context.LoaiGhes.FindAsync(id);
+            var loaiGhe = await _context.LoaiGhe.FindAsync(id);
             if (loaiGhe == null)
             {
                 return NotFound();
@@ -82,7 +82,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(loaiGhe);
         }
 
-        // POST: RapPhim/LoaiGhes/Edit/5
+        // POST: RapPhim/LoaiGhe/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -117,7 +117,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(loaiGhe);
         }
 
-        // GET: RapPhim/LoaiGhes/Delete/5
+        // GET: RapPhim/LoaiGhe/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -125,7 +125,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var loaiGhe = await _context.LoaiGhes
+            var loaiGhe = await _context.LoaiGhe
                 .FirstOrDefaultAsync(m => m.MaLoaiGhe == id);
             if (loaiGhe == null)
             {
@@ -135,15 +135,15 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(loaiGhe);
         }
 
-        // POST: RapPhim/LoaiGhes/Delete/5
+        // POST: RapPhim/LoaiGhe/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var loaiGhe = await _context.LoaiGhes.FindAsync(id);
+            var loaiGhe = await _context.LoaiGhe.FindAsync(id);
             if (loaiGhe != null)
             {
-                _context.LoaiGhes.Remove(loaiGhe);
+                _context.LoaiGhe.Remove(loaiGhe);
             }
 
             await _context.SaveChangesAsync();
@@ -152,7 +152,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
 
         private bool LoaiGheExists(string id)
         {
-            return _context.LoaiGhes.Any(e => e.MaLoaiGhe == id);
+            return _context.LoaiGhe.Any(e => e.MaLoaiGhe == id);
         }
     }
 }

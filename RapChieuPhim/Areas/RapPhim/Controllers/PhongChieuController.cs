@@ -23,7 +23,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
         // GET: RapPhim/PhongChieu
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.PhongChieus.Include(p => p.MaLoaiPhongNavigation);
+            var appDbContext = _context.PhongChieu.Include(p => p.MaLoaiPhongNavigation);
             return View(await appDbContext.ToListAsync());
         }
 
@@ -35,7 +35,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var phongChieu = await _context.PhongChieus
+            var phongChieu = await _context.PhongChieu
                 .Include(p => p.MaLoaiPhongNavigation)
                 .FirstOrDefaultAsync(m => m.MaPhong == id);
             if (phongChieu == null)
@@ -49,7 +49,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
         // GET: RapPhim/PhongChieu/Create
         public IActionResult Create()
         {
-            ViewData["MaLoaiPhong"] = new SelectList(_context.LoaiPhongs, "MaLoaiPhong", "MaLoaiPhong");
+            ViewData["MaLoaiPhong"] = new SelectList(_context.LoaiPhong, "MaLoaiPhong", "TenLoaiPhong");
             return View();
         }
 
@@ -58,7 +58,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("MaPhong,TenPhong,MaLoaiPhong,SoGhe,TrangThai,DaXoa")] PhongChieu phongChieu)
+        public async Task<IActionResult> Create([Bind("MaPhong,TenLoaiPhong,MaLoaiPhong,SoGhe,TrangThai,DaXoa")] PhongChieu phongChieu)
         {
             if (ModelState.IsValid)
             {
@@ -66,7 +66,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaLoaiPhong"] = new SelectList(_context.LoaiPhongs, "MaLoaiPhong", "MaLoaiPhong", phongChieu.MaLoaiPhong);
+            ViewData["MaLoaiPhong"] = new SelectList(_context.LoaiPhong, "MaLoaiPhong", "TenLoaiPhong", phongChieu.MaLoaiPhong);
             return View(phongChieu);
         }
 
@@ -78,12 +78,12 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var phongChieu = await _context.PhongChieus.FindAsync(id);
+            var phongChieu = await _context.PhongChieu.FindAsync(id);
             if (phongChieu == null)
             {
                 return NotFound();
             }
-            ViewData["MaLoaiPhong"] = new SelectList(_context.LoaiPhongs, "MaLoaiPhong", "MaLoaiPhong", phongChieu.MaLoaiPhong);
+            ViewData["MaLoaiPhong"] = new SelectList(_context.LoaiPhong, "MaLoaiPhong", "TenPhong", phongChieu.MaLoaiPhong);
             return View(phongChieu);
         }
 
@@ -92,7 +92,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("MaPhong,TenPhong,MaLoaiPhong,SoGhe,TrangThai,DaXoa")] PhongChieu phongChieu)
+        public async Task<IActionResult> Edit(string id, [Bind("MaPhong,TenLoaiPhong,MaLoaiPhong,SoGhe,TrangThai,DaXoa")] PhongChieu phongChieu)
         {
             if (id != phongChieu.MaPhong)
             {
@@ -119,7 +119,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaLoaiPhong"] = new SelectList(_context.LoaiPhongs, "MaLoaiPhong", "MaLoaiPhong", phongChieu.MaLoaiPhong);
+            ViewData["MaLoaiPhong"] = new SelectList(_context.LoaiPhong, "MaLoaiPhong", "TenLoaiPhong", phongChieu.MaLoaiPhong);
             return View(phongChieu);
         }
 
@@ -131,7 +131,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var phongChieu = await _context.PhongChieus
+            var phongChieu = await _context.PhongChieu
                 .Include(p => p.MaLoaiPhongNavigation)
                 .FirstOrDefaultAsync(m => m.MaPhong == id);
             if (phongChieu == null)
@@ -147,10 +147,10 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var phongChieu = await _context.PhongChieus.FindAsync(id);
+            var phongChieu = await _context.PhongChieu.FindAsync(id);
             if (phongChieu != null)
             {
-                _context.PhongChieus.Remove(phongChieu);
+                _context.PhongChieu.Remove(phongChieu);
             }
 
             await _context.SaveChangesAsync();
@@ -159,7 +159,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
 
         private bool PhongChieuExists(string id)
         {
-            return _context.PhongChieus.Any(e => e.MaPhong == id);
+            return _context.PhongChieu.Any(e => e.MaPhong == id);
         }
     }
 }

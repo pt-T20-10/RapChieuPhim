@@ -11,5 +11,5 @@ public partial class DanhMucDichVu
 
     public bool DaXoa { get; set; }
 
-    public virtual ICollection<DichVu> DichVus { get; set; } = new List<DichVu>();
+    public virtual ICollection<DichVu> DichVu { get; set; } = new List<DichVu>();
 }

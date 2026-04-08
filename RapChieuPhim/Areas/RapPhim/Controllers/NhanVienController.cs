@@ -20,13 +20,13 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             _context = context;
         }
 
-        // GET: RapPhim/NhanViens
+        // GET: RapPhim/NhanVien
         public async Task<IActionResult> Index()
         {
-            return View(await _context.NhanViens.ToListAsync());
+            return View(await _context.NhanVien.ToListAsync());
         }
 
-        // GET: RapPhim/NhanViens/Details/5
+        // GET: RapPhim/NhanVien/Details/5
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -34,7 +34,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var nhanVien = await _context.NhanViens
+            var nhanVien = await _context.NhanVien
                 .FirstOrDefaultAsync(m => m.MaNhanVien == id);
             if (nhanVien == null)
             {
@@ -44,13 +44,13 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(nhanVien);
         }
 
-        // GET: RapPhim/NhanViens/Create
+        // GET: RapPhim/NhanVien/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: RapPhim/NhanViens/Create
+        // POST: RapPhim/NhanVien/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -66,7 +66,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(nhanVien);
         }
 
-        // GET: RapPhim/NhanViens/Edit/5
+        // GET: RapPhim/NhanVien/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -74,7 +74,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var nhanVien = await _context.NhanViens.FindAsync(id);
+            var nhanVien = await _context.NhanVien.FindAsync(id);
             if (nhanVien == null)
             {
                 return NotFound();
@@ -82,7 +82,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(nhanVien);
         }
 
-        // POST: RapPhim/NhanViens/Edit/5
+        // POST: RapPhim/NhanVien/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -117,7 +117,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(nhanVien);
         }
 
-        // GET: RapPhim/NhanViens/Delete/5
+        // GET: RapPhim/NhanVien/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -125,7 +125,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var nhanVien = await _context.NhanViens
+            var nhanVien = await _context.NhanVien
                 .FirstOrDefaultAsync(m => m.MaNhanVien == id);
             if (nhanVien == null)
             {
@@ -135,15 +135,15 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(nhanVien);
         }
 
-        // POST: RapPhim/NhanViens/Delete/5
+        // POST: RapPhim/NhanVien/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var nhanVien = await _context.NhanViens.FindAsync(id);
+            var nhanVien = await _context.NhanVien.FindAsync(id);
             if (nhanVien != null)
             {
-                _context.NhanViens.Remove(nhanVien);
+                _context.NhanVien.Remove(nhanVien);
             }
 
             await _context.SaveChangesAsync();
@@ -152,7 +152,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
 
         private bool NhanVienExists(string id)
         {
-            return _context.NhanViens.Any(e => e.MaNhanVien == id);
+            return _context.NhanVien.Any(e => e.MaNhanVien == id);
         }
     }
 }

@@ -20,14 +20,14 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             _context = context;
         }
 
-        // GET: RapPhim/Ghes
+        // GET: RapPhim/Ghe
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Ghes.Include(g => g.MaLoaiGheNavigation).Include(g => g.MaPhongNavigation);
+            var appDbContext = _context.Ghe.Include(g => g.MaLoaiGheNavigation).Include(g => g.MaPhongNavigation);
             return View(await appDbContext.ToListAsync());
         }
 
-        // GET: RapPhim/Ghes/Details/5
+        // GET: RapPhim/Ghe/Details/5
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -35,7 +35,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var ghe = await _context.Ghes
+            var ghe = await _context.Ghe
                 .Include(g => g.MaLoaiGheNavigation)
                 .Include(g => g.MaPhongNavigation)
                 .FirstOrDefaultAsync(m => m.MaGhe == id);
@@ -47,15 +47,15 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(ghe);
         }
 
-        // GET: RapPhim/Ghes/Create
+        // GET: RapPhim/Ghe/Create
         public IActionResult Create()
         {
-            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhes, "MaLoaiGhe", "MaLoaiGhe");
-            ViewData["MaPhong"] = new SelectList(_context.PhongChieus, "MaPhong", "MaPhong");
+            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhe, "MaLoaiGhe", "MaLoaiGhe");
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu, "MaPhong", "MaPhong");
             return View();
         }
 
-        // POST: RapPhim/Ghes/Create
+        // POST: RapPhim/Ghe/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -68,12 +68,12 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhes, "MaLoaiGhe", "MaLoaiGhe", ghe.MaLoaiGhe);
-            ViewData["MaPhong"] = new SelectList(_context.PhongChieus, "MaPhong", "MaPhong", ghe.MaPhong);
+            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhe, "MaLoaiGhe", "MaLoaiGhe", ghe.MaLoaiGhe);
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu, "MaPhong", "MaPhong", ghe.MaPhong);
             return View(ghe);
         }
 
-        // GET: RapPhim/Ghes/Edit/5
+        // GET: RapPhim/Ghe/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -81,17 +81,17 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var ghe = await _context.Ghes.FindAsync(id);
+            var ghe = await _context.Ghe.FindAsync(id);
             if (ghe == null)
             {
                 return NotFound();
             }
-            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhes, "MaLoaiGhe", "MaLoaiGhe", ghe.MaLoaiGhe);
-            ViewData["MaPhong"] = new SelectList(_context.PhongChieus, "MaPhong", "MaPhong", ghe.MaPhong);
+            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhe, "MaLoaiGhe", "MaLoaiGhe", ghe.MaLoaiGhe);
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu, "MaPhong", "MaPhong", ghe.MaPhong);
             return View(ghe);
         }
 
-        // POST: RapPhim/Ghes/Edit/5
+        // POST: RapPhim/Ghe/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -123,12 +123,12 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhes, "MaLoaiGhe", "MaLoaiGhe", ghe.MaLoaiGhe);
-            ViewData["MaPhong"] = new SelectList(_context.PhongChieus, "MaPhong", "MaPhong", ghe.MaPhong);
+            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhe, "MaLoaiGhe", "MaLoaiGhe", ghe.MaLoaiGhe);
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu, "MaPhong", "MaPhong", ghe.MaPhong);
             return View(ghe);
         }
 
-        // GET: RapPhim/Ghes/Delete/5
+        // GET: RapPhim/Ghe/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -136,7 +136,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var ghe = await _context.Ghes
+            var ghe = await _context.Ghe
                 .Include(g => g.MaLoaiGheNavigation)
                 .Include(g => g.MaPhongNavigation)
                 .FirstOrDefaultAsync(m => m.MaGhe == id);
@@ -148,15 +148,15 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(ghe);
         }
 
-        // POST: RapPhim/Ghes/Delete/5
+        // POST: RapPhim/Ghe/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var ghe = await _context.Ghes.FindAsync(id);
+            var ghe = await _context.Ghe.FindAsync(id);
             if (ghe != null)
             {
-                _context.Ghes.Remove(ghe);
+                _context.Ghe.Remove(ghe);
             }
 
             await _context.SaveChangesAsync();
@@ -165,7 +165,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
 
         private bool GheExists(string id)
         {
-            return _context.Ghes.Any(e => e.MaGhe == id);
+            return _context.Ghe.Any(e => e.MaGhe == id);
         }
     }
 }
