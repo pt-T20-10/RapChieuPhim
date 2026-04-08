@@ -10,18 +10,18 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
     [Area("NguoiDung")]
     public class DichVuController : Controller
     {
-        private readonly DichVuService _dichVuService;
+        private readonly DichVuervice _DichVuervice;
         private readonly AppDbContext _context;
 
-        public DichVuController(DichVuService dichVuService, AppDbContext context)
+        public DichVuController(DichVuervice DichVuervice, AppDbContext context)
         {
-            _dichVuService = dichVuService;
+            _DichVuervice = DichVuervice;
             _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            var menu = await _dichVuService.LayDanhSachMenuAsync();
+            var menu = await _DichVuervice.LayDanhSachMenuAsync();
             return View(menu);
         }
 
@@ -45,7 +45,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             }
             else // Chưa có thì truy vấn DB để lấy thông tin thêm vào
             {
-                var dichVu = _context.DichVus.SingleOrDefault(p => p.MaDichVu == maDichVu);
+                var dichVu = _context.DichVu.SingleOrDefault(p => p.MaDichVu == maDichVu);
                 if (dichVu == null) return NotFound("Không tìm thấy dịch vụ");
 
                 item = new CartItem
@@ -132,7 +132,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 return Json(new { success = false, message = "Giỏ hàng đang trống." });
 
             // Tìm mã Code trong DB
-            var km = await _context.KhuyenMais.FirstOrDefaultAsync(x => x.MaCode == maCode && x.DaXoa == false);
+            var km = await _context.KhuyenMai.FirstOrDefaultAsync(x => x.MaCode == maCode && x.DaXoa == false);
 
             // Kiểm tra các lớp bảo vệ của KhuyenMai
             if (km == null) return Json(new { success = false, message = "Mã giảm giá không tồn tại." });

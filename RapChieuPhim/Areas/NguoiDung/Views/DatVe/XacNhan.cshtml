@@ -1,7 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Xác nhận đặt vé";
     var suatChieu = ViewBag.SuatChieu as RapChieuPhim.Models.Entities.SuatChieu;
-    var ghes = ViewBag.Ghes as List<RapChieuPhim.Models.Entities.Ghe>;
+    var Ghe = ViewBag.Ghe as List<RapChieuPhim.Models.Entities.Ghe>;
     var menuBapNuoc = ViewBag.MenuBapNuoc as List<RapChieuPhim.Models.Entities.DanhMucDichVu>;
     double tongTienVe = ViewBag.TongTienVe;
 }
@@ -26,7 +26,7 @@
                         <div class="mt-3 p-3 bg-light rounded-3 border">
                             <span class="text-muted small d-block mb-1">Ghế đã chọn:</span>
                             <div class="d-flex flex-wrap gap-2">
-                                @foreach (var g in ghes)
+                                @foreach (var g in Ghe)
                                 {
                                     <span class="badge bg-danger fs-6 px-3 py-2">@(g.TenHang + g.SoThu)</span>
                                 }
@@ -61,7 +61,7 @@
                     <hr>
 
                     <div class="d-flex justify-content-between mb-2 small text-muted">
-                        <span>Tiền vé (@ghes.Count ghế):</span>
+                        <span>Tiền vé (@Ghe.Count ghế):</span>
                         <strong class="text-dark" id="tienVe">@string.Format("{0:#,##0}", tongTienVe)đ</strong>
                     </div>
                     <div class="d-flex justify-content-between mb-3 small text-muted">
@@ -95,7 +95,7 @@
                 {
                     <h6 class="fw-bold mb-3 border-bottom pb-2">@dm.TenDanhMuc</h6>
                     <div class="row g-3 mb-4">
-                        @foreach (var dv in dm.DichVus)
+                        @foreach (var dv in dm.DichVu)
                         {
                             var imgUrl = string.IsNullOrEmpty(dv.DuongDanHinh) ? "/images/default/no-image.jpg" : dv.DuongDanHinh;
                             <div class="col-md-6">
@@ -130,8 +130,8 @@
         var gioHangBapNuoc = []; // Mảng chứa các món bắp nước
 
         // Mảng chứa Mã Ghế để đẩy sang Controller
-        var maGhes = [
-        @foreach (var g in ghes)
+        var maGhe = [
+        @foreach (var g in Ghe)
         {
             <text>'@g.MaGhe',</text>
         }
@@ -258,7 +258,7 @@
                 type: 'POST',
                 data: {
                     maSuatChieu: maSuatChieu,
-                    maGhes: maGhes,
+                    maGhe: maGhe,
                     jsonBapNuoc: JSON.stringify(gioHangBapNuoc)
                 },
                 success: function (res) {

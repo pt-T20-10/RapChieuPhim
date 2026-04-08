@@ -54,7 +54,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                         var pendingOrderMa = HttpContext.Session.GetString("DatVe_MaDonHang_Tam");
                         if (!string.IsNullOrEmpty(pendingOrderMa))
                         {
-                            var pendingOrder = await _context.DonHangs.FirstOrDefaultAsync(d => d.MaDonHang == pendingOrderMa && d.TrangThai == "ChoThanhToan");
+                            var pendingOrder = await _context.DonHang.FirstOrDefaultAsync(d => d.MaDonHang == pendingOrderMa && d.TrangThai == "ChoThanhToan");
 
                             // Nếu đơn hàng còn hạn
                             if (pendingOrder != null && pendingOrder.NgayTao.AddMinutes(5) > DateTime.Now)

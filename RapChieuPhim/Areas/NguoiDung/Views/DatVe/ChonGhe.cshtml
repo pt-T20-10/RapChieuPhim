@@ -1,7 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Chọn suất chiếu & Ghế";
     var phim = ViewBag.Phim as RapChieuPhim.Models.Entities.Phim;
-    var suatChieusNhomTheoNgay = ViewBag.SuatChieus as List<IGrouping<DateTime, RapChieuPhim.Models.Entities.SuatChieu>>;
+    var SuatChieuNhomTheoNgay = ViewBag.SuatChieu as List<IGrouping<DateTime, RapChieuPhim.Models.Entities.SuatChieu>>;
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -108,13 +108,13 @@
             <div class="card shadow-sm border-0 rounded-4 mb-4">
                 <div class="card-body">
                     <h6 class="fw-bold mb-3"><i class="bi bi-calendar-event me-2"></i>CHỌN SUẤT CHIẾU</h6>
-                    @if (suatChieusNhomTheoNgay != null && suatChieusNhomTheoNgay.Any())
+                    @if (SuatChieuNhomTheoNgay != null && SuatChieuNhomTheoNgay.Any())
                     {
                         <ul class="nav nav-pills mb-3" id="dateTab" role="tablist">
                             @{
                                 int index = 0;
                             }
-                            @foreach (var group in suatChieusNhomTheoNgay)
+                            @foreach (var group in SuatChieuNhomTheoNgay)
                             {
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link @(index == 0 ? "active" : "") fw-bold px-4" data-bs-toggle="tab" data-bs-target="#date-@index" type="button">
@@ -128,7 +128,7 @@
                             @{
                                 int idx = 0;
                             }
-                            @foreach (var group in suatChieusNhomTheoNgay)
+                            @foreach (var group in SuatChieuNhomTheoNgay)
                             {
                                 <div class="tab-pane fade @(idx == 0 ? "show active" : "")" id="date-@idx">
                                     <div class="d-flex flex-wrap gap-2 mt-3">

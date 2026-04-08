@@ -39,7 +39,7 @@ builder.Services.AddSingleton(payOSClient);
 
 builder.Services.AddScoped<DatVeService>();
 builder.Services.AddScoped<ThongKeService>();
-builder.Services.AddScoped<DichVuService>();
+builder.Services.AddScoped<DichVuervice>();
 
 //builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<AccountService>();

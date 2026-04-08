@@ -44,7 +44,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
 
             if (!string.IsNullOrEmpty(maKhachHang))
             {
-                var khachHang = await _context.KhachHangs.FindAsync(maKhachHang);
+                var khachHang = await _context.KhachHang.FindAsync(maKhachHang);
                 if (khachHang != null)
                 {
                     ViewBag.HoTen = khachHang.HoTen;
@@ -57,7 +57,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             double tongTienVe = 0;
             if (loaiGiaoDich == "DatVe" && !string.IsNullOrEmpty(maDonHangTam))
             {
-                var dhTam = await _context.DonHangs.FindAsync(maDonHangTam);
+                var dhTam = await _context.DonHang.FindAsync(maDonHangTam);
                 if (dhTam != null) tongTienVe = dhTam.TongTienBanDau;
             }
 
@@ -99,7 +99,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             // NẾU LÀ ĐẶT VÉ -> Tái sử dụng Đơn Hàng Tạm đã có
             if (loaiGiaoDich == "DatVe" && !string.IsNullOrEmpty(maDonHangTam))
             {
-                donHang = await _context.DonHangs.Include(d => d.ChiTietVes).FirstOrDefaultAsync(d => d.MaDonHang == maDonHangTam);
+                donHang = await _context.DonHang.Include(d => d.ChiTietVe).FirstOrDefaultAsync(d => d.MaDonHang == maDonHangTam);
                 if (donHang == null || donHang.TrangThai == "DaHuy") return BadRequest("Đơn hàng không hợp lệ hoặc đã lố 5 phút.");
 
                 orderCode = long.Parse(donHang.MaDonHang);
@@ -116,7 +116,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                     TrangThai = "ChoThanhToan",
                     DaXoa = false
                 };
-                _context.DonHangs.Add(donHang);
+                _context.DonHang.Add(donHang);
             }
 
             // Lưu Chi Tiết Bắp Nước vào đơn hàng
@@ -131,11 +131,11 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                     DonGia = item.GiaBan,
                     DaXoa = false
                 };
-                _context.ChiTietDichVus.Add(ct);
+                _context.ChiTietDichVu.Add(ct);
             }
 
             // Cập nhật lại tổng tiền (Vé + Bắp Nước)
-            double tongTienVe = donHang.ChiTietVes?.Sum(v => v.GiaVe) ?? 0;
+            double tongTienVe = donHang.ChiTietVe?.Sum(v => v.GiaVe) ?? 0;
             double tongTienBapNuoc = gioHang.Sum(x => x.ThanhTien);
             double tongTienBanDau = tongTienVe + tongTienBapNuoc;
 
@@ -182,15 +182,15 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             bool cancel = cancelStr == "true" || cancelStr == "True";
 
             // 2. Tìm đơn hàng trong DB
-            var donHang = await _context.DonHangs
+            var donHang = await _context.DonHang
                 .Include(d => d.MaKhachHangNavigation)
                 .Include(d => d.MaKhuyenMaiNavigation)
-                .Include(d => d.ChiTietVes)
+                .Include(d => d.ChiTietVe)
                     .ThenInclude(v => v.MaSuatChieuNavigation)
                         .ThenInclude(s => s.MaPhimNavigation)
-                .Include(d => d.ChiTietVes)
+                .Include(d => d.ChiTietVe)
                     .ThenInclude(v => v.MaGheNavigation)
-                .Include(d => d.ChiTietDichVus)
+                .Include(d => d.ChiTietDichVu)
                     .ThenInclude(dv => dv.MaDichVuNavigation)
                 .FirstOrDefaultAsync(d => d.MaDonHang == orderCode.ToString());
 
@@ -202,9 +202,9 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 if (donHang.TrangThai == "ChoThanhToan")
                 {
                     donHang.TrangThai = "DaHuy";
-                    if (donHang.ChiTietVes != null)
+                    if (donHang.ChiTietVe != null)
                     {
-                        foreach (var ve in donHang.ChiTietVes) ve.TrangThai = "DaHuy";
+                        foreach (var ve in donHang.ChiTietVe) ve.TrangThai = "DaHuy";
                     }
                     await _context.SaveChangesAsync();
                 }
@@ -219,16 +219,16 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             if (donHang.TrangThai == "ChoThanhToan")
             {
                 donHang.TrangThai = "DaThanhToan";
-                if (donHang.ChiTietVes != null)
+                if (donHang.ChiTietVe != null)
                 {
-                    foreach (var ve in donHang.ChiTietVes) ve.TrangThai = "ChuaSuDung"; // Vé sẵn sàng để quét mã
+                    foreach (var ve in donHang.ChiTietVe) ve.TrangThai = "ChuaSuDung"; // Vé sẵn sàng để quét mã
                 }
                 await _context.SaveChangesAsync();
 
                 // 5. GỬI MAIL HÓA ĐƠN
                 if (!string.IsNullOrEmpty(donHang.MaKhachHang))
                 {
-                    var khach = await _context.KhachHangs.FindAsync(donHang.MaKhachHang);
+                    var khach = await _context.KhachHang.FindAsync(donHang.MaKhachHang);
                     if (khach != null && !string.IsNullOrEmpty(khach.Email))
                     {
                         // Lệnh gửi mail chạy ngầm

@@ -23,18 +23,18 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             HttpContext.Session.Remove("DatVe_GioHangBapNuocTam");
 
             // Truy vấn lấy thông tin phim
-            var phim = await _context.Phims.FirstOrDefaultAsync(p => p.MaPhim == maPhim && p.DaXoa == false);
+            var phim = await _context.Phim.FirstOrDefaultAsync(p => p.MaPhim == maPhim && p.DaXoa == false);
             if (phim == null) return NotFound("Không tìm thấy phim.");
 
             // Lấy danh sách suất chiếu của phim này từ hôm nay trở đi, gom nhóm theo Ngày
-            var suatChieus = await _context.SuatChieus
+            var SuatChieu = await _context.SuatChieu
                 .Include(s => s.MaPhongNavigation)
                 .Where(s => s.MaPhim == maPhim && s.ThoiGianBatDau >= DateTime.Now && s.DaXoa == false)
                 .OrderBy(s => s.ThoiGianBatDau)
                 .ToListAsync();
 
             ViewBag.Phim = phim;
-            ViewBag.SuatChieus = suatChieus.GroupBy(s => s.ThoiGianBatDau.Date).ToList();
+            ViewBag.SuatChieu = SuatChieu.GroupBy(s => s.ThoiGianBatDau.Date).ToList();
 
             return View();
         }
@@ -44,14 +44,14 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
         public async Task<IActionResult> LaySoDoGhe(string maSuatChieu)
         {
             // Lấy suất chiếu kèm thông tin phòng
-            var suatChieu = await _context.SuatChieus
+            var suatChieu = await _context.SuatChieu
                 .Include(s => s.MaPhongNavigation)
                 .FirstOrDefaultAsync(s => s.MaSuatChieu == maSuatChieu && s.DaXoa == false);
 
             if (suatChieu == null) return Json(new { success = false });
 
             // 1. Lấy TẤT CẢ ghế của phòng chiếu đó
-            var dsGhe = await _context.Ghes
+            var dsGhe = await _context.Ghe
                 .Include(g => g.MaLoaiGheNavigation)
                 .Where(g => g.MaPhong == suatChieu.MaPhong && g.DaXoa == false)
                 .OrderBy(g => g.TenHang).ThenBy(g => g.SoThu) // Sắp xếp chuẩn A1 -> A2 -> B1
@@ -59,7 +59,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
 
             // 2. Lấy TẤT CẢ vé đã bán/đang giữ của Suất Chiếu này
             // Cách này an toàn tuyệt đối: Dựa vào MaSuatChieu và trạng thái DonHang
-            var veCuaSuatChieu = await _context.ChiTietVes
+            var veCuaSuatChieu = await _context.ChiTietVe
                 .Include(v => v.MaDonHangNavigation)
                 .Where(v => v.MaSuatChieu == maSuatChieu
                          && v.DaXoa == false
@@ -117,7 +117,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 return RedirectToAction("Index", "Home");
 
             // KIỂM TRA BẢO MẬT: Có ai nẫng tay trên ghế này trong tích tắc chưa?
-            var veDaBan = await _context.ChiTietVes
+            var veDaBan = await _context.ChiTietVe
                 .Include(v => v.MaDonHangNavigation)
                 .Where(v => v.MaSuatChieu == maSuatChieu && selectedSeats.Contains(v.MaGhe) && v.DaXoa == false)
                 .ToListAsync();
@@ -136,9 +136,9 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             long orderCode = long.Parse(DateTime.Now.ToString("yyMMddHHmmss"));
             string maKhachHang = HttpContext.Session.GetString("MaKhachHang");
 
-            var suatChieu = await _context.SuatChieus.Include(s => s.MaPhimNavigation).Include(s => s.MaPhongNavigation).FirstOrDefaultAsync(s => s.MaSuatChieu == maSuatChieu);
-            var ghes = await _context.Ghes.Include(g => g.MaLoaiGheNavigation).Where(g => selectedSeats.Contains(g.MaGhe)).ToListAsync();
-            double tongTienVe = ghes.Sum(g => suatChieu.GiaGoc * g.MaLoaiGheNavigation.HeSoGia);
+            var suatChieu = await _context.SuatChieu.Include(s => s.MaPhimNavigation).Include(s => s.MaPhongNavigation).FirstOrDefaultAsync(s => s.MaSuatChieu == maSuatChieu);
+            var Ghe = await _context.Ghe.Include(g => g.MaLoaiGheNavigation).Where(g => selectedSeats.Contains(g.MaGhe)).ToListAsync();
+            double tongTienVe = Ghe.Sum(g => suatChieu.GiaGoc * g.MaLoaiGheNavigation.HeSoGia);
 
             var donHang = new DonHang
             {
@@ -150,9 +150,9 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 TrangThai = "ChoThanhToan", // Bắt đầu tính giờ giữ ghế
                 DaXoa = false
             };
-            _context.DonHangs.Add(donHang);
+            _context.DonHang.Add(donHang);
 
-            foreach (var g in ghes)
+            foreach (var g in Ghe)
             {
                 var ct = new ChiTietVe
                 {
@@ -164,7 +164,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                     TrangThai = "ChoXuLy",
                     DaXoa = false
                 };
-                _context.ChiTietVes.Add(ct);
+                _context.ChiTietVe.Add(ct);
             }
             await _context.SaveChangesAsync();
 
@@ -172,8 +172,8 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             HttpContext.Session.SetString("DatVe_MaDonHang_Tam", donHang.MaDonHang);
 
             // ... (Đoạn lấy MenuBapNuoc và Viewbags trả về View XacNhan giữ nguyên như cũ)
-            var menuBapNuoc = await _context.DanhMucDichVus.Include(dm => dm.DichVus.Where(dv => dv.DaXoa == false)).Where(dm => dm.DaXoa == false).ToListAsync();
-            ViewBag.SuatChieu = suatChieu; ViewBag.Ghes = ghes; ViewBag.MenuBapNuoc = menuBapNuoc; ViewBag.TongTienVe = tongTienVe;
+            var menuBapNuoc = await _context.DanhMucDichVu.Include(dm => dm.DichVu.Where(dv => dv.DaXoa == false)).Where(dm => dm.DaXoa == false).ToListAsync();
+            ViewBag.SuatChieu = suatChieu; ViewBag.Ghe = Ghe; ViewBag.MenuBapNuoc = menuBapNuoc; ViewBag.TongTienVe = tongTienVe;
             ViewBag.ExpireTime = donHang.NgayTao.AddMinutes(5).ToString("yyyy-MM-ddTHH:mm:ss");
 
             ViewBag.JsonBapNuoc = HttpContext.Session.GetString("DatVe_GioHangBapNuocTam") ?? "[]";
@@ -183,11 +183,11 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
 
         // 4. API LƯU DỮ LIỆU ĐỂ SANG TRANG THANH TOÁN (PAYOS)
         [HttpPost]
-        public IActionResult LuuSessionThanhToan(string maSuatChieu, List<string> maGhes, string jsonBapNuoc)
+        public IActionResult LuuSessionThanhToan(string maSuatChieu, List<string> maGhe, string jsonBapNuoc)
         {
             // Lưu trạng thái Đặt Vé
             HttpContext.Session.SetString("DatVe_MaSuatChieu", maSuatChieu);
-            HttpContext.Session.Set("DatVe_MaGhes", maGhes);
+            HttpContext.Session.Set("DatVe_MaGhe", maGhe);
             HttpContext.Session.SetString("LoaiGiaoDich", "DatVe"); // Phân biệt với khách chỉ mua bắp nước lẻ
 
             // Xử lý giỏ bắp nước (nếu có mua thêm)
@@ -205,8 +205,8 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
         [HttpGet]
         public async Task<IActionResult> TiepTucDatVe(string maDonHang)
         {
-            var donHang = await _context.DonHangs
-                .Include(d => d.ChiTietVes)
+            var donHang = await _context.DonHang
+                .Include(d => d.ChiTietVe)
                 .FirstOrDefaultAsync(d => d.MaDonHang == maDonHang && d.TrangThai == "ChoThanhToan");
 
             // Nếu đơn hàng không tồn tại hoặc đã lố 5 phút
@@ -215,8 +215,8 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 if (donHang != null)
                 {
                     donHang.TrangThai = "DaHuy";
-                    var chiTietVes = await _context.ChiTietVes.Where(v => v.MaDonHang == maDonHang).ToListAsync();
-                    foreach (var ve in chiTietVes) ve.TrangThai = "DaHuy";
+                    var ChiTietVe = await _context.ChiTietVe.Where(v => v.MaDonHang == maDonHang).ToListAsync();
+                    foreach (var ve in ChiTietVe) ve.TrangThai = "DaHuy";
                     await _context.SaveChangesAsync();
                 }
                 HttpContext.Session.Remove("DatVe_MaDonHang_Tam");
@@ -224,15 +224,15 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             }
 
             // Phục hồi lại dữ liệu cho View XacNhan.cshtml
-            var maSuatChieu = donHang.ChiTietVes.First().MaSuatChieu;
-            var selectedSeatIds = donHang.ChiTietVes.Select(v => v.MaGhe).ToList();
+            var maSuatChieu = donHang.ChiTietVe.First().MaSuatChieu;
+            var selectedSeatIds = donHang.ChiTietVe.Select(v => v.MaGhe).ToList();
 
-            var suatChieu = await _context.SuatChieus.Include(s => s.MaPhimNavigation).Include(s => s.MaPhongNavigation).FirstOrDefaultAsync(s => s.MaSuatChieu == maSuatChieu);
-            var ghes = await _context.Ghes.Include(g => g.MaLoaiGheNavigation).Where(g => selectedSeatIds.Contains(g.MaGhe)).ToListAsync();
-            var menuBapNuoc = await _context.DanhMucDichVus.Include(dm => dm.DichVus.Where(dv => dv.DaXoa == false)).Where(dm => dm.DaXoa == false).ToListAsync();
+            var suatChieu = await _context.SuatChieu.Include(s => s.MaPhimNavigation).Include(s => s.MaPhongNavigation).FirstOrDefaultAsync(s => s.MaSuatChieu == maSuatChieu);
+            var Ghe = await _context.Ghe.Include(g => g.MaLoaiGheNavigation).Where(g => selectedSeatIds.Contains(g.MaGhe)).ToListAsync();
+            var menuBapNuoc = await _context.DanhMucDichVu.Include(dm => dm.DichVu.Where(dv => dv.DaXoa == false)).Where(dm => dm.DaXoa == false).ToListAsync();
 
             ViewBag.SuatChieu = suatChieu;
-            ViewBag.Ghes = ghes;
+            ViewBag.Ghe = Ghe;
             ViewBag.MenuBapNuoc = menuBapNuoc;
             ViewBag.TongTienVe = donHang.TongTienBanDau;
 
@@ -247,14 +247,14 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
         [HttpPost]
         public async Task<IActionResult> HuyDonHangTam(string maDonHang)
         {
-            var donHang = await _context.DonHangs.FirstOrDefaultAsync(d => d.MaDonHang == maDonHang);
+            var donHang = await _context.DonHang.FirstOrDefaultAsync(d => d.MaDonHang == maDonHang);
             if (donHang != null && donHang.TrangThai == "ChoThanhToan")
             {
                 donHang.TrangThai = "DaHuy"; // Chuyển Hủy
 
                 // Trả các vé về Hủy để nhả ghế ra sơ đồ
-                var chiTietVes = await _context.ChiTietVes.Where(v => v.MaDonHang == maDonHang).ToListAsync();
-                foreach (var ve in chiTietVes) ve.TrangThai = "DaHuy";
+                var ChiTietVe = await _context.ChiTietVe.Where(v => v.MaDonHang == maDonHang).ToListAsync();
+                foreach (var ve in ChiTietVe) ve.TrangThai = "DaHuy";
 
                 await _context.SaveChangesAsync();
             }
