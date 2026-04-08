@@ -28,6 +28,22 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             return View(phim);
         }
 
+        // 0. TRANG CHI TIẾT PHIM (Thêm hàm này vào để hết lỗi 404)
+        [HttpGet]
+        public async Task<IActionResult> ChiTietPhim(string maPhim)
+        {
+            if (string.IsNullOrEmpty(maPhim)) return RedirectToAction("Index", "Home");
+
+            // Truy vấn lấy thông tin phim kèm Thể loại
+            var phim = await _context.Phim
+                .Include(p => p.MaTheLoaiNavigation)
+                .FirstOrDefaultAsync(p => p.MaPhim == maPhim && p.DaXoa == false);
+
+            if (phim == null) return NotFound("Phim này không tồn tại hoặc đã ngừng chiếu.");
+
+            return View(phim);
+        }
+
         // 1. TRANG CHỌN SUẤT CHIẾU VÀ GHẾ
         [HttpGet]
         public async Task<IActionResult> ChonGhe(string maPhim)
