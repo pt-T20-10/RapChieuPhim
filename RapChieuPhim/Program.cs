@@ -4,6 +4,8 @@ using Hangfire;
 using Hangfire.SqlServer;
 using RapChieuPhim.Services;
 using PayOS;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +20,19 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+})
+.AddCookie()
+.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+{
+    // LƯU Ý: Bạn phải thay 2 dòng này bằng Key lấy từ Google Cloud Console nhé!
+    options.ClientId = "xxx";
+    options.ClientSecret = "xxx";
+});
 
 
 builder.Services.AddHangfire(config => config

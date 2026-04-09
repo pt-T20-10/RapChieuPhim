@@ -4,6 +4,10 @@ using RapChieuPhim.Data;
 using RapChieuPhim.Models.ViewModels;
 using RapChieuPhim.Services;
 using RapChieuPhim.Models.Entities;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using System.Security.Claims;
 
 namespace RapChieuPhim.Areas.NguoiDung.Controllers
 {
@@ -16,7 +20,7 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
         public TaiKhoanController(AccountService accountService, AppDbContext context)
         {
             _accountService = accountService;
-            _context = context; 
+            _context = context;
         }
 
         // GET: Hiển thị form Đăng nhập
@@ -32,7 +36,6 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DangNhap(DangNhapViewModel model, string returnUrl = null)
         {
-            // Đăng nhập thành công -> Xử lý ReturnUrl
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
@@ -44,31 +47,24 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
 
                 if (tk != null)
                 {
-                    // Đăng nhập thành công -> Lưu Session
                     _accountService.LuuSession(HttpContext, tk);
 
-                    // Điều hướng dựa theo Role (VaiTro) chính xác theo thiết kế hệ thống
                     if (tk.VaiTro == "KhachHang")
                     {
-                        // KIỂM TRA ĐƠN HÀNG TẠM TRONG 5 PHÚT
                         var pendingOrderMa = HttpContext.Session.GetString("DatVe_MaDonHang_Tam");
                         if (!string.IsNullOrEmpty(pendingOrderMa))
                         {
                             var pendingOrder = await _context.DonHang.FirstOrDefaultAsync(d => d.MaDonHang == pendingOrderMa && d.TrangThai == "ChoThanhToan");
 
-                            // Nếu đơn hàng còn hạn
                             if (pendingOrder != null && pendingOrder.NgayTao.AddMinutes(5) > DateTime.Now)
                             {
-                                // Cập nhật đơn hàng là của user này (Để lát có thanh toán thì được tích điểm)
                                 pendingOrder.MaKhachHang = tk.MaKhachHang;
                                 await _context.SaveChangesAsync();
-
-                                // Đẩy tín hiệu ra Layout để bật Popup
                                 TempData["PendingOrder"] = pendingOrderMa;
                             }
                             else
                             {
-                                HttpContext.Session.Remove("DatVe_MaDonHang_Tam"); // Hết hạn thì xóa rác
+                                HttpContext.Session.Remove("DatVe_MaDonHang_Tam");
                             }
                         }
 
@@ -77,23 +73,99 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                     }
                     else if (tk.VaiTro == "NhanVien")
                     {
-                        // Nhân viên -> Trang Bán Vé & Dịch vụ (Controller BanHang)
                         return RedirectToAction("Index", "BanHang", new { area = "RapPhim" });
                     }
                     else if (tk.VaiTro == "Admin")
                     {
-                        // Quản lý/Admin -> Trang Dashboard Tổng quan
                         return RedirectToAction("Index", "Dashboard", new { area = "RapPhim" });
                     }
                 }
-
-                // Trả về lỗi nếu sai tài khoản/mật khẩu
                 ModelState.AddModelError(string.Empty, "Tài khoản không tồn tại, sai mật khẩu hoặc đã bị khóa.");
             }
             return View(model);
         }
 
-        // Action Đăng ký
+        // =======================================================
+        // LUỒNG ĐĂNG NHẬP GOOGLE
+        // =======================================================
+
+        [HttpGet]
+        public IActionResult GoogleLogin()
+        {
+            var properties = new AuthenticationProperties { RedirectUri = Url.Action("GoogleResponse") };
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GoogleResponse()
+        {
+            var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            if (!result.Succeeded) return RedirectToAction("DangNhap");
+
+            var claims = result.Principal.Identities.FirstOrDefault()?.Claims;
+            var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+
+            if (email == null) return RedirectToAction("DangNhap");
+
+            // Kiểm tra xem khách hàng này đã từng đăng nhập chưa
+            var khachHang = await _context.KhachHang.FirstOrDefaultAsync(k => k.Email == email);
+            TaiKhoan taiKhoan = null;
+
+            if (khachHang == null)
+            {
+                // 1. CHƯA CÓ -> TẠO KHÁCH HÀNG MỚI
+                khachHang = new KhachHang
+                {
+                    MaKhachHang = "KH" + DateTime.Now.Ticks.ToString().Substring(10),
+                    HoTen = name ?? "Khách hàng Google",
+                    Email = email,
+                    GioiTinh = "Khác",
+                    // Fix lỗi DateOnly: Dùng DateOnly.FromDateTime để cắt bỏ giờ/phút/giây
+                    NgaySinh = DateOnly.FromDateTime(DateTime.Now.AddYears(-18)),
+                    DaXoa = false
+                };
+                _context.KhachHang.Add(khachHang);
+
+                // 2. TẠO TÀI KHOẢN MỚI CHO KHÁCH HÀNG NÀY
+                taiKhoan = new TaiKhoan
+                {
+                    TenDangNhap = email,
+                    MatKhau = "Google@123", // Mật khẩu ảo cho tài khoản mượn quyền Google
+                    VaiTro = "KhachHang",
+                    TrangThai = "DangHoatDong",
+                    MaKhachHang = khachHang.MaKhachHang, // Liên kết (Foreign Key)
+                    DaXoa = false
+                };
+                _context.TaiKhoan.Add(taiKhoan);
+
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                // Nếu khách đã tồn tại, tìm Tài khoản của họ để check xem có bị khóa không
+                taiKhoan = await _context.TaiKhoan.FirstOrDefaultAsync(t => t.MaKhachHang == khachHang.MaKhachHang);
+                if (taiKhoan != null && taiKhoan.TrangThai == "BiKhoa")
+                {
+                    ModelState.AddModelError(string.Empty, "Tài khoản của bạn đã bị khóa.");
+                    return View("DangNhap");
+                }
+            }
+
+            // ĐĂNG NHẬP THÀNH CÔNG -> Lưu Session y hệt như đăng nhập thường
+            HttpContext.Session.SetString("MaKhachHang", khachHang.MaKhachHang);
+            HttpContext.Session.SetString("TenDangNhap", taiKhoan?.TenDangNhap ?? email);
+            HttpContext.Session.SetString("HoTen", khachHang.HoTen);
+            HttpContext.Session.SetString("VaiTro", taiKhoan?.VaiTro ?? "KhachHang");
+
+            // Đăng xuất khỏi Cookie tạm của Google
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        // =======================================================
+
         [HttpGet]
         public IActionResult DangKy()
         {
@@ -103,18 +175,17 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
         [HttpGet]
         public IActionResult DangXuat()
         {
-            // Gọi hàm xóa Session từ Service
             _accountService.DangXuat(HttpContext);
             return RedirectToAction("Index", "Home");
         }
 
+        // ... Các hàm ThongTin, QuenMatKhau, XacNhanOTP giữ nguyên không đổi ...
         [HttpGet]
         public async Task<IActionResult> ThongTin([FromServices] RapChieuPhim.Data.AppDbContext context)
         {
             var maKh = HttpContext.Session.GetString("MaKhachHang");
             if (string.IsNullOrEmpty(maKh)) return RedirectToAction("DangNhap");
 
-            // Lấy thông tin cũ từ DB đưa lên Form
             var kh = await context.KhachHang.FindAsync(maKh);
             if (kh == null) return NotFound();
 
@@ -141,7 +212,6 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 var result = await _accountService.CapNhatThongTinAsync(maKh, model);
                 if (result.ThanhCong)
                 {
-                    // Cập nhật lại Session tên hiển thị trên Header nếu họ đổi Tên
                     HttpContext.Session.SetString("HoTen", model.HoTen);
                     TempData["SuccessMessage"] = result.ThongBao;
                 }
@@ -153,7 +223,6 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             return View(model);
         }
 
-        // --- 1. NHẬP EMAIL ---
         [HttpGet]
         public IActionResult QuenMatKhau() => View();
 
@@ -162,7 +231,6 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
-            // 1. Kiểm tra xem có đang bị khóa (Block) 1 tiếng hay không
             var blockUntilStr = HttpContext.Session.GetString("BlockUntil");
             if (!string.IsNullOrEmpty(blockUntilStr))
             {
@@ -175,13 +243,11 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 }
                 else
                 {
-                    // Đã hết thời gian khóa -> Reset lại bộ đếm
                     HttpContext.Session.Remove("BlockUntil");
                     HttpContext.Session.Remove("ResendCount");
                 }
             }
 
-            // 2. Kiểm tra Email tồn tại
             bool isExist = await _accountService.KiemTraEmailTonTaiAsync(model.Email);
             if (!isExist)
             {
@@ -189,26 +255,22 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 return View(model);
             }
 
-            // 3. Xử lý bộ đếm gửi lại (ResendCount)
             int count = HttpContext.Session.GetInt32("ResendCount") ?? 0;
             count++;
             HttpContext.Session.SetInt32("ResendCount", count);
 
             if (count > 5)
             {
-                // Khóa tính năng trong 1 tiếng
                 var lockTime = DateTime.Now.AddHours(1);
                 HttpContext.Session.SetString("BlockUntil", lockTime.ToString());
                 ModelState.AddModelError("", "Hệ thống phát hiện spam. Tính năng này đã bị tạm khóa 1 tiếng.");
                 return View(model);
             }
 
-            // 4. Sinh OTP mới (Ghi đè hoàn toàn mã cũ)
             string otp = new Random().Next(100000, 999999).ToString();
             HttpContext.Session.SetString("ResetOTP", otp);
             HttpContext.Session.SetString("ResetEmail", model.Email);
 
-            // 5. Gửi Mail
             bool isSent = await _accountService.GuiEmailOTPAsync(model.Email, otp);
             if (!isSent)
             {
@@ -219,7 +281,6 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             return RedirectToAction("XacNhanOTP");
         }
 
-        // --- 2. XÁC NHẬN OTP ---
         [HttpGet]
         public IActionResult XacNhanOTP() => View();
 
@@ -236,7 +297,6 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             return View();
         }
 
-        // --- 3. ĐẶT LẠI MẬT KHẨU & CAPTCHA ---
         [HttpGet]
         public IActionResult DatLaiMatKhau() => View();
 
@@ -258,27 +318,22 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 bool rs = await _accountService.DatLaiMatKhauAsync(email, model.MatKhauMoi);
                 if (rs)
                 {
-                    // Đổi xong thì xóa Session rác
                     HttpContext.Session.Remove("ResetOTP");
                     HttpContext.Session.Remove("ResetEmail");
                     HttpContext.Session.Remove("CaptchaCode");
 
-                    return RedirectToAction("DangNhap"); // Về lại form đăng nhập
+                    return RedirectToAction("DangNhap");
                 }
             }
-
             return View(model);
         }
 
-        // --- API SINH ẢNH CAPTCHA CHẤT LƯỢNG ---
         [Route("api/captcha")]
         public IActionResult GetCaptchaImage()
         {
             string captcha = new Random().Next(1000, 9999).ToString();
             HttpContext.Session.SetString("CaptchaCode", captcha);
 
-            // Dùng thư viện SkiaSharp hoặc trả về ảnh base64/SVG đơn giản. 
-            // Để gọn nhất cho MVC, ta render 1 ảnh HTML dạng SVG
             string svg = $@"<svg width='120' height='40' xmlns='http://www.w3.org/2000/svg'>
                              <rect width='100%' height='100%' fill='#f0f0f0'/>
                              <text x='50%' y='50%' font-size='24' font-weight='bold' font-family='monospace' fill='#034ea2' dominant-baseline='middle' text-anchor='middle' transform='rotate({new Random().Next(-5, 5)}, 60, 20)'>{captcha}</text>
