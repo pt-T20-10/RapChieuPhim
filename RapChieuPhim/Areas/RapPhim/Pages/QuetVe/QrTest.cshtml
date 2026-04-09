@@ -1,0 +1,151 @@
+@page "/RapPhim/QuetVe/QrTest"
+@{
+    ViewData["Title"] = "Test QR Code";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                max-width: 800px;
+                margin: 50px auto;
+                padding: 20px;
+            }
+        
+            .container {
+                background: white;
+                border-radius: 10px;
+                padding: 30px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+        
+            h2 {
+                color: #333;
+                margin-bottom: 20px;
+            }
+        
+            #qrDisplay {
+                text-align: center;
+                margin: 30px 0;
+            }
+        
+            #qrImage {
+                width: 300px;
+                height: 300px;
+                border: 3px solid #667eea;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+        
+            .input-group {
+                display: flex;
+                gap: 10px;
+                margin: 20px 0;
+            }
+        
+            input {
+                flex: 1;
+                padding: 10px;
+                font-size: 16px;
+                border: 2px solid #e0e0e0;
+                border-radius: 5px;
+            }
+        
+                input:focus {
+                    outline: none;
+                    border-color: #667eea;
+                }
+        
+            button {
+                padding: 10px 20px;
+                font-size: 16px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-weight: 600;
+            }
+        
+                button:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+                }
+        
+            .note {
+                background: #f0f8ff;
+                border-left: 4px solid #667eea;
+                padding: 15px;
+                border-radius: 5px;
+                color: #333;
+            }
+        
+            .success {
+                color: #2ecc71;
+                font-weight: 600;
+            }
+        
+            .error {
+                color: #ff6b6b;
+                font-weight: 600;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🎯 Test QR Code Scanner</h2>
+        
+        <div id="qrDisplay">
+            <img id="qrImage" src="" alt="QR Code" />
+        </div>
+        
+        <div class="input-group">
+            <input type="text" id="testText" value="TEST_QR_001" placeholder="Nhập text để tạo QR..." />
+            <button onclick="generateTestQr()">Tạo QR Test</button>
+        </div>
+        
+        <div id="status"></div>
+        
+        <div class="note">
+            💡 <strong>Cách sử dụng:</strong>
+            <ol>
+                <li>Nhập text hoặc giữ "TEST_QR_001"</li>
+                <li>Nhấn "Tạo QR Test" để tạo mã QR</li>
+                <li>Mở trang <a href="/RapPhim/QuetVe/Index" target="_blank">/RapPhim/QuetVe/Index</a></li>
+                <li>Mở DevTools (F12) → Console</li>
+                <li>Quét QR ở trên bằng camera</li>
+                <li>Xem console có log "🎉 QR DETECTED"?</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+            function generateTestQr() {
+                const text = document.getElementById('testText').value || 'TEST_QR_001';
+                const statusDiv = document.getElementById('status');
+            
+                statusDiv.innerHTML = '<p>⏳ Đang tạo QR...</p>';
+            
+                fetch(`/RapPhim/QuetVe/QrApi?handler=TestQr&text=${encodeURIComponent(text)}`)
+                    .then(r => {
+                        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                        return r.json();
+                    })
+                    .then(data => {
+                        console.log('✅ QR Generated:', data);
+                        document.getElementById('qrImage').src = data.qrCodeBase64;
+                        statusDiv.innerHTML = `<p class="success">✅ QR tạo thành công! Text: "${text}"</p>`;
+                    })
+                    .catch(error => {
+                        console.error('❌ Error:', error);
+                        statusDiv.innerHTML = `<p class="error">❌ Lỗi: ${error.message}</p>`;
+                    });
+            }
+
+            // Load QR mặc định khi page load
+            window.addEventListener('load', generateTestQr);
+    </script>
+</body>
+</html>
