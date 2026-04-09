@@ -1,0 +1,846 @@
+@page
+@using RapChieuPhim.Areas.RapPhim.Pages.QuetVe
+@model IndexModel
+@{
+    ViewData["Title"] = "Quét Vé";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .scanner-container {
+            width: 100%;
+            max-width: 900px;
+            flex-shrink: 0;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: slideDown 0.6s ease;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: slideUp 0.6s ease;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h2 {
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 0;
+        }
+
+        .room-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            backdrop-filter: blur(10px);
+            white-space: nowrap;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .scanner-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: #667eea;
+            font-size: 1.3rem;
+        }
+
+        /* Hide html5-qrcode built-in controls */
+        .html5-qrcode-element-onboard-controls {
+            display: none !important;
+        }
+
+        .qr-shaded-region {
+            display: none !important;
+        }
+
+        /* Hide only select/label dropdowns, NOT video or SVG */
+        #qr-reader__scan_region {
+            display: none !important;
+        }
+
+        #qr-reader__camera_selection {
+            display: none !important;
+        }
+
+        #qr-reader select,
+        #qr-reader label {
+            display: none !important;
+        }
+
+        /* Main QR reader container */
+        #qr-reader {
+            width: 100%;
+            height: 350px;
+            border-radius: 15px;
+            border: 3px solid #e0e0e0;
+            background: #000;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin: 0 auto 20px auto;
+            position: relative;
+        }
+
+        /* Video element - must be visible */
+        #qr-reader video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            display: block !important;
+        }
+
+        /* SVG scanning frame */
+        #qr-reader svg {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            z-index: 10 !important;
+        }
+
+        #qr-reader.scanning {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        #startScanBtn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        #startScanBtn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6);
+        }
+
+        #startScanBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #stopScanBtn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        #stopScanBtn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.6);
+        }
+
+        #stopScanBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            padding: 10px 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            width: 100%;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #999;
+            animation: pulse 2s infinite;
+            flex-shrink: 0;
+        }
+
+        .status-dot.active {
+            background: #2ecc71;
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.8);
+        }
+
+        @@keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @@keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #ddd, transparent);
+            margin: 30px 0;
+        }
+
+        .manual-input-section {
+            margin-bottom: 0;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 120px;
+            gap: 12px;
+        }
+
+        #MaQr {
+            padding: 15px 20px;
+            font-size: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+        }
+
+        #MaQr:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-group button[type="submit"] {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.4);
+        }
+
+        .input-group button[type="submit"]:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(46, 204, 113, 0.6);
+        }
+
+        /* Error Alert */
+        .alert {
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid;
+            margin-top: 20px;
+            animation: slideDown 0.4s ease;
+        }
+
+        .alert-danger {
+            background: #fee;
+            border-color: #ff6b6b;
+            color: #c92a2a;
+        }
+
+        .alert h5 {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        /* Success Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            animation: scaleIn 0.3s ease;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-header h5 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .ticket-info {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .ticket-info label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666;
+        }
+
+        .ticket-info h6 {
+            font-size: 1.2rem;
+            margin-top: 5px;
+            color: #333;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-footer button {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 0.95rem;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @@keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+            
+        /* Responsive */
+        @@media (max-width: 768px) {
+            body {
+                justify-content: flex-start;
+                padding-top: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header {
+                margin-bottom: 20px;
+            }
+
+            .card-body {
+                padding: 20px;
+            }
+
+            #qr-reader {
+                height: 280px;
+                margin-bottom: 15px;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+                margin-bottom: 10px;
+            }
+
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+
+            .input-group button[type="submit"] {
+                width: 100%;
+            }
+
+            .divider {
+                margin: 20px 0;
+            }
+
+            .card-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .room-badge {
+                font-size: 0.75rem;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanner-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎫 Quét Vé Rạp Chiếu Phim</h1>
+            <p>Quét mã QR trên vé hoặc nhập mã vé để xác nhận</p>
+        </div>
+
+        <!-- Main Card -->
+        <div class="main-card">
+            <!-- Card Header -->
+            <div class="card-header">
+                <h2>
+                    <i class="fas fa-film"></i>
+                    Quét Mã Vé
+                </h2>
+                <div class="room-badge">
+                    <i class="fas fa-door-open"></i> Phòng: @Model.MaPhongThietBi
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body">
+                <!-- Scanner Section -->
+                <div class="scanner-section">
+                    <div class="section-title">
+                        <i class="fas fa-camera"></i>
+                        Quét Bằng Camera
+                    </div>
+                    <div id="qr-reader"></div>
+                    
+                    <div class="button-group">
+                        <button type="button" id="startScanBtn">
+                            <i class="fas fa-play"></i>Bắt Đầu Quét
+                        </button>
+                        <button type="button" id="stopScanBtn" disabled>
+                            <i class="fas fa-stop"></i>Dừng Quét
+                        </button>
+                    </div>
+
+                    <div class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span id="statusText">Nhấn "Bắt Đầu Quét" để khởi động camera</span>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="divider"></div>
+
+                <!-- Manual Input Section -->
+                <div class="manual-input-section">
+                    <div class="section-title">
+                        <i class="fas fa-keyboard"></i>
+                        Nhập Thủ Công
+                    </div>
+                    <form method="post" asp-area="RapPhim" asp-page="/QuetVe/Index">
+                        @Html.AntiForgeryToken()
+                        <div class="input-group">
+                            <input type="text" id="MaQr" name="MaQr" 
+                                   placeholder="Nhập mã vé (ví dụ: QR001_TEST)" 
+                                   autocomplete="off" autofocus>
+                            <button type="submit" title="Quét vé">
+                                <i class="fas fa-check"></i>Quét Vé
+                            </button>
+                        </div>
+                        <span class="text-danger d-block mt-2" style="color: #ff6b6b; margin-top: 10px;">
+                            @Html.ValidationMessage(nameof(Model.MaQr))
+                        </span>
+                    </form>
+                </div>
+
+                <!-- Error Alert -->
+                @if (Model.KetQua != null && !Model.KetQua.ThanhCong)
+                {
+                    <div class="alert alert-danger">
+                        <h5>
+                            <i class="fas fa-exclamation-circle"></i> Quét Vé Thất Bại
+                        </h5>
+                        <p style="margin-bottom: 10px;">@Model.KetQua.TinNhan</p>
+                        <small style="opacity: 0.8;">Mã: <strong>@Model.KetQua.MaTinhTrang</strong></small>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        @if (Model.KetQua != null && Model.KetQua.ThanhCong)
+        {
+            <div class="modal show">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5>
+                            <i class="fas fa-check-circle"></i> Quét Vé Thành Công
+                        </h5>
+                    </div>
+
+                    <div class="modal-body">
+                        @if (!string.IsNullOrEmpty(Model.QrCodeImage))
+                        {
+                            <div style="text-align: center; margin-bottom: 30px;">
+                                <img src="@Model.QrCodeImage" alt="QR Code" 
+                                     style="width: 180px; height: 180px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                            </div>
+                        }
+
+                        <div class="ticket-info">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <label>🎫 Mã Vé</label>
+                                    <h6>@Model.KetQua.DuLieuVe?.MaVe</h6>
+                                </div>
+                                <div>
+                                    <label>✅ Trạng Thái</label>
+                                    <h6 style="color: #2ecc71;">@Model.KetQua.DuLieuVe?.TrangThaiMoi</h6>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ticket-info">
+                            <div style="margin-bottom: 20px;">
+                                <label>🎬 Tên Phim</label>
+                                <h5 style="margin-top: 8px; font-size: 1.3rem;">@Model.KetQua.DuLieuVe?.TenPhim</h5>
+                            </div>
+                        </div>
+
+                        <div class="ticket-info">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <label>🎭 Phòng Chiếu</label>
+                                    <h6>@Model.KetQua.DuLieuVe?.TenPhong</h6>
+                                </div>
+                                <div>
+                                    <label>💺 Ghế</label>
+                                    <h6>@Model.KetQua.DuLieuVe?.MaGhe</h6>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ticket-info">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <label>🕐 Giờ Chiếu</label>
+                                    <h6>@Model.KetQua.DuLieuVe?.ThoiGianBatDau:dd/MM/yyyy HH:mm</h6>
+                                </div>
+                                <div>
+                                    <label>💰 Giá Vé</label>
+                                    <h6 style="color: #667eea;">@Model.KetQua.DuLieuVe?.GiaVe:C</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" id="printBtn" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white;">
+                            <i class="fas fa-print"></i> In Vé
+                        </button>
+                        <button type="button" id="exportPdfBtn" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white;">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                        <button type="button" onclick="location.reload();" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white;">
+                            <i class="fas fa-check"></i> Tiếp Tục
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Thư viện QR Code Scanner -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
+
+    <script>
+        let html5Qrcode = null;
+        let isScanning = false;
+
+        function startScanner() {
+            if (isScanning) return;
+
+            try {
+                const startBtn = document.getElementById('startScanBtn');
+                const stopBtn = document.getElementById('stopScanBtn');
+                const statusText = document.getElementById('statusText');
+                const statusDot = document.querySelector('.status-dot');
+                const qrReader = document.getElementById('qr-reader');
+
+                if (typeof Html5Qrcode === 'undefined') {
+                    alert("Lỗi: Thư viện QR scanner chưa load!");
+                    return;
+                }
+
+                // Xóa nếu đã có instance cũ
+                if (html5Qrcode) {
+                    try {
+                        html5Qrcode.stop();
+                        html5Qrcode = null;
+                    } catch (e) {}
+                }
+
+                html5Qrcode = new Html5Qrcode("qr-reader", {
+                    formfactor: "portrait",
+                    supportedScanTypes: [Html5QrcodeScanType.CAMERA]
+                });
+
+                const config = {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0,
+                    disableFlip: false
+                };
+
+                html5Qrcode.start(
+                    { facingMode: "environment" },
+                    config,
+                    onScanSuccess,
+                    onScanError
+                ).then(() => {
+                    // Ẩn toàn bộ controls sau khi start
+                    setTimeout(() => {
+                        qrReader.querySelectorAll('button, select, label, [role="button"]').forEach(el => {
+                            el.style.display = 'none !important';
+                        });
+                        qrReader.querySelectorAll('div').forEach(el => {
+                            const html = el.innerHTML || '';
+                            if (html.includes('select') || html.includes('label') || html.includes('Camera')) {
+                                el.style.display = 'none !important';
+                            }
+                        });
+                    }, 100);
+
+                    isScanning = true;
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    statusText.textContent = "✅ Camera đang hoạt động - Đưa QR code vào camera";
+                    statusDot.classList.add('active');
+                    qrReader.classList.add('scanning');
+                }).catch(err => {
+                    console.error("Lỗi khởi động scanner:", err);
+                    alert("Lỗi khởi động camera: " + err.message);
+                });
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Lỗi: " + error.message);
+            }
+        }
+
+        function stopScanner() {
+            if (!isScanning || !html5Qrcode) return;
+
+            try {
+                html5Qrcode.stop().then(() => {
+                    isScanning = false;
+
+                    const startBtn = document.getElementById('startScanBtn');
+                    const stopBtn = document.getElementById('stopScanBtn');
+                    const statusText = document.getElementById('statusText');
+                    const statusDot = document.querySelector('.status-dot');
+                    const qrReader = document.getElementById('qr-reader');
+
+                    // Clear container
+                    qrReader.innerHTML = '';
+
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    statusText.textContent = "⏹ Camera đã dừng";
+                    statusDot.classList.remove('active');
+                    qrReader.classList.remove('scanning');
+                }).catch(err => {
+                    console.error("Error stopping:", err);
+                });
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        function onScanSuccess(decodedText) {
+            if (isScanning) {
+                document.getElementById('MaQr').value = decodedText;
+                stopScanner();
+                setTimeout(() => {
+                    document.querySelector('form').submit();
+                }, 300);
+            }
+        }
+
+        function onScanError(error) {
+            // Ignore - không cần log errors
+        }
+
+        function printTicket(maVe) {
+            alert("Tính năng in vé sẽ được hoàn tất!");
+        }
+
+        function exportPdf(maVe) {
+            fetch('@Url.Page("Index", "ExportPdf", new { area = "RapPhim" })', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ maVe: maVe })
+            })
+            .catch(error => alert("Lỗi xuất PDF!"));
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const startBtn = document.getElementById('startScanBtn');
+            const stopBtn = document.getElementById('stopScanBtn');
+            const printBtn = document.getElementById('printBtn');
+            const exportPdfBtn = document.getElementById('exportPdfBtn');
+            
+            if (startBtn) startBtn.addEventListener('click', startScanner);
+            if (stopBtn) stopBtn.addEventListener('click', stopScanner);
+            
+            if (printBtn) {
+                printBtn.addEventListener('click', function() {
+                    const maVe = document.querySelector('.modal-body h6')?.textContent?.trim() || 'unknown';
+                    printTicket(maVe);
+                });
+            }
+            
+            if (exportPdfBtn) {
+                exportPdfBtn.addEventListener('click', function() {
+                    const maVe = document.querySelector('.modal-body h6')?.textContent?.trim() || 'unknown';
+                    exportPdf(maVe);
+                });
+            }
+            
+            const maQrInput = document.getElementById('MaQr');
+            if (maQrInput) maQrInput.focus();
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (isScanning) stopScanner();
+        });
+    </script>
+</body>
+</html>
