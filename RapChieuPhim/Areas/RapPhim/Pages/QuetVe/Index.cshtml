@@ -9,505 +9,437 @@
 <html>
 <head>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            height: 100%;
-            width: 100%;
-        }
-
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .scanner-container {
-            width: 100%;
-            max-width: 900px;
-            flex-shrink: 0;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-            animation: slideDown 0.6s ease;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .main-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-            animation: slideUp 0.6s ease;
-        }
-
-        .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .card-header h2 {
-            font-size: 1.6rem;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 0;
-        }
-
-        .room-badge {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            backdrop-filter: blur(10px);
-            white-space: nowrap;
-        }
-
-        .card-body {
-            padding: 30px;
-        }
-
-        .scanner-section {
-            margin-bottom: 30px;
-        }
-
-        .section-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .section-title i {
-            color: #667eea;
-            font-size: 1.3rem;
-        }
-
-        /* Hide html5-qrcode built-in controls */
-        .html5-qrcode-element-onboard-controls {
-            display: none !important;
-        }
-
-        .qr-shaded-region {
-            display: none !important;
-        }
-
-        /* Hide only select/label dropdowns, NOT video or SVG */
-        #qr-reader__scan_region {
-            display: none !important;
-        }
-
-        #qr-reader__camera_selection {
-            display: none !important;
-        }
-
-        #qr-reader select,
-        #qr-reader label {
-            display: none !important;
-        }
-
-        /* Main QR reader container */
-        #qr-reader {
-            width: 100%;
-            height: 350px;
-            border-radius: 15px;
-            border: 3px solid #e0e0e0;
-            background: #000;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            margin: 0 auto 20px auto;
-            position: relative;
-        }
-
-        /* Video element - must be visible */
-        #qr-reader video {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
-            display: block !important;
-        }
-
-        /* SVG scanning frame */
-        #qr-reader svg {
-            position: absolute !important;
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
-            z-index: 10 !important;
-        }
-
-        #qr-reader.scanning {
-            border-color: #667eea;
-            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
-        }
-
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        button {
-            padding: 14px 20px;
-            font-size: 1rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        button:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        #startScanBtn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        #startScanBtn:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6);
-        }
-
-        #startScanBtn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        #stopScanBtn {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-            color: white;
-            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
-        }
-
-        #stopScanBtn:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.6);
-        }
-
-        #stopScanBtn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-            padding: 10px 15px;
-            background: #f0f0f0;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-            width: 100%;
-        }
-
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #999;
-            animation: pulse 2s infinite;
-            flex-shrink: 0;
-        }
-
-        .status-dot.active {
-            background: #2ecc71;
-            box-shadow: 0 0 10px rgba(46, 204, 113, 0.8);
-        }
-
-        @@keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        @@keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @@keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #ddd, transparent);
-            margin: 30px 0;
-        }
-
-        .manual-input-section {
-            margin-bottom: 0;
-        }
-
-        .input-group {
-            display: grid;
-            grid-template-columns: 1fr 120px;
-            gap: 12px;
-        }
-
-        #MaQr {
-            padding: 15px 20px;
-            font-size: 1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            font-family: 'Courier New', monospace;
-        }
-
-        #MaQr:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .input-group button[type="submit"] {
-            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-            color: white;
-            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.4);
-        }
-
-        .input-group button[type="submit"]:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(46, 204, 113, 0.6);
-        }
-
-        /* Error Alert */
-        .alert {
-            padding: 20px;
-            border-radius: 12px;
-            border-left: 5px solid;
-            margin-top: 20px;
-            animation: slideDown 0.4s ease;
-        }
-
-        .alert-danger {
-            background: #fee;
-            border-color: #ff6b6b;
-            color: #c92a2a;
-        }
-
-        .alert h5 {
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-
-        /* Success Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 1000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-            animation: scaleIn 0.3s ease;
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 20px 20px 0 0;
-        }
-
-        .modal-header h5 {
-            font-size: 1.5rem;
-            margin: 0;
-        }
-
-        .modal-body {
-            padding: 30px;
-        }
-
-        .ticket-info {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-        }
-
-        .ticket-info label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #666;
-        }
-
-        .ticket-info h6 {
-            font-size: 1.2rem;
-            margin-top: 5px;
-            color: #333;
-        }
-
-        .modal-footer {
-            padding: 20px 30px;
-            border-top: 1px solid #eee;
-            display: flex;
-            gap: 12px;
-        }
-
-        .modal-footer button {
-            flex: 1;
-            padding: 12px 20px;
-            font-size: 0.95rem;
-        }
-
-        @@keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @@keyframes scaleIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-            
-        /* Responsive */
-        @@media (max-width: 768px) {
-            body {
-                justify-content: flex-start;
-                padding-top: 20px;
-            }
-
-            .header h1 {
-                font-size: 1.8rem;
-            }
-
-            .header {
-                margin-bottom: 20px;
-            }
-
-            .card-body {
-                padding: 20px;
-            }
-
-            #qr-reader {
-                height: 280px;
-                margin-bottom: 15px;
-            }
-
-            .button-group {
-                grid-template-columns: 1fr;
-                margin-bottom: 10px;
-            }
-
-            .input-group {
-                grid-template-columns: 1fr;
-            }
-
-            .input-group button[type="submit"] {
-                width: 100%;
-            }
-
-            .divider {
-                margin: 20px 0;
-            }
-
-            .card-header h2 {
-                font-size: 1.3rem;
-            }
-
-            .room-badge {
-                font-size: 0.75rem;
-                padding: 6px 12px;
-            }
-        }
+        /* ===== Cinema Theme Override ===== */
+:root {
+    --cinema-bg-1: #0b0f1a;
+    --cinema-bg-2: #171a2a;
+    --cinema-primary: #e50914;
+    --cinema-primary-2: #b20710;
+    --cinema-accent: #f5c518;
+    --cinema-card: rgba(20, 23, 38, 0.9);
+    --cinema-border: rgba(245, 197, 24, 0.25);
+    --cinema-text: #f3f4f6;
+    --cinema-subtext: #b6bcc8;
+}
+
+/* ===== UI Polish v2 ===== */
+:root {
+    --ui-radius-xl: 20px;
+    --ui-radius-lg: 14px;
+    --ui-radius-md: 10px;
+    --ui-shadow-soft: 0 16px 40px rgba(0, 0, 0, .35);
+    --ui-shadow-glow: 0 0 0 1px rgba(245, 197, 24, .22), 0 12px 32px rgba(245, 197, 24, .15);
+}
+
+body {
+    background:
+        radial-gradient(circle at 15% 10%, rgba(245,197,24,0.12), transparent 30%),
+        radial-gradient(circle at 90% 20%, rgba(229,9,20,0.15), transparent 35%),
+        linear-gradient(145deg, var(--cinema-bg-1), var(--cinema-bg-2)) !important;
+    color: var(--cinema-text);
+}
+
+/* ===== Layout fix: căn giữa + tối ưu chiều cao ===== */
+html, body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    min-height: 100dvh;
+    padding: 12px 0 !important;
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.scanner-container {
+    width: min(980px, calc(100% - 24px)) !important;
+    margin: 0 auto !important;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.header {
+    padding: 14px 16px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    box-shadow: 0 12px 30px rgba(0,0,0,.28);
+}
+
+.card-header {
+    padding: 14px 18px;
+    background: linear-gradient(120deg, #e50914, #b20710);
+    border-bottom: 1px solid rgba(255,255,255,.1);
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.main-card {
+    background: rgba(15, 23, 42, .78);
+    border: 1px solid rgba(245,197,24,.2);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 18px 40px rgba(0,0,0,.35);
+}
+
+.card-body {
+    padding: 14px !important;
+    overflow: auto;
+}
+
+.section-title {
+    margin-bottom: 10px;
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+/* camera frame: safe mode */
+.qr-reader-wrap {
+    border-radius: 14px;
+    border: 2px solid rgba(255,255,255,.65);
+    overflow: hidden;
+    background: #000;
+    margin-bottom: 10px;
+}
+
+#qr-reader {
+    width: 100% !important;
+    height: clamp(260px, 44dvh, 380px) !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #000 !important;
+}
+
+#qr-reader__scan_region {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    background: #000 !important;
+}
+
+/* QUAN TRỌNG: không ép video/canvas/img nữa */
+#qr-reader video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    display: block !important;
+}
+
+#qr-reader canvas,
+#qr-reader img {
+    width: auto !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    display: block !important;
+}
+
+button {
+    min-height: 44px;
+    border-radius: 10px;
+    border: 0;
+    font-weight: 700;
+    padding: 8px 12px;
+}
+
+button::before {
+    display: none !important;
+}
+
+#startScanBtn {
+    color: #fff !important;
+    background: linear-gradient(135deg, #e50914, #7f1d1d) !important;
+}
+
+#stopScanBtn {
+    color: #e5e7eb !important;
+    background: linear-gradient(135deg, #4b5563, #1f2937) !important;
+}
+
+.button-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 10px;
+    border-radius: 10px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    border-left: 4px solid #f5c518;
+    color: #e5e7eb;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #9ca3af;
+}
+.status-dot.active { background: #22c55e; }
+
+.scan-guide-text {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    text-align: center;
+    color: #cbd5e1;
+    font-size: .85rem;
+}
+
+/* Divider between sections */
+.divider {
+    height: 1px;
+    margin: 12px 0;
+    background: linear-gradient(90deg, transparent, rgba(245,197,24,.5), transparent);
+}
+
+/* Input group for manual ticket code entry */
+.input-group {
+    display: grid;
+    grid-template-columns: 1fr 110px;
+    gap: 10px;
+}
+
+#MaQr {
+    min-height: 42px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.22);
+    background: rgba(255,255,255,.05);
+    color: #fff;
+    padding: 0 12px;
+}
+
+#MaQr::placeholder { color: #94a3b8; }
+
+.input-group button[type="submit"] {
+    background: linear-gradient(135deg, #f5c518, #ca8a04) !important;
+    color: #111827 !important;
+}
+
+/* ===== Ticket modal cleanup ===== */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: rgba(0, 0, 0, .62);
+    padding: 14px;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.show {
+    display: flex !important;
+}
+
+.modal-content {
+    width: min(720px, 95vw);
+    max-height: 88dvh;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 20px 55px rgba(0, 0, 0, .45);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: #fff;
+    padding: 14px 16px;
+}
+
+.modal-header h5 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.modal-body {
+    max-height: calc(88dvh - 130px);
+    overflow: auto;
+    background: #f1f5f9 !important;
+    padding: 10px;
+}
+
+.ticket-sheet {
+    margin: 0;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+/* Màu chữ vé */
+.ticket-head,
+.ticket-grid,
+.ticket-section,
+.ticket-note {
+    color: #111827;
+}
+
+.ticket-head {
+    text-align: center;
+    padding: 14px 12px;
+    border-bottom: 1px dashed #d1d5db;
+}
+
+.ticket-head .cinema {
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: #6b7280;
+    text-transform: uppercase;
+}
+
+.ticket-head .movie {
+    margin-top: 6px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #111827;
+}
+
+.ticket-head .sub {
+    margin-top: 4px;
+    color: #6b7280;
+    font-size: .85rem;
+}
+
+.ticket-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 12px;
+    border-bottom: 1px dashed #d1d5db;
+}
+
+.ticket-item {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 8px 10px;
+}
+
+.ticket-item .label {
+    font-size: .72rem;
+    text-transform: uppercase;
+    color: #6b7280;
+    font-weight: 700;
+}
+
+.ticket-item .value {
+    margin-top: 3px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.ticket-item .value.success {
+    color: #16a34a;
+}
+
+.ticket-section {
+    padding: 12px;
+    border-bottom: 1px dashed #d1d5db;
+}
+
+.ticket-section h6 {
+    margin: 0 0 8px;
+    font-size: .84rem;
+    text-transform: uppercase;
+    color: #374151;
+}
+
+.ticket-line {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px dotted #e5e7eb;
+    color: #1f2937;
+}
+
+.ticket-line:last-child {
+    border-bottom: 0;
+}
+
+.ticket-total {
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 2px solid #e5e7eb;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    color: #dc2626;
+    font-weight: 800;
+}
+
+.ticket-note {
+    padding: 10px 12px 14px;
+    text-align: center;
+    color: #6b7280;
+    font-size: .84rem;
+}
+
+.modal-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 12px;
+    border-top: 1px solid #e5e7eb;
+    background: #fff;
+}
+
+@@media (max-width: 768px) {
+    .input-group,
+    .modal-footer {
+        grid-template-columns: 1fr;
+    }
+
+    .ticket-grid,
+    .modal-footer {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ❌ bỏ ẩn shaded region */
+.qr-shaded-region {
+    display: block !important;
+}
+
+/* ❌ không ép object-fit để tránh lệch vùng decode */
+#qr-reader video,
+#qr-reader__scan_region video,
+#qr-reader__scan_region img {
+    object-fit: initial !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+/* ❌ không ép lại vị trí SVG overlay */
+#qr-reader svg {
+    position: static !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+}
     </style>
 </head>
 <body>
@@ -526,9 +458,6 @@
                     <i class="fas fa-film"></i>
                     Quét Mã Vé
                 </h2>
-                <div class="room-badge">
-                    <i class="fas fa-door-open"></i> Phòng: @Model.MaPhongThietBi
-                </div>
             </div>
 
             <!-- Card Body -->
@@ -539,7 +468,9 @@
                         <i class="fas fa-camera"></i>
                         Quét Bằng Camera
                     </div>
-                    <div id="qr-reader"></div>
+                    <div class="qr-reader-wrap">
+                        <div id="qr-reader"></div>
+                    </div>
                     
                     <div class="button-group">
                         <button type="button" id="startScanBtn">
@@ -553,6 +484,10 @@
                     <div class="status-indicator">
                         <span class="status-dot"></span>
                         <span id="statusText">Nhấn "Bắt Đầu Quét" để khởi động camera</span>
+                    </div>
+
+                    <div class="scan-guide-text">
+                        Đưa mã QR vào giữa khung hình để quét
                     </div>
                 </div>
 
@@ -570,7 +505,7 @@
                         <div class="input-group">
                             <input type="text" id="MaQr" name="MaQr" 
                                    placeholder="Nhập mã vé (ví dụ: QR001_TEST)" 
-                                   autocomplete="off" autofocus>
+                                   autocomplete="off">
                             <button type="submit" title="Quét vé">
                                 <i class="fas fa-check"></i>Quét Vé
                             </button>
@@ -592,6 +527,19 @@
                         <small style="opacity: 0.8;">Mã: <strong>@Model.KetQua.MaTinhTrang</strong></small>
                     </div>
                 }
+
+                <!-- Successful Scan Info -->
+                @if (Model.KetQua != null && Model.KetQua.ThanhCong && !string.IsNullOrEmpty(Model.MaQrDaQuet))
+                {
+                    <div class="scan-success-box">
+                        <div class="scan-success-label">
+                            <i class="fas fa-qrcode"></i> Thông Tin Mã QR Đã Quét:
+                        </div>
+                        <div class="scan-success-code">
+                            @Model.MaQrDaQuet
+                        </div>
+                    </div>
+                }
             </div>
         </div>
 
@@ -607,70 +555,87 @@
                     </div>
 
                     <div class="modal-body">
-                        @if (!string.IsNullOrEmpty(Model.QrCodeImage))
-                        {
-                            <div style="text-align: center; margin-bottom: 30px;">
-                                <img src="@Model.QrCodeImage" alt="QR Code" 
-                                     style="width: 180px; height: 180px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                            </div>
-                        }
+                        <div class="ticket-sheet">
+        <div class="ticket-head">
+            <div class="cinema">Rạp Chiếu Phim</div>
+            <div class="movie">@Model.KetQua.DuLieuVe?.TenPhim</div>
+            <div class="sub">Biên nhận quét vé</div>
+        </div>
 
-                        <div class="ticket-info">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                                <div>
-                                    <label>🎫 Mã Vé</label>
-                                    <h6>@Model.KetQua.DuLieuVe?.MaVe</h6>
-                                </div>
-                                <div>
-                                    <label>✅ Trạng Thái</label>
-                                    <h6 style="color: #2ecc71;">@Model.KetQua.DuLieuVe?.TrangThaiMoi</h6>
-                                </div>
-                            </div>
-                        </div>
+        <div class="ticket-grid">
+            <div class="ticket-item">
+                <div class="label">Mã vé</div>
+                <div class="value">@Model.KetQua.DuLieuVe?.MaVe</div>
+            </div>
+            <div class="ticket-item">
+                <div class="label">Trạng thái</div>
+                <div class="value success">@Model.KetQua.DuLieuVe?.TrangThaiMoi</div>
+            </div>
+            <div class="ticket-item">
+                <div class="label">Ngày chiếu</div>
+                <div class="value">@Model.KetQua.DuLieuVe?.ThoiGianBatDau.ToString("dd/MM/yyyy")</div>
+            </div>
+            <div class="ticket-item">
+                <div class="label">Giờ chiếu</div>
+                <div class="value">@Model.KetQua.DuLieuVe?.ThoiGianBatDau.ToString("HH:mm")</div>
+            </div>
+        </div>
 
-                        <div class="ticket-info">
-                            <div style="margin-bottom: 20px;">
-                                <label>🎬 Tên Phim</label>
-                                <h5 style="margin-top: 8px; font-size: 1.3rem;">@Model.KetQua.DuLieuVe?.TenPhim</h5>
-                            </div>
-                        </div>
+        <div class="ticket-section">
+            <h6>Thông tin suất chiếu</h6>
+            <div class="ticket-line"><span>Phòng</span><strong>@Model.KetQua.DuLieuVe?.TenPhong</strong></div>
+            <div class="ticket-line"><span>Ghế</span><strong>@Model.KetQua.DuLieuVe?.MaGhe</strong></div>
+            <div class="ticket-line"><span>Số lượng vé</span><strong>@(Model.KetQua?.DuLieuVe?.SoLuongVe ?? 0)</strong></div>
+        </div>
 
-                        <div class="ticket-info">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                                <div>
-                                    <label>🎭 Phòng Chiếu</label>
-                                    <h6>@Model.KetQua.DuLieuVe?.TenPhong</h6>
-                                </div>
-                                <div>
-                                    <label>💺 Ghế</label>
-                                    <h6>@Model.KetQua.DuLieuVe?.MaGhe</h6>
-                                </div>
-                            </div>
-                        </div>
+        <div class="ticket-section">
+            <h6>Thanh toán</h6>
+            <div class="ticket-line">
+                <span>Giá vé</span>
+                <strong>@Model.KetQua.DuLieuVe?.GiaVe.ToString("N0") ₫</strong>
+            </div>
+            <div class="ticket-line">
+                <span>Dịch vụ</span>
+                <strong>@Model.KetQua.DuLieuVe?.GiaDichVu.ToString("N0") ₫</strong>
+            </div>
 
-                        <div class="ticket-info">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                                <div>
-                                    <label>🕐 Giờ Chiếu</label>
-                                    <h6>@Model.KetQua.DuLieuVe?.ThoiGianBatDau:dd/MM/yyyy HH:mm</h6>
-                                </div>
-                                <div>
-                                    <label>💰 Giá Vé</label>
-                                    <h6 style="color: #667eea;">@Model.KetQua.DuLieuVe?.GiaVe:C</h6>
-                                </div>
-                            </div>
-                        </div>
+            @if (Model.KetQua?.DuLieuVe?.DanhSachDichVu != null && Model.KetQua.DuLieuVe.DanhSachDichVu.Any())
+            {
+                @foreach (var dv in Model.KetQua.DuLieuVe.DanhSachDichVu)
+                {
+                    <div class="ticket-line">
+                        <span>@dv.TenDichVu x@dv.SoLuong</span>
+                        <strong>@dv.ThanhTien.ToString("N0") ₫</strong>
+                    </div>
+                }
+            }
+
+            <div class="ticket-total">
+                <span>Tổng cộng</span>
+                <span>@Model.KetQua.DuLieuVe?.TongTien.ToString("N0") ₫</span>
+            </div>
+        </div>
+
+        <div class="ticket-note">
+            Cảm ơn quý khách. Vui lòng giữ vé để vào rạp.<br />
+            @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+        </div>
+    </div>
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" id="printBtn" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white;">
-                            <i class="fas fa-print"></i> In Vé
+                        <button type="button"
+                                id="exportPdfBtn"
+                                data-ma-ve="@Model.KetQua?.DuLieuVe?.MaVe"
+                                style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white;">
+                            <i class="fas fa-file-pdf"></i> In vé (PDF)
                         </button>
-                        <button type="button" id="exportPdfBtn" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white;">
-                            <i class="fas fa-file-pdf"></i> PDF
-                        </button>
-                        <button type="button" onclick="location.reload();" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white;">
-                            <i class="fas fa-check"></i> Tiếp Tục
+
+                        <button type="button"
+                                id="confirmEntryBtn"
+                                data-ma-ve="@Model.KetQua?.DuLieuVe?.MaVe"
+                                style="background: linear-gradient(135deg, #f39c12 0%, #d35400 100%); color: white;">
+                            <i class="fas fa-door-open"></i> Xác Nhận Vào Rạp
                         </button>
                     </div>
                 </div>
@@ -679,167 +644,367 @@
     </div>
 
     <!-- Thư viện QR Code Scanner -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script> -->
+    <!-- THAY BẰNG VERSION 2.3.8 (ổn định hơn) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 
     <script>
         let html5Qrcode = null;
-        let isScanning = false;
+        let scanState = "idle"; // idle | starting | running | stopping
+        let scanLock = false;
+        let lastScanErrorAt = 0;
+        let isSubmitting = false;
+        let pendingStopPromise = null;
+        let scanErrorCount = 0;
+        let heartbeatTimer = null;
 
-        function startScanner() {
-            if (isScanning) return;
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        function debugLog(message, data) {
+            if (data !== undefined) {
+                console.log(`[QuetVe] ${message}`, data);
+            } else {
+                console.log(`[QuetVe] ${message}`);
+            }
+        }
+
+        function setIdleUi(message = 'Nhấn "Bắt Đầu Quét" để khởi động camera') {
+            const startBtn = document.getElementById('startScanBtn');
+            const stopBtn = document.getElementById('stopScanBtn');
+            const statusText = document.getElementById('statusText');
+            const statusDot = document.querySelector('.status-dot');
+            const qrReader = document.getElementById('qr-reader');
+
+            if (startBtn) startBtn.disabled = false;
+            if (stopBtn) stopBtn.disabled = true;
+            if (statusText) statusText.textContent = message;
+            if (statusDot) statusDot.classList.remove('active');
+            if (qrReader) qrReader.classList.remove('scanning');
+        }
+
+async function safeStopScannerInstance(instance) {
+    if (!instance) return;
+
+    for (let i = 0; i < 4; i++) {
+        try {
+            await instance.stop();
+            return;
+        } catch (e) {
+            const msg = String(e?.message ?? e ?? "");
+            if (msg.includes("already under transition")) {
+                await sleep(120);
+                continue;
+            }
+            if (msg.includes("Cannot stop, scanner is not running")) {
+                return;
+            }
+            throw e;
+        }
+    }
+}
+
+        async function disposeScanner() {
+            if (!html5Qrcode) return;
+
+            const instance = html5Qrcode;
+            html5Qrcode = null;
 
             try {
-                const startBtn = document.getElementById('startScanBtn');
-                const stopBtn = document.getElementById('stopScanBtn');
+                await safeStopScannerInstance(instance);
+            } catch (e) {
+                debugLog("stop() bỏ qua lỗi", e);
+            }
+
+            try {
+                await instance.clear();
+            } catch (e) {
+                debugLog("clear() bỏ qua lỗi", e);
+            }
+        }
+
+        function startHeartbeat() {
+            stopHeartbeat();
+            heartbeatTimer = setInterval(() => {
+                if (scanState === "running") {
+                    debugLog(`heartbeat: running | scanErrorCount=${scanErrorCount}`);
+                }
+            }, 3000);
+        }
+
+        function stopHeartbeat() {
+            if (heartbeatTimer) {
+                clearInterval(heartbeatTimer);
+                heartbeatTimer = null;
+            }
+        }
+
+        async function startScanner() {
+    if (scanLock || scanState !== "idle") return;
+
+    scanLock = true;
+    scanState = "starting";
+    isSubmitting = false;
+    scanErrorCount = 0;
+
+    const startBtn = document.getElementById("startScanBtn");
+    const stopBtn = document.getElementById("stopScanBtn");
+    const statusText = document.getElementById("statusText");
+    const statusDot = document.querySelector(".status-dot");
+    const qrReader = document.getElementById("qr-reader");
+
+    try {
+        if (startBtn) startBtn.disabled = true;
+
+        if (typeof Html5Qrcode === "undefined") throw new Error("html5-qrcode chưa load");
+        if (!navigator.mediaDevices?.getUserMedia) throw new Error("Trình duyệt không hỗ trợ camera.");
+
+        if (pendingStopPromise) {
+            await pendingStopPromise;
+        }
+
+        await disposeScanner();
+        if (qrReader) qrReader.innerHTML = "";
+
+        const cameras = await Html5Qrcode.getCameras();
+        if (!cameras?.length) throw new Error("Không tìm thấy camera.");
+
+        const preferredCamera = cameras.find(c => /back|rear|environment/i.test(c.label)) ?? cameras[0];
+
+        const config = {
+            fps: 10,
+            qrbox: (vw, vh) => {
+                const edge = Math.floor(Math.min(vw, vh) * 0.65);
+                return { width: edge, height: edge };
+            },
+            disableFlip: false,
+            formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE]
+        };
+
+        const cameraCandidates = [
+            { facingMode: { ideal: "environment" } },
+            preferredCamera.id,
+            ...cameras.map(c => c.id).filter(id => id !== preferredCamera.id)
+        ];
+
+        let started = false;
+        let lastError = null;
+
+        for (const cameraConfig of cameraCandidates) {
+            try {
+                const instance = new Html5Qrcode("qr-reader");
+                html5Qrcode = instance;
+
+                debugLog("Thử start camera", cameraConfig);
+                await instance.start(cameraConfig, config, onScanSuccess, onScanError);
+
+                started = true;
+                break;
+            } catch (err) {
+                lastError = err;
+                debugLog("Start scanner thất bại", err);
+                await disposeScanner();
+                await sleep(120);
+            }
+        }
+
+        if (!started) throw (lastError ?? new Error("Không thể khởi động camera."));
+
+        scanState = "running";
+        if (stopBtn) stopBtn.disabled = false;
+        if (statusText) statusText.textContent = "✅ Camera đang hoạt động - Đưa QR vào giữa khung";
+        if (statusDot) statusDot.classList.add("active");
+        if (qrReader) qrReader.classList.add("scanning");
+
+        startHeartbeat();
+    } catch (error) {
+        console.error("[QuetVe] Start scanner error:", error);
+        scanState = "idle";
+        setIdleUi("Không thể khởi động camera");
+        alert("Lỗi camera: " + (error?.message ?? error));
+    } finally {
+        scanLock = false;
+    }
+}
+
+        async function stopScanner() {
+            if (pendingStopPromise) return pendingStopPromise;
+
+            if (!html5Qrcode) {
+                scanState = "idle";
+                setIdleUi("⏹ Camera đã dừng");
+                stopHeartbeat();
+                return Promise.resolve();
+            }
+
+            scanState = "stopping";
+            scanLock = true;
+
+            pendingStopPromise = (async () => {
+                try {
+                    await disposeScanner();
+                    setIdleUi("⏹ Camera đã dừng");
+                    debugLog("Scanner đã dừng");
+                } finally {
+                    scanState = "idle";
+                    scanLock = false;
+                    pendingStopPromise = null;
+                    stopHeartbeat();
+                }
+            })();
+
+            return pendingStopPromise;
+        }
+
+        async function onScanSuccess(decodedText) {
+            if (scanState !== "running" || isSubmitting) return;
+            isSubmitting = true;
+
+            console.log("🎉 QR DETECTED:", decodedText);
+
+            const statusText = document.getElementById('statusText');
+            if (statusText) statusText.textContent = `✅ Đã nhận QR: ${decodedText}`;
+
+            const qrInput = document.getElementById('MaQr');
+            if (!qrInput) return;
+
+            qrInput.value = decodedText.trim();
+
+            await stopScanner();
+
+            const form = document.querySelector('form');    
+            if (form) form.submit();
+        }
+
+        function onScanError(errorMessage) {
+            scanErrorCount++;
+
+            const now = Date.now();
+            if (now - lastScanErrorAt > 1200) {
+                lastScanErrorAt = now;
+                console.warn("[QuetVe] onScanError:", errorMessage);
+
                 const statusText = document.getElementById('statusText');
-                const statusDot = document.querySelector('.status-dot');
-                const qrReader = document.getElementById('qr-reader');
-
-                if (typeof Html5Qrcode === 'undefined') {
-                    alert("Lỗi: Thư viện QR scanner chưa load!");
-                    return;
+                if (statusText && scanState === "running") {
+                    statusText.textContent = `🔎 Đang tìm QR... (${scanErrorCount})`;
                 }
-
-                // Xóa nếu đã có instance cũ
-                if (html5Qrcode) {
-                    try {
-                        html5Qrcode.stop();
-                        html5Qrcode = null;
-                    } catch (e) {}
-                }
-
-                html5Qrcode = new Html5Qrcode("qr-reader", {
-                    formfactor: "portrait",
-                    supportedScanTypes: [Html5QrcodeScanType.CAMERA]
-                });
-
-                const config = {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 },
-                    aspectRatio: 1.0,
-                    disableFlip: false
-                };
-
-                html5Qrcode.start(
-                    { facingMode: "environment" },
-                    config,
-                    onScanSuccess,
-                    onScanError
-                ).then(() => {
-                    // Ẩn toàn bộ controls sau khi start
-                    setTimeout(() => {
-                        qrReader.querySelectorAll('button, select, label, [role="button"]').forEach(el => {
-                            el.style.display = 'none !important';
-                        });
-                        qrReader.querySelectorAll('div').forEach(el => {
-                            const html = el.innerHTML || '';
-                            if (html.includes('select') || html.includes('label') || html.includes('Camera')) {
-                                el.style.display = 'none !important';
-                            }
-                        });
-                    }, 100);
-
-                    isScanning = true;
-                    startBtn.disabled = true;
-                    stopBtn.disabled = false;
-                    statusText.textContent = "✅ Camera đang hoạt động - Đưa QR code vào camera";
-                    statusDot.classList.add('active');
-                    qrReader.classList.add('scanning');
-                }).catch(err => {
-                    console.error("Lỗi khởi động scanner:", err);
-                    alert("Lỗi khởi động camera: " + err.message);
-                });
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Lỗi: " + error.message);
             }
-        }
-
-        function stopScanner() {
-            if (!isScanning || !html5Qrcode) return;
-
-            try {
-                html5Qrcode.stop().then(() => {
-                    isScanning = false;
-
-                    const startBtn = document.getElementById('startScanBtn');
-                    const stopBtn = document.getElementById('stopScanBtn');
-                    const statusText = document.getElementById('statusText');
-                    const statusDot = document.querySelector('.status-dot');
-                    const qrReader = document.getElementById('qr-reader');
-
-                    // Clear container
-                    qrReader.innerHTML = '';
-
-                    startBtn.disabled = false;
-                    stopBtn.disabled = true;
-                    statusText.textContent = "⏹ Camera đã dừng";
-                    statusDot.classList.remove('active');
-                    qrReader.classList.remove('scanning');
-                }).catch(err => {
-                    console.error("Error stopping:", err);
-                });
-            } catch (error) {
-                console.error("Error:", error);
-            }
-        }
-
-        function onScanSuccess(decodedText) {
-            if (isScanning) {
-                document.getElementById('MaQr').value = decodedText;
-                stopScanner();
-                setTimeout(() => {
-                    document.querySelector('form').submit();
-                }, 300);
-            }
-        }
-
-        function onScanError(error) {
-            // Ignore - không cần log errors
         }
 
         function printTicket(maVe) {
             alert("Tính năng in vé sẽ được hoàn tất!");
         }
 
-        function exportPdf(maVe) {
-            fetch('@Url.Page("Index", "ExportPdf", new { area = "RapPhim" })', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ maVe: maVe })
-            })
-            .catch(error => alert("Lỗi xuất PDF!"));
+        function getAntiForgeryToken() {
+            return document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        async function exportPdf(maVe) {
+            if (!maVe || maVe === 'unknown') {
+                alert("Không tìm thấy mã vé để xuất PDF.");
+                return;
+            }
+
+            try {
+                const token = getAntiForgeryToken();
+                const response = await fetch('@Url.Page("Index", "ExportPdf", new { area = "RapPhim" })', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                    },
+                    body: new URLSearchParams({
+                        __RequestVerificationToken: token,
+                        maVe: maVe
+                    })
+                });
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(errText || "Xuất PDF thất bại.");
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Ve_${maVe}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error("[QuetVe] Export PDF error:", error);
+                alert("Lỗi xuất PDF!");
+            }
+        }
+
+        async function confirmEntry(maVe) {
+            if (!maVe || maVe === 'unknown') {
+                alert("Không tìm thấy mã vé để xác nhận.");
+                return;
+            }
+
+            try {
+                const token = getAntiForgeryToken();
+                const response = await fetch('@Url.Page("Index", "ConfirmEntry", new { area = "RapPhim" })', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                    },
+                    body: new URLSearchParams({
+                        __RequestVerificationToken: token,
+                        maVe: maVe
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || "Xác nhận thất bại.");
+                }
+
+                alert(result.message);
+
+                const confirmBtn = document.getElementById('confirmEntryBtn');
+                if (confirmBtn) {
+                    confirmBtn.disabled = true;
+                    confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Đã Xác Nhận';
+                }
+            } catch (error) {
+                console.error("[QuetVe] Confirm entry error:", error);
+                alert(error.message || "Lỗi xác nhận vào rạp!");
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            debugLog("DOMContentLoaded");
+
             const startBtn = document.getElementById('startScanBtn');
             const stopBtn = document.getElementById('stopScanBtn');
-            const printBtn = document.getElementById('printBtn');
             const exportPdfBtn = document.getElementById('exportPdfBtn');
-            
+            const confirmEntryBtn = document.getElementById('confirmEntryBtn');
+
             if (startBtn) startBtn.addEventListener('click', startScanner);
             if (stopBtn) stopBtn.addEventListener('click', stopScanner);
-            
-            if (printBtn) {
-                printBtn.addEventListener('click', function() {
-                    const maVe = document.querySelector('.modal-body h6')?.textContent?.trim() || 'unknown';
-                    printTicket(maVe);
-                });
-            }
-            
+
             if (exportPdfBtn) {
-                exportPdfBtn.addEventListener('click', function() {
-                    const maVe = document.querySelector('.modal-body h6')?.textContent?.trim() || 'unknown';
+                exportPdfBtn.addEventListener('click', function () {
+                    const maVe = exportPdfBtn.dataset.maVe || 'unknown';
                     exportPdf(maVe);
                 });
             }
-            
-            const maQrInput = document.getElementById('MaQr');
-            if (maQrInput) maQrInput.focus();
+
+            if (confirmEntryBtn) {
+                confirmEntryBtn.addEventListener('click', function () {
+                    const maVe = confirmEntryBtn.dataset.maVe || 'unknown';
+                    confirmEntry(maVe);
+                });
+            }
         });
 
         window.addEventListener('beforeunload', () => {
-            if (isScanning) stopScanner();
+            if (scanState === "running" || scanState === "starting") {
+                stopScanner();
+            }
         });
     </script>
 </body>

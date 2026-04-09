@@ -37,18 +37,16 @@ PayOSClient payOSClient = new PayOSClient(
 );
 builder.Services.AddSingleton(payOSClient);
 
+builder.Services.AddRazorPages();
+
+// Service registrations
 builder.Services.AddScoped<DatVeService>();
 builder.Services.AddScoped<ThongKeService>();
 builder.Services.AddScoped<DichVuervice>();
-
-//builder.Services.AddScoped<AccountService>();
-
-builder.Services.AddRazorPages(); // ✅ THÊM DÒNG NÀY
-builder.Services.AddScoped<DatVeService>();
-builder.Services.AddScoped<ThongKeService>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<QRCodeService>();
 builder.Services.AddScoped<QuetVeService>();
+builder.Services.AddScoped<PdfTicketService>();
 
 var app = builder.Build();
 

@@ -7,44 +7,64 @@ namespace RapChieuPhim.Services;
 public class QRCodeService
 {
     /// <summary>
-    /// Tạo QR code dưới dạng Base64 string (để hiển thị trong HTML)
+    /// Tạo QR code dưới dạng Base64 string
+    /// Module size: 20 (lớn hơn để dễ quét)
+    /// ECCLevel: M (tối ưu balance giữa kích thước và khả năng khôi phục)
     /// </summary>
     public string GenerateQRCodeBase64(string data)
     {
         try
         {
-            using (var qrGenerator = new QRCodeGenerator())
+            if (string.IsNullOrWhiteSpace(data))
             {
-                var qrCodeData = qrGenerator.CreateQrCode(data, QRCodeGenerator.ECCLevel.Q);
+                throw new ArgumentException("Data không được để trống", nameof(data));
+            }
+
+            Console.WriteLine($"[QRCodeService] Generating QR for: {data}");
+
+            using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+            {
+                // ECCLevel.M thay vì Q để QR code nhỏ hơn, dễ quét hơn
+                QRCodeData qrCodeData = qrGenerator.CreateQrCode(data, QRCodeGenerator.ECCLevel.M);
                 
-                // ✅ Dùng PngByteQRCode thay vì QRCode
-                var pngQrCode = new PngByteQRCode(qrCodeData);
-                byte[] qrCodeImage = pngQrCode.GetGraphic(10);
-                
-                string base64String = Convert.ToBase64String(qrCodeImage);
-                return $"data:image/png;base64,{base64String}";
+                using (PngByteQRCode qrCode = new PngByteQRCode(qrCodeData))
+                {
+                    // Module size: 20 (pixel per module)
+                    byte[] qrCodeImage = qrCode.GetGraphic(20);
+                    string base64String = Convert.ToBase64String(qrCodeImage);
+                    
+                    Console.WriteLine($"[QRCodeService] ✅ QR code generated successfully");
+                    
+                    return $"data:image/png;base64,{base64String}";
+                }
             }
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[QRCodeService] ❌ Error: {ex.Message}");
             throw new Exception($"Lỗi tạo QR code: {ex.Message}", ex);
         }
     }
 
     /// <summary>
-    /// Tạo QR code dưới dạng file PNG bytes
+    /// Tạo QR code dưới dạng PNG bytes (cho PDF export)
     /// </summary>
     public byte[] GenerateQRCodeBytes(string data)
     {
         try
         {
-            using (var qrGenerator = new QRCodeGenerator())
+            if (string.IsNullOrWhiteSpace(data))
             {
-                var qrCodeData = qrGenerator.CreateQrCode(data, QRCodeGenerator.ECCLevel.Q);
-                
-                // ✅ Dùng PngByteQRCode
-                var pngQrCode = new PngByteQRCode(qrCodeData);
-                return pngQrCode.GetGraphic(10);
+                throw new ArgumentException("Data không được để trống", nameof(data));
+            }
+
+            using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+            {
+                QRCodeData qrCodeData = qrGenerator.CreateQrCode(data, QRCodeGenerator.ECCLevel.M);
+                using (PngByteQRCode qrCode = new PngByteQRCode(qrCodeData))
+                {
+                    return qrCode.GetGraphic(20);
+                }
             }
         }
         catch (Exception ex)
