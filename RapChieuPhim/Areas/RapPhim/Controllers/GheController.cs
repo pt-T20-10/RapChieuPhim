@@ -35,6 +35,12 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
         // Xem sơ đồ ghế theo phòng
         // =============================================
         public async Task<IActionResult> SoDoGhe(string maPhong)
+            var appDbContext = _context.Ghe.Include(g => g.MaLoaiGheNavigation).Include(g => g.MaPhongNavigation);
+            return View(await appDbContext.ToListAsync());
+        }
+
+        // GET: RapPhim/Ghe/Details/5
+        public async Task<IActionResult> Details(string id)
         {
             if (string.IsNullOrEmpty(maPhong))
                 return RedirectToAction("Index", "PhongChieu");
@@ -46,6 +52,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             if (phong == null) return NotFound();
 
             var ghes = await _context.Ghe
+            var ghe = await _context.Ghe
                 .Include(g => g.MaLoaiGheNavigation)
                 .Where(g => g.MaPhong == maPhong && !g.DaXoa)
                 .OrderBy(g => g.TenHang)
@@ -192,6 +199,19 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
+        // GET: RapPhim/Ghe/Create
+        public IActionResult Create()
+        {
+            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhe, "MaLoaiGhe", "MaLoaiGhe");
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu, "MaPhong", "MaPhong");
+            return View();
+        }
+
+        // POST: RapPhim/Ghe/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("MaGhe,MaPhong,TenHang,SoThu,MaLoaiGhe,TrangThai,DaXoa")] Ghe ghe)
         {
             ModelState.Remove("MaLoaiGheNavigation");
@@ -220,6 +240,34 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
+            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhe, "MaLoaiGhe", "MaLoaiGhe", ghe.MaLoaiGhe);
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu, "MaPhong", "MaPhong", ghe.MaPhong);
+            return View(ghe);
+        }
+
+        // GET: RapPhim/Ghe/Edit/5
+        public async Task<IActionResult> Edit(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var ghe = await _context.Ghe.FindAsync(id);
+            if (ghe == null)
+            {
+                return NotFound();
+            }
+            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhe, "MaLoaiGhe", "MaLoaiGhe", ghe.MaLoaiGhe);
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu, "MaPhong", "MaPhong", ghe.MaPhong);
+            return View(ghe);
+        }
+
+        // POST: RapPhim/Ghe/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("MaGhe,MaPhong,TenHang,SoThu,MaLoaiGhe,TrangThai,DaXoa")] Ghe ghe)
         {
             if (id != ghe.MaGhe) return NotFound();
@@ -241,6 +289,19 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null) return NotFound();
+            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhe, "MaLoaiGhe", "MaLoaiGhe", ghe.MaLoaiGhe);
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu, "MaPhong", "MaPhong", ghe.MaPhong);
+            return View(ghe);
+        }
+
+        // GET: RapPhim/Ghe/Delete/5
+        public async Task<IActionResult> Delete(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
             var ghe = await _context.Ghe
                 .Include(g => g.MaLoaiGheNavigation)
                 .Include(g => g.MaPhongNavigation)
@@ -256,6 +317,17 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
         {
             var ghe = await _context.Ghe.FindAsync(id);
             if (ghe != null) { ghe.DaXoa = true; _context.Update(ghe); }
+        // POST: RapPhim/Ghe/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(string id)
+        {
+            var ghe = await _context.Ghe.FindAsync(id);
+            if (ghe != null)
+            {
+                _context.Ghe.Remove(ghe);
+            }
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -274,5 +346,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
         };
 
         private bool GheExists(string id) => _context.Ghe.Any(e => e.MaGhe == id);
+            return _context.Ghe.Any(e => e.MaGhe == id);
+        }
     }
 }

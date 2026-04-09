@@ -1,0 +1,112 @@
+                    <div class="modal-header">
+                        <h5>
+                            <i class="fas fa-check-circle"></i> Quét Vé Thành Công
+                        </h5>
+                    </div>
+
+                    <div class="modal-body">
+                        @if (!string.IsNullOrEmpty(Model.QrCodeImage))
+                        {
+                            <div style="text-align: center; margin-bottom: 30px;">
+                                <img src="@Model.QrCodeImage" alt="QR Code" 
+                                     style="width: 180px; height: 180px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                            </div>
+                        }
+
+                        <div class="ticket-info">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <label>🎫 Mã Vé</label>
+                                    <h6>@Model.KetQua.DuLieuVe?.MaVe</h6>
+                                </div>
+                                <div>
+                                    <label>✅ Trạng Thái</label>
+                                    <h6 style="color: #2ecc71;">@Model.KetQua.DuLieuVe?.TrangThaiMoi</h6>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ticket-info">
+                            <div style="margin-bottom: 20px;">
+                                <label>🎬 Tên Phim</label>
+                                <h5 style="margin-top: 8px; font-size: 1.3rem;">@Model.KetQua.DuLieuVe?.TenPhim</h5>
+                            </div>
+                        </div>
+
+                        <div class="ticket-info">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <label>🎭 Phòng Chiếu</label>
+                                    <h6>@Model.KetQua.DuLieuVe?.TenPhong</h6>
+                                </div>
+                                <div>
+                                    <label>💺 Ghế</label>
+                                    <h6>@Model.KetQua.DuLieuVe?.MaGhe</h6>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ticket-info">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <label>🕐 Giờ Chiếu</label>
+                                    <h6>@Model.KetQua.DuLieuVe?.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")</h6>
+                                </div>
+                                <div>
+                                    <label>💰 Giá Vé</label>
+                                    <h6 style="color: #667eea;">@Model.KetQua.DuLieuVe?.GiaVe.ToString("N0") VNĐ</h6>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (Model.KetQua.DuLieuVe?.DanhSachDichVu != null && Model.KetQua.DuLieuVe.DanhSachDichVu.Any())
+                        {
+                            <div class="ticket-info">
+                                <label>🍿 Dịch Vụ Đã Đặt</label>
+                                <div style="margin-top: 12px;">
+                                    @foreach (var dv in Model.KetQua.DuLieuVe.DanhSachDichVu)
+                                    {
+                                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.1);">
+                                            <div>
+                                                <span style="font-weight: 600;">@dv.TenDichVu</span>
+                                            </div>
+                                            <div style="text-align: center;">
+                                                <span style="color: #666;">x@dv.SoLuong</span>
+                                            </div>
+                                            <div style="text-align: right;">
+                                                <span style="color: #667eea; font-weight: 600;">@dv.ThanhTien.ToString("N0") VNĐ</span>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <div class="ticket-info" style="background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%); border-left: 4px solid #e74c3c;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <label style="color: #c0392b;">💵 Tổng Dịch Vụ</label>
+                                    <h6 style="color: #c0392b; margin-top: 5px;">@Model.KetQua.DuLieuVe?.GiaDichVu.ToString("N0") VNĐ</h6>
+                                </div>
+                                <div>
+                                    <label style="color: #c0392b; font-weight: 700;">💰 TỔNG TIỀN</label>
+                                    <h5 style="color: #c0392b; margin-top: 5px; font-size: 1.3rem;">@Model.KetQua.DuLieuVe?.TongTien.ToString("N0") VNĐ</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" id="printBtn" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white;">
+                            <i class="fas fa-print"></i> In Vé
+                        </button>
+                        <button type="button" id="exportPdfBtn" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white;">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                        <button type="button" onclick="location.reload();" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white;">
+                            <i class="fas fa-check"></i> Tiếp Tục
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }

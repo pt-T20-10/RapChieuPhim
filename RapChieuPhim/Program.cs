@@ -60,6 +60,9 @@ builder.Services.AddScoped<DichVuervice>();
 
 //builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<AccountService>();
+builder.Services.AddScoped<QRCodeService>();
+builder.Services.AddScoped<QuetVeService>();
+builder.Services.AddScoped<PdfTicketService>();
 
 var app = builder.Build();
 
@@ -73,7 +76,9 @@ else
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// ❌ Tạm comment lại dòng này khi test
+// app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
@@ -83,7 +88,14 @@ app.UseAuthorization();
 //-----------
 app.UseHangfireDashboard(builder.Configuration["Hangfire:DashboardPath"]);
 
-// ── Area Routes — dùng MapAreaControllerRoute ─────────────
+// ── Razor Pages Routes ─────────────
+app.MapRazorPages();
+
+// ── Area Routes — Controllers ─────────────
+app.MapAreaControllerRoute(
+    name: "RapPhim",
+    areaName: "RapPhim",
+    pattern: "RapPhim/{controller=Dashboard}/{action=Index}/{id?}");
 app.MapAreaControllerRoute(
     name: "RapPhim",
     areaName: "RapPhim",
