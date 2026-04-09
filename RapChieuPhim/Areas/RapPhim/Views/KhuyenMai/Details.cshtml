@@ -1,81 +1,98 @@
 ﻿@model RapChieuPhim.Models.Entities.KhuyenMai
 
 @{
+    ViewData["Title"] = "Chi tiết khuyến mãi";
 }
 
-<!DOCTYPE html>
+<div class="container mt-4">
+    <div class="card shadow rounded-4">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0">📋 Chi tiết khuyến mãi</h4>
+        </div>
 
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Details</title>
-</head>
-<body>
+        <div class="card-body">
 
-<div>
-    <h4>KhuyenMai</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MaCode)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MaCode)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PhanTramGiam)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PhanTramGiam)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.GiamToiDa)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.GiamToiDa)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TuNgay)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TuNgay)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DenNgay)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DenNgay)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SoLuongConLai)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SoLuongConLai)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DonToiThieu)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DonToiThieu)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TrangThai)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TrangThai)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DaXoa)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DaXoa)
-        </dd>
-    </dl>
+            <dl class="row">
+
+                <dt class="col-sm-3 fw-bold">Mã code</dt>
+                <dd class="col-sm-9">
+                    <span class="badge bg-dark">@Model.MaCode</span>
+                </dd>
+
+                <dt class="col-sm-3 fw-bold">Phần trăm giảm</dt>
+                <dd class="col-sm-9 text-success fw-bold">
+                    @Model.PhanTramGiam %
+                </dd>
+
+                <dt class="col-sm-3 fw-bold">Giảm tối đa</dt>
+                <dd class="col-sm-9 text-danger">
+                    @(Model.GiamToiDa?.ToString("N0") ?? "Không giới hạn") VNĐ
+                </dd>
+
+                <dt class="col-sm-3 fw-bold">Từ ngày</dt>
+                <dd class="col-sm-9">
+                    @Model.TuNgay.ToString("dd/MM/yyyy HH:mm")
+                </dd>
+
+                <dt class="col-sm-3 fw-bold">Đến ngày</dt>
+                <dd class="col-sm-9">
+                    @Model.DenNgay.ToString("dd/MM/yyyy HH:mm")
+                </dd>
+
+                <dt class="col-sm-3 fw-bold">Số lượng còn lại</dt>
+                <dd class="col-sm-9 text-warning fw-bold">
+                    @Model.SoLuongConLai
+                </dd>
+
+                <dt class="col-sm-3 fw-bold">Đơn tối thiểu</dt>
+                <dd class="col-sm-9">
+                    @Model.DonToiThieu.ToString("N0") VNĐ
+                </dd>
+
+                <dt class="col-sm-3 fw-bold">Trạng thái</dt>
+                <dd class="col-sm-9">
+                    @{
+                        string badgeClass = Model.TrangThai switch
+                        {
+                            "ChoKichHoat" => "bg-secondary",
+                            "DangApDung" => "bg-success",
+                            "DaKetThuc" => "bg-danger",
+                            _ => "bg-dark"
+                        };
+                    }
+                    <span class="badge @badgeClass">
+                        @Model.TrangThai
+                    </span>
+                </dd>
+
+                <dt class="col-sm-3 fw-bold">Trạng thái xóa</dt>
+                <dd class="col-sm-9">
+                    @if (Model.DaXoa)
+                    {
+                        <span class="badge bg-danger">Đã xóa</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Đang hoạt động</span>
+                    }
+                </dd>
+
+            </dl>
+
+            <hr />
+
+            <div class="d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.MaKhuyenMai"
+                   class="btn btn-warning rounded-pill">
+                    ✏️ Chỉnh sửa
+                </a>
+
+                <a asp-action="Index"
+                   class="btn btn-secondary rounded-pill">
+                    ⬅ Quay lại
+                </a>
+            </div>
+
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.MaKhuyenMai">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
-</body>
-</html>
-

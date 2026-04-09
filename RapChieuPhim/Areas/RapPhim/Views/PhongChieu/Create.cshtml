@@ -1,61 +1,319 @@
 ﻿@model RapChieuPhim.Models.Entities.PhongChieu
-
 @{
+    ViewData["Title"] = "Thêm Phòng chiếu";
+    // FIX: khai báo biến trước, tránh lỗi dấu ngoặc kép lồng nhau trong asp-items
+    var danhSachLoaiPhong = ViewData["MaLoaiPhong"] as Microsoft.AspNetCore.Mvc.Rendering.SelectList;
+    var danhSachLoaiGhe = ViewData["MaLoaiGhe"] as Microsoft.AspNetCore.Mvc.Rendering.SelectList;
 }
 
-<!DOCTYPE html>
+<style>
+    .form-card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 1px 6px rgba(0,0,0,.09);
+        overflow: hidden;
+        max-width: 680px;
+    }
 
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Create</title>
-</head>
-<body>
+    .form-header {
+        background: linear-gradient(135deg,#0f2027,#2c5364);
+        padding: 22px 28px;
+    }
 
-<h4>PhongChieu</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="MaPhong" class="control-label"></label>
-                <input asp-for="MaPhong" class="form-control" />
-                <span asp-validation-for="MaPhong" class="text-danger"></span>
+        .form-header h4 {
+            color: #fff;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .form-header p {
+            color: #94a3b8;
+            margin: 4px 0 0;
+            font-size: .85rem;
+        }
+
+    .form-body {
+        padding: 28px;
+    }
+
+    .sec-title {
+        font-size: .78rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f1f5f9;
+        margin-bottom: 18px;
+    }
+
+    .form-label {
+        font-size: .85rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 5px;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1.5px solid #e2e8f0;
+        font-size: .9rem;
+        transition: all .2s;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+        }
+
+    .req {
+        color: #ef4444;
+    }
+
+    .hint {
+        font-size: .78rem;
+        color: #94a3b8;
+        margin-top: 3px;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg,#1a73e8,#1557b0);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        padding: 10px 26px;
+        border-radius: 8px;
+        transition: all .2s;
+    }
+
+        .btn-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(26,115,232,.35);
+            color: #fff;
+        }
+
+    .btn-cancel {
+        border: 1.5px solid #e2e8f0;
+        color: #64748b;
+        font-weight: 600;
+        padding: 9px 22px;
+        border-radius: 8px;
+        background: #fff;
+        text-decoration: none;
+        display: inline-block;
+        transition: all .2s;
+    }
+
+        .btn-cancel:hover {
+            background: #f8fafc;
+        }
+
+    .radio-tt {
+        cursor: pointer;
+    }
+
+        .radio-tt input[type=radio] {
+            display: none;
+        }
+
+        .radio-tt label {
+            padding: 7px 18px;
+            border-radius: 20px;
+            border: 2px solid #e2e8f0;
+            font-size: .83rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            display: block;
+        }
+
+        .radio-tt input:checked + label.hd {
+            background: #dcfce7;
+            border-color: #16a34a;
+            color: #15803d;
+        }
+
+        .radio-tt input:checked + label.bd {
+            background: #fef9c3;
+            border-color: #d97706;
+            color: #854d0e;
+        }
+
+        .radio-tt input:checked + label.do {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+            color: #475569;
+        }
+
+    .preview-hang {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-top: 10px;
+    }
+
+    .hang-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    .hang-label {
+        font-size: .8rem;
+        font-weight: 700;
+        color: #475569;
+        width: 24px;
+    }
+
+    .ghe-dot {
+        width: 22px;
+        height: 22px;
+        border-radius: 4px;
+        background: #dbeafe;
+        border: 1px solid #93c5fd;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .65rem;
+        color: #1d4ed8;
+        font-weight: 600;
+    }
+</style>
+
+<div class="mb-3">
+    <a asp-action="Index" asp-area="RapPhim" class="btn-cancel">← Quay lại</a>
+</div>
+
+<div class="form-card">
+    <div class="form-header">
+        <h4>🏠 Thêm Phòng chiếu mới</h4>
+        <p>Ghế sẽ được tạo tự động theo số ghế — mỗi hàng tối đa 10, tên hàng A, B, C...</p>
+    </div>
+    <div class="form-body">
+        <form asp-action="Create" asp-area="RapPhim" method="post">
+            @Html.AntiForgeryToken()
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger rounded-3 py-2 px-3 mb-4" style="font-size:.875rem">
+                    <strong>⚠️ Vui lòng kiểm tra lại:</strong>
+                    <ul class="mb-0 mt-1">
+                        @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@err.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <p class="sec-title">📋 Thông tin phòng chiếu</p>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label asp-for="MaPhong" class="form-label">Mã phòng <span class="req">*</span></label>
+                    <input asp-for="MaPhong" class="form-control" placeholder="VD: PC03" maxlength="10" />
+                    <span asp-validation-for="MaPhong" class="text-danger small"></span>
+                    <div class="hint">Tối đa 10 ký tự, không dấu</div>
+                </div>
+                <div class="col-md-8">
+                    <label asp-for="TenPhong" class="form-label">Tên phòng <span class="req">*</span></label>
+                    <input asp-for="TenPhong" class="form-control" placeholder="VD: Phòng 3 - IMAX" maxlength="50" />
+                    <span asp-validation-for="TenPhong" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="MaLoaiPhong" class="form-label">Loại phòng <span class="req">*</span></label>
+                    <select asp-for="MaLoaiPhong" class="form-select" asp-items="danhSachLoaiPhong">
+                        <option value="" disabled selected>-- Chọn loại phòng --</option>
+                    </select>
+                    <span asp-validation-for="MaLoaiPhong" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="SoGhe" class="form-label">Số ghế <span class="req">*</span></label>
+                    <input asp-for="SoGhe" type="number" class="form-control" id="soGheInput"
+                           placeholder="VD: 30" min="1" max="260" oninput="capNhatPreview()" />
+                    <span asp-validation-for="SoGhe" class="text-danger small"></span>
+                    <div class="hint">Tối đa 260 ghế (26 hàng × 10)</div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="TenPhong" class="control-label"></label>
-                <input asp-for="TenPhong" class="form-control" />
-                <span asp-validation-for="TenPhong" class="text-danger"></span>
+
+            @* Preview sơ đồ hàng ghế *@
+            <div class="preview-hang" id="previewHang" style="display:none">
+                <div class="fw-semibold small mb-2 text-muted">📐 Xem trước sơ đồ hàng ghế</div>
+                <div id="previewContent"></div>
+                <div class="text-muted small mt-2" id="previewSummary"></div>
             </div>
-            <div class="form-group">
-                <label asp-for="MaLoaiPhong" class="control-label"></label>
-                <select asp-for="MaLoaiPhong" class ="form-control" asp-items="ViewBag.MaLoaiPhong"></select>
+
+            <p class="sec-title mt-4">💺 Loại ghế mặc định khi tạo</p>
+            <div class="mb-4">
+                <label class="form-label">Tất cả ghế mới sẽ được tạo với loại</label>
+                <select name="maLoaiGheMacDinh" class="form-select" style="max-width:280px"
+                        asp-items="danhSachLoaiGhe">
+                </select>
+                <div class="hint">Có thể thay đổi từng ghế sau khi tạo phòng</div>
             </div>
-            <div class="form-group">
-                <label asp-for="SoGhe" class="control-label"></label>
-                <input asp-for="SoGhe" class="form-control" />
-                <span asp-validation-for="SoGhe" class="text-danger"></span>
+
+            <p class="sec-title">📌 Trạng thái</p>
+            <div class="mb-4">
+                <div class="d-flex gap-2 flex-wrap">
+                    <div class="radio-tt">
+                        <input type="radio" name="TrangThai" value="HoatDong" id="tt_hd" checked />
+                        <label for="tt_hd" class="hd">✅ Hoạt động</label>
+                    </div>
+                    <div class="radio-tt">
+                        <input type="radio" name="TrangThai" value="BaoDuong" id="tt_bd" />
+                        <label for="tt_bd" class="bd">🔧 Bảo dưỡng</label>
+                    </div>
+                    <div class="radio-tt">
+                        <input type="radio" name="TrangThai" value="Dong" id="tt_do" />
+                        <label for="tt_do" class="do">🚫 Đóng</label>
+                    </div>
+                </div>
             </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="DaXoa" /> @Html.DisplayNameFor(model => model.DaXoa)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+
+            <input type="hidden" asp-for="DaXoa" value="false" />
+
+            <div class="d-flex gap-3 pt-2 border-top">
+                <button type="submit" class="btn btn-save">💾 Lưu & tạo ghế tự động</button>
+                <a asp-action="Index" asp-area="RapPhim" class="btn-cancel">Hủy</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
-</body>
-</html>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function capNhatPreview() {
+            const soGhe = parseInt(document.getElementById('soGheInput').value) || 0;
+            const previewHang = document.getElementById('previewHang');
+            const previewContent = document.getElementById('previewContent');
+            const previewSummary = document.getElementById('previewSummary');
 
+            if (soGhe <= 0 || soGhe > 260) { previewHang.style.display = 'none'; return; }
+
+            previewHang.style.display = 'block';
+            let html = '', con = soGhe, hangIdx = 0;
+            const maxHienThi = 5;
+
+            while (con > 0 && hangIdx < maxHienThi) {
+                const tenHang = String.fromCharCode(65 + hangIdx);
+                const soHang = Math.min(10, con);
+                html += `<div class="hang-row"><span class="hang-label">${tenHang}</span>`;
+                for (let i = 1; i <= soHang; i++) html += `<span class="ghe-dot">${i}</span>`;
+                html += '</div>';
+                con -= soHang;
+                hangIdx++;
+            }
+
+            const tongHang = Math.ceil(soGhe / 10);
+            if (tongHang > maxHienThi)
+                html += `<div class="text-muted small">... và ${tongHang - maxHienThi} hàng tiếp theo</div>`;
+
+            previewContent.innerHTML = html;
+            previewSummary.textContent = `→ Tổng ${tongHang} hàng (${soGhe} ghế)`;
+        }
+    </script>
+}

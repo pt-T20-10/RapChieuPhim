@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using RapChieuPhim.Data;
 using RapChieuPhim.Models.ViewModels;
@@ -170,6 +171,156 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
         public IActionResult DangKy()
         {
             return View();
+        }
+
+        // POST: Xử lý form đăng ký
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DangKy(DangKyViewModel model)
+        {
+            // K5: Kiểm tra mật khẩu khớp
+            if (model.MatKhau != model.XacNhanMatKhau)
+            {
+                ModelState.AddModelError("XacNhanMatKhau", "Mat khau xac nhan khong khop.");
+                return View(model);
+            }
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var (thanhCong, thongBao, tenDangNhap) = await _accountService.DangKyAsync(model);
+
+            if (!thanhCong)
+            {
+                // K4.a: Email trùng
+                if (thongBao.Contains("Email") || thongBao.Contains("email"))
+                    ModelState.AddModelError("Email", thongBao);
+                // Tên đăng nhập trùng
+                else if (thongBao.Contains("Ten dang nhap") || thongBao.Contains("ten dang nhap"))
+                    ModelState.AddModelError("TenDangNhap", thongBao);
+                // K6.a: Mật khẩu yếu
+                else
+                    ModelState.AddModelError("MatKhau", thongBao);
+                return View(model);
+            }
+
+            // K8: Gửi email xác minh
+            string? token = VerifyTokenStore.GetTokenByUser(tenDangNhap!);
+            if (token != null)
+                await _accountService.GuiEmailXacMinhAsync(model.Email, tenDangNhap!, token);
+
+            // K9: Chuyển đến trang chờ xác minh
+            TempData["DangKyEmail"] = model.Email;
+            TempData["DangKyTenDN"] = tenDangNhap;
+            return RedirectToAction("ChoXacMinh");
+        }
+
+        // K9: Trang chờ xác minh email
+        [HttpGet]
+        public IActionResult ChoXacMinh()
+        {
+            ViewBag.Email = TempData["DangKyEmail"];
+            ViewBag.TenDN = TempData["DangKyTenDN"];
+            return View();
+        }
+
+        // K10: Người dùng click link trong email
+        [HttpGet]
+        public async Task<IActionResult> XacMinhEmail(string token, string user)
+        {
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(user))
+            {
+                TempData["XacMinhError"] = "Link xac minh khong hop le.";
+                return RedirectToAction("DangNhap");
+            }
+
+            var (thanhCong, thongBao) = await _accountService.XacMinhEmailAsync(token, user);
+
+            if (thanhCong)
+                TempData["XacMinhSuccess"] = thongBao;
+            else
+            {
+                // K10.a: Link hết hạn
+                TempData["XacMinhError"] = thongBao;
+                TempData["XacMinhUser"] = user;
+            }
+            return RedirectToAction("DangNhap");
+        }
+
+        // K10.a: Gửi lại email xác minh
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GuiLaiXacMinh(string email, string tenDangNhap)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(tenDangNhap))
+                return RedirectToAction("DangKy");
+
+            string token = Convert.ToBase64String(
+                System.Security.Cryptography.RandomNumberGenerator.GetBytes(48))
+                .Replace("+", "-").Replace("/", "_").Replace("=", "");
+
+            VerifyTokenStore.Save(token, email, tenDangNhap);
+            await _accountService.GuiEmailXacMinhAsync(email, tenDangNhap, token);
+
+            TempData["DangKyEmail"] = email;
+            TempData["DangKyTenDN"] = tenDangNhap;
+            return RedirectToAction("ChoXacMinh");
+        }
+
+        // G1→G2: Bắt đầu đăng ký / đăng nhập bằng Google
+        [HttpGet]
+        public IActionResult GoogleLogin1()
+        {
+            var redirectUrl = Url.Action("GoogleCallback", "TaiKhoan", new { area = "NguoiDung" });
+            var props = new AuthenticationProperties { RedirectUri = redirectUrl };
+            return Challenge(props,
+                Microsoft.AspNetCore.Authentication.Google.GoogleDefaults.AuthenticationScheme);
+        }
+
+        // G3→G7: Google trả về kết quả
+        [HttpGet]
+        public async Task<IActionResult> GoogleCallback()
+        {
+            var result = await HttpContext.AuthenticateAsync(
+                Microsoft.AspNetCore.Authentication.Cookies
+                    .CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // G3.a: Người dùng từ chối cấp quyền
+            if (!result.Succeeded || result.Principal == null)
+            {
+                TempData["GoogleError"] = "Ban da huy dang nhap bang Google.";
+                return RedirectToAction("DangKy");
+            }
+
+            // G4: Lấy email và họ tên từ Google
+            var claims = result.Principal.Claims.ToList();
+            string? email = claims.FirstOrDefault(c =>
+                c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+            string? hoTen = claims.FirstOrDefault(c =>
+                c.Type == System.Security.Claims.ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(email))
+            {
+                TempData["GoogleError"] = "Khong the lay thong tin email tu Google.";
+                return RedirectToAction("DangKy");
+            }
+            hoTen ??= email.Split('@')[0];
+
+            // G5 → G6 → G7
+            var (taiKhoan, laKhachMoi, thongBao) =
+                await _accountService.XuLyGoogleCallbackAsync(email, hoTen);
+
+            if (taiKhoan == null)
+            {
+                // G5.a: Tài khoản bị khóa hoặc chờ xác minh
+                TempData["GoogleError"] = thongBao;
+                return RedirectToAction("DangNhap");
+            }
+
+            // G7: Lưu session và chuyển về trang chủ
+            _accountService.LuuSession(HttpContext, taiKhoan);
+            TempData["GoogleSuccess"] = thongBao;
+            return RedirectToAction("Index", "Home", new { area = "NguoiDung" });
         }
 
         [HttpGet]

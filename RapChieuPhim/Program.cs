@@ -7,6 +7,7 @@ using PayOS;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -19,6 +20,7 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(options =>
@@ -52,12 +54,11 @@ PayOSClient payOSClient = new PayOSClient(
 );
 builder.Services.AddSingleton(payOSClient);
 
-builder.Services.AddRazorPages();
-
-// Service registrations
 builder.Services.AddScoped<DatVeService>();
 builder.Services.AddScoped<ThongKeService>();
 builder.Services.AddScoped<DichVuervice>();
+
+//builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<QRCodeService>();
 builder.Services.AddScoped<QuetVeService>();
@@ -81,6 +82,10 @@ else
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
+//GG-------
+app.UseAuthentication();
+app.UseAuthorization();
+//-----------
 app.UseHangfireDashboard(builder.Configuration["Hangfire:DashboardPath"]);
 
 // ── Razor Pages Routes ─────────────
@@ -96,8 +101,13 @@ app.MapAreaControllerRoute(
     areaName: "RapPhim",
     pattern: "RapPhim/{controller=Dashboard}/{action=Index}/{id?}");
 app.MapAreaControllerRoute(
+    name: "RapPhim",
+    areaName: "RapPhim",
+    pattern: "RapPhim/{controller=Dashboard}/{action=Index}/{id?}");
+app.MapAreaControllerRoute(
     name: "NguoiDung",
     areaName: "NguoiDung",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+

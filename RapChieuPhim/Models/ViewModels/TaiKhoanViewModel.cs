@@ -32,7 +32,7 @@ namespace RapChieuPhim.Models.ViewModels
 
         [Required(ErrorMessage = "Vui lòng nhập mật khẩu.")]
         [DataType(DataType.Password)]
-        [MinLength(6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự.")]
+        [MinLength(8, ErrorMessage = "Mật khẩu phải có ít nhất 8 ký tự.")]
         public string MatKhau { get; set; } = null!;
 
         [Required(ErrorMessage = "Vui lòng xác nhận mật khẩu.")]

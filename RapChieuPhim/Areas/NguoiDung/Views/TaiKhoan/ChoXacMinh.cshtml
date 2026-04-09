@@ -1,0 +1,54 @@
+﻿@{
+    ViewData["Title"] = "Xac minh email";
+    string email = ViewBag.Email ?? "email cua ban";
+    string tenDN = ViewBag.TenDN ?? "";
+}
+
+<div class="container py-5" style="min-height: 70vh;">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+
+                <div class="card-body p-5 text-center">
+
+                    <div style="font-size: 3.5rem; margin-bottom: 16px;">&#128231;</div>
+
+                    <h4 class="fw-bold mb-2" style="color: #034ea2;">Kiem tra email!</h4>
+                    <p class="text-muted small">Chung toi da gui link xac minh den:</p>
+                    <div class="badge bg-primary bg-opacity-10 text-primary fs-6 px-3 py-2 mb-3">
+                        @email
+                    </div>
+
+                    <hr />
+
+                    <div class="text-start mb-4">
+                        <p class="small mb-2"><span class="badge bg-primary me-2">1</span> Mo hop thu <strong>@email</strong></p>
+                        <p class="small mb-2"><span class="badge bg-primary me-2">2</span> Tim email tu <strong>Rap Chieu Phim Nhom 1</strong></p>
+                        <p class="small mb-0"><span class="badge bg-primary me-2">3</span> Nhan nut <strong>Xac minh tai khoan</strong></p>
+                    </div>
+
+                    <p class="text-muted small mb-2">Chua nhan duoc email?</p>
+
+                    <form asp-area="NguoiDung" asp-controller="TaiKhoan"
+                          asp-action="GuiLaiXacMinh" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="email" value="@email" />
+                        <input type="hidden" name="tenDangNhap" value="@tenDN" />
+                        <button type="submit" class="btn btn-outline-primary rounded-pill px-4">
+                            Gui lai email xac minh
+                        </button>
+                    </form>
+
+                </div>
+
+                <div class="card-footer bg-light text-center py-3 border-0">
+                    <a asp-area="NguoiDung" asp-controller="TaiKhoan" asp-action="DangNhap"
+                       class="text-decoration-none small" style="color: #034ea2;">
+                        Quay lai dang nhap
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

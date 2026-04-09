@@ -1,57 +1,101 @@
 ﻿@model RapChieuPhim.Models.Entities.PhongChieu
-
 @{
+    ViewData["Title"] = "Chi tiết Phòng chiếu";
 }
 
-<!DOCTYPE html>
+<style>
+    .detail-card { background:#fff; border-radius:14px; box-shadow:0 1px 6px rgba(0,0,0,.09); overflow:hidden; max-width:600px; }
+    .detail-header { background:linear-gradient(135deg,#0f2027,#2c5364); padding:22px 28px; display:flex; align-items:center; gap:14px; }
+    .detail-icon { width:52px; height:52px; border-radius:12px; background:rgba(255,255,255,.15); display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; }
+    .detail-header h4 { color:#fff; margin:0; font-weight:700; }
+    .detail-header p  { color:#94a3b8; margin:4px 0 0; font-size:.85rem; }
+    .detail-body { padding:28px; }
+    .info-row { display:flex; padding:11px 0; border-bottom:1px solid #f1f5f9; align-items:flex-start; }
+    .info-row:last-child { border-bottom:none; }
+    .info-label { font-size:.8rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.04em; width:150px; flex-shrink:0; padding-top:2px; }
+    .info-value { font-size:.9rem; color:#1e293b; font-weight:500; }
+    .badge-tt { padding:5px 12px; border-radius:20px; font-size:.75rem; font-weight:600; }
+    .badge-HoatDong { background:#dcfce7; color:#15803d; }
+    .badge-BaoDuong  { background:#fef9c3; color:#854d0e; }
+    .badge-Dong      { background:#f1f5f9; color:#64748b; }
+    .btn-edit { background:linear-gradient(135deg,#1a73e8,#1557b0); border:none; color:#fff; font-weight:600; padding:9px 20px; border-radius:8px; transition:all .2s; text-decoration:none; display:inline-block; }
+    .btn-edit:hover { transform:translateY(-1px); box-shadow:0 4px 15px rgba(26,115,232,.35); color:#fff; }
+    .btn-sodo { background:linear-gradient(135deg,#15803d,#16a34a); border:none; color:#fff; font-weight:600; padding:9px 20px; border-radius:8px; transition:all .2s; text-decoration:none; display:inline-block; }
+    .btn-sodo:hover { transform:translateY(-1px); box-shadow:0 4px 15px rgba(21,128,61,.35); color:#fff; }
+    .btn-back { border:1.5px solid #e2e8f0; color:#64748b; font-weight:600; padding:9px 18px; border-radius:8px; background:#fff; text-decoration:none; display:inline-block; transition:all .2s; }
+    .btn-back:hover { background:#f8fafc; }
+    /* FIX: dùng span thay vì div để tránh lỗi HTML nesting */
+    .capacity-visual { display:flex; gap:3px; flex-wrap:wrap; margin-top:6px; }
+    .capacity-dot { width:10px; height:10px; border-radius:2px; background:#dbeafe; border:1px solid #93c5fd; display:inline-block; }
+</style>
 
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Details</title>
-</head>
-<body>
-
-<div>
-    <h4>PhongChieu</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TenPhong)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TenPhong)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SoGhe)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SoGhe)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TrangThai)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TrangThai)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DaXoa)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DaXoa)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MaLoaiPhongNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MaLoaiPhongNavigation.MaLoaiPhong)
-        </dd>
-    </dl>
+<div class="mb-3">
+    <a asp-action="Index" asp-area="RapPhim" class="btn-back">← Quay lại danh sách</a>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.MaPhong">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
-</body>
-</html>
 
+<div class="detail-card">
+    <div class="detail-header">
+        <div class="detail-icon">🎦</div>
+        <div>
+            <h4>@Model.TenPhong</h4>
+            <p>@Model.MaPhong &nbsp;•&nbsp; @(Model.MaLoaiPhongNavigation?.TenLoaiPhong ?? Model.MaLoaiPhong)</p>
+        </div>
+    </div>
+
+    <div class="detail-body">
+        <div class="mb-4">
+            <div class="info-row">
+                <span class="info-label">Mã phòng</span>
+                <span class="info-value"><code style="font-size:.9rem">@Model.MaPhong</code></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Tên phòng</span>
+                <span class="info-value">@Model.TenPhong</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Loại phòng</span>
+                <span class="info-value">@(Model.MaLoaiPhongNavigation?.TenLoaiPhong ?? Model.MaLoaiPhong)</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Số ghế</span>
+                @* FIX: đổi div thành span để tránh lỗi HTML nesting *@
+                <span class="info-value">
+                    <span class="fw-bold">@Model.SoGhe</span> ghế
+                    &nbsp;•&nbsp; @(Math.Ceiling((double)Model.SoGhe / 10)) hàng
+                    <span class="capacity-visual">
+                        @for (int i = 0; i < Math.Min(Model.SoGhe, 50); i++)
+                        {
+                            <span class="capacity-dot"></span>
+                        }
+                        @if (Model.SoGhe > 50)
+                        {
+                            <span class="text-muted small ms-1">+@(Model.SoGhe - 50)</span>
+                        }
+                    </span>
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Trạng thái</span>
+                <span class="info-value">
+                    <span class="badge-tt badge-@Model.TrangThai">
+                        @(Model.TrangThai switch {
+                            "HoatDong" => "✅ Hoạt động",
+                            "BaoDuong" => "🔧 Bảo dưỡng",
+                            "Dong"     => "🚫 Đóng",
+                            _          => Model.TrangThai
+                        })
+                    </span>
+                </span>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap pt-2 border-top">
+            <a asp-controller="Ghe" asp-action="SoDoGhe"
+               asp-route-maPhong="@Model.MaPhong" asp-area="RapPhim"
+               class="btn-sodo">🪑 Xem sơ đồ ghế</a>
+            <a asp-action="Edit" asp-route-id="@Model.MaPhong" asp-area="RapPhim"
+               class="btn-edit">✏️ Chỉnh sửa</a>
+            <a asp-action="Index" asp-area="RapPhim" class="btn-back">Quay lại</a>
+        </div>
+    </div>
+</div>

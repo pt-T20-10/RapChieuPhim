@@ -11,10 +11,12 @@ namespace RapChieuPhim.Services
     public class AccountService
     {
         private readonly AppDbContext _context;
+        private readonly IConfiguration _config;
 
-        public AccountService(AppDbContext context)
+        public AccountService(AppDbContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
         }
 
         // 1. Hàm xử lý đăng nhập
@@ -155,7 +157,7 @@ namespace RapChieuPhim.Services
             {
                 var fromAddress = new MailAddress("nhoangnghia2104@gmail.com", "B E T A Cinemas");
                 var toAddress = new MailAddress(toEmail);
-                const string fromPassword = "xxx"; 
+                const string fromPassword = "xxx";
 
                 var smtp = new SmtpClient
                 {
@@ -253,6 +255,315 @@ namespace RapChieuPhim.Services
                 Console.WriteLine(ex.Message);
                 return false;
             }
+        }
+
+        // ================================================
+        // ĐĂNG KÝ BẰNG MẬT KHẨU
+        // ================================================
+        public async Task<(bool ThanhCong, string ThongBao, string? TenDangNhap)> DangKyAsync(DangKyViewModel model)
+        {
+            // K4: Kiểm tra email trùng
+            bool emailTonTai = await _context.KhachHang.AnyAsync(k => k.Email == model.Email && !k.DaXoa);
+            if (emailTonTai)
+                return (false, "Email nay da duoc dang ky. Vui long dung email khac.", null);
+
+            // Kiểm tra tên đăng nhập trùng
+            bool tenTonTai = await _context.TaiKhoan.AnyAsync(t => t.TenDangNhap == model.TenDangNhap && !t.DaXoa);
+            if (tenTonTai)
+                return (false, "Ten dang nhap da ton tai. Vui long chon ten khac.", null);
+
+            // K6: Kiểm tra độ mạnh mật khẩu
+            var (duManh, lyDo) = KiemTraDoManhMatKhau(model.MatKhau);
+            if (!duManh)
+                return (false, lyDo, null);
+
+            // Sinh mã KhachHang tự động
+            string maKH = await SinhMaKhachHangAsync();
+
+            // Sinh token xác minh email (random 48 bytes, URL-safe)
+            string token = Convert.ToBase64String(
+                System.Security.Cryptography.RandomNumberGenerator.GetBytes(48))
+                .Replace("+", "-").Replace("/", "_").Replace("=", "");
+
+            VerifyTokenStore.Save(token, model.Email.Trim().ToLower(), model.TenDangNhap.Trim());
+
+            var khachHang = new KhachHang
+            {
+                MaKhachHang = maKH,
+                HoTen = model.HoTen.Trim(),
+                Email = model.Email.Trim().ToLower(),
+                MaLoaiKh = "LKH01",
+                DiemTichLuy = 0,
+                PhanTramGiamGia = 0,
+                DaXoa = false
+            };
+
+            // K7: TrangThai = "ChoXacMinh" — chờ xác minh email
+            var taiKhoan = new TaiKhoan
+            {
+                TenDangNhap = model.TenDangNhap.Trim(),
+                MatKhau = BCrypt.Net.BCrypt.HashPassword(model.MatKhau),
+                VaiTro = "KhachHang",
+                TrangThai = "ChoXacMinh",
+                MaKhachHang = maKH,
+                DaXoa = false
+            };
+
+            using var tx = await _context.Database.BeginTransactionAsync();
+            _context.KhachHang.Add(khachHang);
+            _context.TaiKhoan.Add(taiKhoan);
+            await _context.SaveChangesAsync();
+            await tx.CommitAsync();
+
+            return (true, "OK", model.TenDangNhap.Trim());
+        }
+
+        // ================================================
+        // GỬI EMAIL XÁC MINH (K8)
+        // ================================================
+        public async Task<bool> GuiEmailXacMinhAsync(string email, string tenDangNhap, string token)
+        {
+            string baseUrl = _config["AppUrl"] ?? "https://localhost:7000";
+            // SAU (đúng — có đầy đủ area)
+            // Sửa lại thành (không có NguoiDung)
+            string link = $"{baseUrl}/TaiKhoan/XacMinhEmail"
+                        + $"?token={Uri.EscapeDataString(token)}"
+                        + $"&user={Uri.EscapeDataString(tenDangNhap)}";
+
+            string body = "<div style='font-family:Segoe UI,sans-serif;max-width:520px;margin:auto;'>"
+                + "<div style='background:#034ea2;padding:28px 32px;border-radius:12px 12px 0 0;text-align:center;'>"
+                + "<h2 style='color:#fff;margin:0;'>Rap Chieu Phim Nhom 1</h2></div>"
+                + "<div style='background:#fff;padding:32px;border:1px solid #e5e7eb;border-radius:0 0 12px 12px;'>"
+                + $"<p>Xin chao <strong>{email}</strong>,</p>"
+                + "<p>Nhan nut ben duoi de xac minh email va kich hoat tai khoan:</p>"
+                + "<div style='text-align:center;margin:28px 0;'>"
+                + $"<a href='{link}' style='background:#034ea2;color:#fff;padding:14px 32px;"
+                + "border-radius:50px;text-decoration:none;font-weight:700;display:inline-block;'>"
+                + "Xac minh tai khoan</a></div>"
+                + "<p style='color:#6b7280;font-size:13px;'>Link co hieu luc trong 24 gio.</p>"
+                + "</div></div>";
+
+            return await GuiEmailAsync(email, "Xac minh tai khoan - Rap Chieu Phim Nhom 1", body);
+        }
+
+        // ================================================
+        // XÁC MINH EMAIL (K10)
+        // ================================================
+        public async Task<(bool ThanhCong, string ThongBao)> XacMinhEmailAsync(string token, string tenDangNhap)
+        {
+            var info = VerifyTokenStore.Get(token);
+            if (info == null)
+                return (false, "Link xac minh khong hop le hoac da het han (24 gio). Vui long gui lai.");
+
+            if (info.TenDangNhap != tenDangNhap)
+                return (false, "Link xac minh khong hop le.");
+
+            var tk = await _context.TaiKhoan
+                .FirstOrDefaultAsync(t => t.TenDangNhap == tenDangNhap && !t.DaXoa);
+
+            if (tk == null)
+                return (false, "Khong tim thay tai khoan.");
+
+            if (tk.TrangThai == "HoatDong")
+                return (false, "Tai khoan da duoc xac minh. Vui long dang nhap.");
+
+            tk.TrangThai = "HoatDong";
+            _context.TaiKhoan.Update(tk);
+            await _context.SaveChangesAsync();
+            VerifyTokenStore.Remove(token);
+
+            return (true, "Tai khoan da duoc kich hoat thanh cong! Vui long dang nhap.");
+        }
+
+        // ================================================
+        // XỬ LÝ GOOGLE CALLBACK (G4 → G7)
+        // ================================================
+        public async Task<(TaiKhoan? TaiKhoan, bool LaKhachMoi, string ThongBao)> XuLyGoogleCallbackAsync(
+            string email, string hoTen)
+        {
+            email = email.Trim().ToLower();
+            hoTen = hoTen.Trim();
+
+            // G5: Kiểm tra email đã tồn tại chưa
+            var khCu = await _context.KhachHang
+                .FirstOrDefaultAsync(k => k.Email == email && !k.DaXoa);
+
+            if (khCu != null)
+            {
+                // G5.a: Email đã tồn tại → tìm tài khoản, đăng nhập luôn
+                var tkCu = await _context.TaiKhoan
+                    .Include(t => t.MaKhachHangNavigation)
+                    .FirstOrDefaultAsync(t =>
+                        t.MaKhachHang == khCu.MaKhachHang &&
+                        t.TrangThai == "HoatDong" &&
+                        !t.DaXoa);
+
+                if (tkCu == null)
+                    return (null, false, "Tai khoan dang bi khoa hoac cho xac minh.");
+
+                return (tkCu, false, $"Chao mung tro lai, {hoTen}!");
+            }
+
+            // G6: Email chưa tồn tại → tạo mới, kích hoạt luôn (Google đã xác minh)
+            string maKH = await SinhMaKhachHangAsync();
+            string tenDN = await SinhTenDangNhapGoogleAsync(email);
+
+            var khMoi = new KhachHang
+            {
+                MaKhachHang = maKH,
+                HoTen = hoTen,
+                Email = email,
+                MaLoaiKh = "LKH01",
+                DiemTichLuy = 0,
+                PhanTramGiamGia = 0,
+                DaXoa = false
+            };
+
+            var tkMoi = new TaiKhoan
+            {
+                TenDangNhap = tenDN,
+                MatKhau = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()),
+                VaiTro = "KhachHang",
+                TrangThai = "HoatDong",
+                MaKhachHang = maKH,
+                DaXoa = false
+            };
+
+            using var tx = await _context.Database.BeginTransactionAsync();
+            _context.KhachHang.Add(khMoi);
+            _context.TaiKhoan.Add(tkMoi);
+            await _context.SaveChangesAsync();
+            await tx.CommitAsync();
+
+            tkMoi.MaKhachHangNavigation = khMoi;
+            return (tkMoi, true, $"Dang ky thanh cong! Chao mung {hoTen}!");
+        }
+
+        // ================================================
+        // PRIVATE HELPERS (dùng nội bộ)
+        // ================================================
+        private static (bool DuManh, string LyDo) KiemTraDoManhMatKhau(string pw)
+        {
+            if (pw.Length < 8)
+                return (false, "Mat khau phai co it nhat 8 ky tu.");
+            if (!pw.Any(char.IsUpper))
+                return (false, "Mat khau phai co it nhat 1 chu hoa (A-Z).");
+            if (!pw.Any(char.IsLower))
+                return (false, "Mat khau phai co it nhat 1 chu thuong (a-z).");
+            if (!pw.Any(char.IsDigit))
+                return (false, "Mat khau phai co it nhat 1 chu so (0-9).");
+            if (!pw.Any(c => "!@#$%^&*()-_=+[]{}|;':\",./<>?".Contains(c)))
+                return (false, "Mat khau phai co it nhat 1 ky tu dac biet (!@#$...).");
+            return (true, "OK");
+        }
+
+        private async Task<string> SinhMaKhachHangAsync()
+        {
+            int count = await _context.KhachHang.CountAsync();
+            string ma;
+            do
+            {
+                count++;
+                ma = $"KH{count:D2}";
+            }
+            while (await _context.KhachHang.AnyAsync(k => k.MaKhachHang == ma));
+            return ma;
+        }
+
+        private async Task<string> SinhTenDangNhapGoogleAsync(string email)
+        {
+            string baseNam = email.Split('@')[0].Replace(".", "_");
+            string tenDN;
+            var rng = new Random();
+            do
+            {
+                tenDN = $"{baseNam}_{rng.Next(100, 999)}";
+            }
+            while (await _context.TaiKhoan.AnyAsync(t => t.TenDangNhap == tenDN));
+            return tenDN;
+        }
+
+        private async Task<bool> GuiEmailAsync(string toEmail, string subject, string body)
+        {
+            try
+            {
+                var from = _config["Email:From"]!;
+                var dispName = _config["Email:DisplayName"] ?? "Rap Chieu Phim";
+                var password = _config["Email:Password"]!;
+                var host = _config["Email:Host"] ?? "smtp.gmail.com";
+                int port = _config.GetValue<int>("Email:Port", 587);
+
+                using var smtp = new System.Net.Mail.SmtpClient
+                {
+                    Host = host,
+                    Port = port,
+                    EnableSsl = true,
+                    UseDefaultCredentials = false,
+                    Credentials = new System.Net.NetworkCredential(from, password)
+                };
+                using var msg = new System.Net.Mail.MailMessage(
+                    new System.Net.Mail.MailAddress(from, dispName),
+                    new System.Net.Mail.MailAddress(toEmail))
+                {
+                    Subject = subject,
+                    Body = body,
+                    IsBodyHtml = true
+                };
+                await smtp.SendMailAsync(msg);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
+    public static class VerifyTokenStore
+    {
+        public record TokenInfo(string Email, string TenDangNhap, DateTime Expiry);
+
+        private static readonly Dictionary<string, TokenInfo> _store = new();
+        private static readonly object _lock = new();
+
+        public static void Save(string token, string email, string tenDangNhap)
+        {
+            lock (_lock)
+            {
+                var expired = _store
+                    .Where(x => x.Value.Expiry < DateTime.UtcNow)
+                    .Select(x => x.Key)
+                    .ToList();
+                expired.ForEach(k => _store.Remove(k));
+
+                _store[token] = new TokenInfo(email, tenDangNhap, DateTime.UtcNow.AddHours(24));
+            }
+        }
+
+        public static TokenInfo? Get(string token)
+        {
+            lock (_lock)
+            {
+                if (_store.TryGetValue(token, out var info) && info.Expiry >= DateTime.UtcNow)
+                    return info;
+                return null;
+            }
+        }
+
+        public static string? GetTokenByUser(string tenDangNhap)
+        {
+            lock (_lock)
+            {
+                return _store
+                    .FirstOrDefault(x =>
+                        x.Value.TenDangNhap == tenDangNhap &&
+                        x.Value.Expiry >= DateTime.UtcNow)
+                    .Key;
+            }
+        }
+
+        public static void Remove(string token)
+        {
+            lock (_lock) { _store.Remove(token); }
         }
     }
 }
