@@ -226,6 +226,20 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
                 {
                     foreach (var ve in donHang.ChiTietVe) ve.TrangThai = "ChuaSuDung";
                 }
+                if (!string.IsNullOrEmpty(donHang.MaKhuyenMai))
+                {
+                    var km = await _context.KhuyenMai
+                        .FirstOrDefaultAsync(k => k.MaKhuyenMai == donHang.MaKhuyenMai
+                                               && !k.DaXoa);
+                    if (km != null && km.SoLuongConLai > 0)
+                    {
+                        km.SoLuongConLai -= 1;
+
+                       
+                        if (km.SoLuongConLai == 0)
+                            km.TrangThai = "DaKetThuc";
+                    }
+                }
                 await _context.SaveChangesAsync();
 
                 if (!string.IsNullOrEmpty(donHang.MaKhachHang))

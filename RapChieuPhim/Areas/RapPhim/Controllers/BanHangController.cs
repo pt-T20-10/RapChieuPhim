@@ -258,6 +258,16 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 ve.TrangThai = "ChuaSuDung";
                 ve.MaQr = Guid.NewGuid().ToString("N").ToUpper();
             }
+            if (!string.IsNullOrEmpty(donHang.MaKhuyenMai))
+            {
+                var km = await _context.KhuyenMai
+                    .FirstOrDefaultAsync(k => k.MaKhuyenMai == donHang.MaKhuyenMai && !k.DaXoa);
+                if (km != null && km.SoLuongConLai > 0)
+                {
+                    km.SoLuongConLai -= 1;
+                    if (km.SoLuongConLai == 0) km.TrangThai = "DaKetThuc";
+                }
+            }
 
             // Tạo bản ghi ThanhToan
             _context.ThanhToan.Add(new ThanhToan
@@ -441,7 +451,16 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return Json(new { success = false, message = "Số tiền nhận không đủ" });
 
             donHang.TrangThai = "DaThanhToan";
-
+            if (!string.IsNullOrEmpty(donHang.MaKhuyenMai))
+            {
+                var km = await _context.KhuyenMai
+                    .FirstOrDefaultAsync(k => k.MaKhuyenMai == donHang.MaKhuyenMai && !k.DaXoa);
+                if (km != null && km.SoLuongConLai > 0)
+                {
+                    km.SoLuongConLai -= 1;
+                    if (km.SoLuongConLai == 0) km.TrangThai = "DaKetThuc";
+                }
+            }
             _context.ThanhToan.Add(new ThanhToan
             {
                 MaThanhToan = "TT" + DateTime.Now.ToString("yyMMddHHmmss"),
@@ -508,5 +527,61 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
 
             return View(donHang);
         }
+        [HttpPost]
+        public async Task<IActionResult> ApDungKhuyenMai(string maCode, string maDonHang)
+        {
+            var donHang = await _context.DonHang.FindAsync(maDonHang);
+            if (donHang == null)
+                return Json(new { success = false, message = "Không tìm thấy đơn hàng." });
+
+            double tongTien = donHang.TongTienBanDau;
+
+            var km = await _context.KhuyenMai
+                .FirstOrDefaultAsync(x => x.MaCode == maCode && !x.DaXoa);
+
+            if (km == null)
+                return Json(new { success = false, message = "Mã giảm giá không tồn tại." });
+            if (km.TrangThai != "DangApDung")
+                return Json(new { success = false, message = "Mã chưa được kích hoạt hoặc đã đóng." });
+            if (DateTime.Now < km.TuNgay || DateTime.Now > km.DenNgay)
+                return Json(new { success = false, message = "Mã không trong thời gian sử dụng." });
+            if (km.SoLuongConLai <= 0)
+                return Json(new { success = false, message = "Mã đã hết lượt sử dụng." });
+            if (tongTien < km.DonToiThieu)
+                return Json(new { success = false, message = $"Đơn tối thiểu {km.DonToiThieu:N0}₫ để dùng mã này." });
+
+            double tienGiam = tongTien * (km.PhanTramGiam / 100.0);
+            if (km.GiamToiDa.HasValue && tienGiam > km.GiamToiDa.Value)
+                tienGiam = km.GiamToiDa.Value;
+
+            double tongTienMoi = tongTien - tienGiam;
+
+            // Cập nhật thẳng vào DonHang luôn
+            donHang.MaKhuyenMai = km.MaKhuyenMai;
+            donHang.TongTienSauGiam = tongTienMoi;
+            await _context.SaveChangesAsync();
+
+            return Json(new
+            {
+                success = true,
+                message = $"Áp dụng thành công! Giảm {tienGiam:N0}₫",
+                tienGiam,
+                tongTienMoi
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> HuyKhuyenMai(string maDonHang)
+        {
+            var donHang = await _context.DonHang.FindAsync(maDonHang);
+            if (donHang != null)
+            {
+                donHang.MaKhuyenMai = null;
+                donHang.TongTienSauGiam = donHang.TongTienBanDau;
+                await _context.SaveChangesAsync();
+            }
+            return Json(new { success = true, tongTienGoc = donHang?.TongTienBanDau ?? 0 });
+        }
     }
+
 }

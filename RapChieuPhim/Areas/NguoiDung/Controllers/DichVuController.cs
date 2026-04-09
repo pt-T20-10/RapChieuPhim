@@ -126,31 +126,44 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
         public async Task<IActionResult> ApDungKhuyenMai(string maCode)
         {
             var gioHang = LayGioHang();
-            double tongTien = gioHang.Sum(x => x.ThanhTien);
+            double tongTienBapNuoc = gioHang.Sum(x => x.ThanhTien);
+
+            // ── THÊM: Lấy thêm tiền vé nếu đang trong luồng đặt vé ─
+            double tongTienVe = 0;
+            string maDonHangTam = HttpContext.Session.GetString("DatVe_MaDonHang_Tam");
+            if (!string.IsNullOrEmpty(maDonHangTam))
+            {
+                var dhTam = await _context.DonHang.FindAsync(maDonHangTam);
+                if (dhTam != null && dhTam.TrangThai == "ChoThanhToan")
+                    tongTienVe = dhTam.TongTienBanDau;
+            }
+
+            double tongTien = tongTienBapNuoc + tongTienVe; // ← tổng đúng
+                                                            // ────────────────────────────────────────────────────────
 
             if (tongTien == 0)
                 return Json(new { success = false, message = "Giỏ hàng đang trống." });
 
-            // Tìm mã Code trong DB
-            var km = await _context.KhuyenMai.FirstOrDefaultAsync(x => x.MaCode == maCode && x.DaXoa == false);
+            var km = await _context.KhuyenMai
+                .FirstOrDefaultAsync(x => x.MaCode == maCode && x.DaXoa == false);
 
-            // Kiểm tra các lớp bảo vệ của KhuyenMai
-            if (km == null) return Json(new { success = false, message = "Mã giảm giá không tồn tại." });
-            if (km.TrangThai != "DangApDung") return Json(new { success = false, message = "Mã này chưa được kích hoạt hoặc đã đóng." });
-            if (DateTime.Now < km.TuNgay || DateTime.Now > km.DenNgay) return Json(new { success = false, message = "Mã không trong thời gian sử dụng." });
-            if (km.SoLuongConLai <= 0) return Json(new { success = false, message = "Mã đã hết lượt sử dụng." });
-            if (tongTien < km.DonToiThieu) return Json(new { success = false, message = $"Đơn hàng tối thiểu {string.Format("{0:#,##0}", km.DonToiThieu)}đ để áp dụng mã này." });
+            if (km == null)
+                return Json(new { success = false, message = "Mã giảm giá không tồn tại." });
+            if (km.TrangThai != "DangApDung")
+                return Json(new { success = false, message = "Mã này chưa được kích hoạt hoặc đã đóng." });
+            if (DateTime.Now < km.TuNgay || DateTime.Now > km.DenNgay)
+                return Json(new { success = false, message = "Mã không trong thời gian sử dụng." });
+            if (km.SoLuongConLai <= 0)
+                return Json(new { success = false, message = "Mã đã hết lượt sử dụng." });
+            if (tongTien < km.DonToiThieu)
+                return Json(new { success = false, message = $"Đơn hàng tối thiểu {string.Format("{0:#,##0}", km.DonToiThieu)}đ để áp dụng mã này." });
 
-            // Tính tiền giảm (Theo % và không vượt quá Giảm Tối Đa)
             double tienGiam = tongTien * (km.PhanTramGiam / 100.0);
             if (km.GiamToiDa.HasValue && tienGiam > km.GiamToiDa.Value)
-            {
                 tienGiam = km.GiamToiDa.Value;
-            }
 
             double tongTienMoi = tongTien - tienGiam;
 
-            // Lưu thông tin vào Session để lát chuyển sang trang Thanh Toán
             HttpContext.Session.SetString("MaKhuyenMai", km.MaKhuyenMai);
             HttpContext.Session.SetString("SoTienGiam", tienGiam.ToString());
             HttpContext.Session.SetString("TongTienSauGiam", tongTienMoi.ToString());
@@ -159,8 +172,8 @@ namespace RapChieuPhim.Areas.NguoiDung.Controllers
             {
                 success = true,
                 message = "Áp dụng mã thành công!",
-                tienGiam = tienGiam,
-                tongTienMoi = tongTienMoi
+                tienGiam,
+                tongTienMoi
             });
         }
     }

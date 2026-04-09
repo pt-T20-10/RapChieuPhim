@@ -87,7 +87,7 @@ namespace RapChieuPhim.Services
             {
                 var fromAddress = new MailAddress("nhoangnghia2104@gmail.com", "Rạp Chiếu Phim Nhóm 1");
                 var toAddress = new MailAddress(toEmail);
-                const string fromPassword = "ugjx sbps gcih arte"; 
+                const string fromPassword = "xxx"; 
 
                 string subject = "Mã xác nhận khôi phục mật khẩu";
                 string body = $"Mã OTP của bạn là: <strong>{otp}</strong>. Mã này có hiệu lực trong 5 phút. Vui lòng không chia sẻ cho bất kỳ ai.";
@@ -155,7 +155,7 @@ namespace RapChieuPhim.Services
             {
                 var fromAddress = new MailAddress("nhoangnghia2104@gmail.com", "B E T A Cinemas");
                 var toAddress = new MailAddress(toEmail);
-                const string fromPassword = "ugjx sbps gcih arte"; 
+                const string fromPassword = "xxx"; 
 
                 var smtp = new SmtpClient
                 {

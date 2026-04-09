@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace RapChieuPhim.Models.ViewModels
 {
+    // ==========================================
+    // 1. KHU VỰC VIEWMODEL CHO THỐNG KÊ QUÁ KHỨ
+    // ==========================================
     public class ThongKeViewModel
     {
         // Bộ lọc thời gian
@@ -22,6 +25,11 @@ namespace RapChieuPhim.Models.ViewModels
 
         // Dữ liệu cho Bảng Tỷ lệ lấp đầy theo phòng
         public List<LapDayPhongItem> LapDayTheoPhong { get; set; } = new();
+
+        // --- CÁC THUỘC TÍNH NÂNG CẤP VIP ---
+        public int SoVeThuong { get; set; }
+        public int SoVeVIP { get; set; }
+        public List<DoanhThuTheLoaiItem> DoanhThuTheoTheLoai { get; set; } = new();
     }
 
     public class DoanhThuNgayItem
@@ -48,12 +56,25 @@ namespace RapChieuPhim.Models.ViewModels
         public double TyLe => TongGhe == 0 ? 0 : Math.Round((double)GheDaDat / TongGhe * 100, 1);
     }
 
+    public class DoanhThuTheLoaiItem
+    {
+        public string TenTheLoai { get; set; } = "";
+        public double DoanhThu { get; set; }
+    }
+
+
+    // ==========================================
+    // 2. KHU VỰC VIEWMODEL CHO DỰ BÁO TƯƠNG LAI
+    // ==========================================
     public class DuBaoViewModel
     {
         public int SoNgayDuBao { get; set; } = 7; // Mặc định dự báo 7 ngày tới
         public double DoanhThuDuKien { get; set; }
         public bool DuDieuKien { get; set; } = true;
         public string ThongBao { get; set; } = "";
+
+        public double KichBanLacQuan { get; set; }
+        public double KichBanBiQuan { get; set; }
 
         // Dữ liệu để vẽ biểu đồ đường xu hướng
         public List<DuBaoItem> DanhSachDuBao { get; set; } = new();
@@ -63,6 +84,6 @@ namespace RapChieuPhim.Models.ViewModels
     {
         public string Ngay { get; set; } = "";
         public double DoanhThu { get; set; }
-        public bool LaDuBao { get; set; } // True: Dữ liệu dự đoán, False: Dữ liệu thực tế quá khứ
+        public bool LaDuBao { get; set; } 
     }
 }
