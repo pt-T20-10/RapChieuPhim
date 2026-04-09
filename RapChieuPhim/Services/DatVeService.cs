@@ -13,7 +13,7 @@ namespace RapChieuPhim.Services
             _context = context;
         }
 
-        // Lấy danh sách phim đang chiếu + sắp chiếu (Không lấy phim đã xóa)
+      
         public async Task<List<Phim>> LayDanhSachPhimAsync()
         {
             return await _context.Phim
