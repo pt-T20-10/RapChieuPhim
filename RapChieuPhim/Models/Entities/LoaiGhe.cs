@@ -13,5 +13,5 @@ public partial class LoaiGhe
 
     public bool DaXoa { get; set; }
 
-    public virtual ICollection<Ghe> Ghes { get; set; } = new List<Ghe>();
+    public virtual ICollection<Ghe> Ghe { get; set; } = new List<Ghe>();
 }

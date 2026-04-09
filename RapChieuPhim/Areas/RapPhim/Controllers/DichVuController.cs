@@ -20,14 +20,14 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             _context = context;
         }
 
-        // GET: RapPhim/DichVus
+        // GET: RapPhim/DichVu
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.DichVus.Include(d => d.MaDanhMucNavigation);
+            var appDbContext = _context.DichVu.Include(d => d.MaDanhMucNavigation);
             return View(await appDbContext.ToListAsync());
         }
 
-        // GET: RapPhim/DichVus/Details/5
+        // GET: RapPhim/DichVu/Details/5
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -35,7 +35,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var dichVu = await _context.DichVus
+            var dichVu = await _context.DichVu
                 .Include(d => d.MaDanhMucNavigation)
                 .FirstOrDefaultAsync(m => m.MaDichVu == id);
             if (dichVu == null)
@@ -46,14 +46,14 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(dichVu);
         }
 
-        // GET: RapPhim/DichVus/Create
+        // GET: RapPhim/DichVu/Create
         public IActionResult Create()
         {
-            ViewData["MaDanhMuc"] = new SelectList(_context.DanhMucDichVus, "MaDanhMuc", "MaDanhMuc");
+            ViewData["MaDanhMuc"] = new SelectList(_context.DanhMucDichVu, "MaDanhMuc", "MaDanhMuc");
             return View();
         }
 
-        // POST: RapPhim/DichVus/Create
+        // POST: RapPhim/DichVu/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -66,11 +66,11 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaDanhMuc"] = new SelectList(_context.DanhMucDichVus, "MaDanhMuc", "MaDanhMuc", dichVu.MaDanhMuc);
+            ViewData["MaDanhMuc"] = new SelectList(_context.DanhMucDichVu, "MaDanhMuc", "MaDanhMuc", dichVu.MaDanhMuc);
             return View(dichVu);
         }
 
-        // GET: RapPhim/DichVus/Edit/5
+        // GET: RapPhim/DichVu/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -78,16 +78,16 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var dichVu = await _context.DichVus.FindAsync(id);
+            var dichVu = await _context.DichVu.FindAsync(id);
             if (dichVu == null)
             {
                 return NotFound();
             }
-            ViewData["MaDanhMuc"] = new SelectList(_context.DanhMucDichVus, "MaDanhMuc", "MaDanhMuc", dichVu.MaDanhMuc);
+            ViewData["MaDanhMuc"] = new SelectList(_context.DanhMucDichVu, "MaDanhMuc", "MaDanhMuc", dichVu.MaDanhMuc);
             return View(dichVu);
         }
 
-        // POST: RapPhim/DichVus/Edit/5
+        // POST: RapPhim/DichVu/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -119,11 +119,11 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaDanhMuc"] = new SelectList(_context.DanhMucDichVus, "MaDanhMuc", "MaDanhMuc", dichVu.MaDanhMuc);
+            ViewData["MaDanhMuc"] = new SelectList(_context.DanhMucDichVu, "MaDanhMuc", "MaDanhMuc", dichVu.MaDanhMuc);
             return View(dichVu);
         }
 
-        // GET: RapPhim/DichVus/Delete/5
+        // GET: RapPhim/DichVu/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -131,7 +131,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
                 return NotFound();
             }
 
-            var dichVu = await _context.DichVus
+            var dichVu = await _context.DichVu
                 .Include(d => d.MaDanhMucNavigation)
                 .FirstOrDefaultAsync(m => m.MaDichVu == id);
             if (dichVu == null)
@@ -142,15 +142,15 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             return View(dichVu);
         }
 
-        // POST: RapPhim/DichVus/Delete/5
+        // POST: RapPhim/DichVu/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var dichVu = await _context.DichVus.FindAsync(id);
+            var dichVu = await _context.DichVu.FindAsync(id);
             if (dichVu != null)
             {
-                _context.DichVus.Remove(dichVu);
+                _context.DichVu.Remove(dichVu);
             }
 
             await _context.SaveChangesAsync();
@@ -159,7 +159,7 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
 
         private bool DichVuExists(string id)
         {
-            return _context.DichVus.Any(e => e.MaDichVu == id);
+            return _context.DichVu.Any(e => e.MaDichVu == id);
         }
     }
 }

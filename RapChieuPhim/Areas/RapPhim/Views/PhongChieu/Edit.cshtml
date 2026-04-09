@@ -1,63 +1,252 @@
 ﻿@model RapChieuPhim.Models.Entities.PhongChieu
-
 @{
+    ViewData["Title"] = "Sửa Phòng chiếu";
+    // FIX: khai báo biến trước, tránh lỗi dấu ngoặc kép lồng nhau trong asp-items
+    var danhSachLoaiPhong = ViewData["MaLoaiPhong"] as Microsoft.AspNetCore.Mvc.Rendering.SelectList;
 }
 
-<!DOCTYPE html>
+<style>
+    .form-card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 1px 6px rgba(0,0,0,.09);
+        overflow: hidden;
+        max-width: 620px;
+    }
 
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Edit</title>
-</head>
-<body>
+    .form-header {
+        background: linear-gradient(135deg,#1e3a5f,#1a73e8);
+        padding: 22px 28px;
+    }
 
-<h4>PhongChieu</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        .form-header h4 {
+            color: #fff;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .form-header p {
+            color: #bfdbfe;
+            margin: 4px 0 0;
+            font-size: .85rem;
+        }
+
+    .form-body {
+        padding: 28px;
+    }
+
+    .sec-title {
+        font-size: .78rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f1f5f9;
+        margin-bottom: 18px;
+    }
+
+    .form-label {
+        font-size: .85rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 5px;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1.5px solid #e2e8f0;
+        font-size: .9rem;
+        transition: all .2s;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+        }
+
+    .req {
+        color: #ef4444;
+    }
+
+    .hint {
+        font-size: .78rem;
+        color: #94a3b8;
+        margin-top: 3px;
+    }
+
+    .id-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 7px 14px;
+        font-family: monospace;
+        font-size: .9rem;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg,#1a73e8,#1557b0);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        padding: 10px 26px;
+        border-radius: 8px;
+        transition: all .2s;
+    }
+
+        .btn-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(26,115,232,.35);
+            color: #fff;
+        }
+
+    .btn-cancel {
+        border: 1.5px solid #e2e8f0;
+        color: #64748b;
+        font-weight: 600;
+        padding: 9px 22px;
+        border-radius: 8px;
+        background: #fff;
+        text-decoration: none;
+        display: inline-block;
+        transition: all .2s;
+    }
+
+        .btn-cancel:hover {
+            background: #f8fafc;
+        }
+
+    .radio-tt {
+        cursor: pointer;
+    }
+
+        .radio-tt input[type=radio] {
+            display: none;
+        }
+
+        .radio-tt label {
+            padding: 7px 18px;
+            border-radius: 20px;
+            border: 2px solid #e2e8f0;
+            font-size: .83rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            display: block;
+        }
+
+        .radio-tt input:checked + label.hd {
+            background: #dcfce7;
+            border-color: #16a34a;
+            color: #15803d;
+        }
+
+        .radio-tt input:checked + label.bd {
+            background: #fef9c3;
+            border-color: #d97706;
+            color: #854d0e;
+        }
+
+        .radio-tt input:checked + label.do {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+            color: #475569;
+        }
+</style>
+
+<div class="mb-3">
+    <a asp-action="Index" asp-area="RapPhim" class="btn-cancel">← Quay lại danh sách</a>
+</div>
+
+<div class="form-card">
+    <div class="form-header">
+        <h4>✏️ Cập nhật Phòng chiếu</h4>
+        <p>Chỉnh sửa thông tin phòng — thay đổi sẽ được lưu ngay khi bấm Lưu</p>
+    </div>
+    <div class="form-body">
+        <form asp-action="Edit" asp-area="RapPhim" method="post">
+            @Html.AntiForgeryToken()
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger rounded-3 py-2 px-3 mb-4" style="font-size:.875rem">
+                    <strong>⚠️ Vui lòng kiểm tra lại:</strong>
+                    <ul class="mb-0 mt-1">
+                        @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@err.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
             <input type="hidden" asp-for="MaPhong" />
-            <div class="form-group">
-                <label asp-for="TenPhong" class="control-label"></label>
-                <input asp-for="TenPhong" class="form-control" />
-                <span asp-validation-for="TenPhong" class="text-danger"></span>
+            <input type="hidden" asp-for="DaXoa" />
+
+            <p class="sec-title">📋 Thông tin phòng chiếu</p>
+
+            <div class="mb-3">
+                <label class="form-label">Mã phòng</label><br />
+                <span class="id-badge">🔑 @Model.MaPhong</span>
             </div>
-            <div class="form-group">
-                <label asp-for="MaLoaiPhong" class="control-label"></label>
-                <select asp-for="MaLoaiPhong" class="form-control" asp-items="ViewBag.MaLoaiPhong"></select>
-                <span asp-validation-for="MaLoaiPhong" class="text-danger"></span>
+
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <label asp-for="TenPhong" class="form-label">Tên phòng <span class="req">*</span></label>
+                    <input asp-for="TenPhong" class="form-control" placeholder="VD: Phòng 1 - 2D Standard" maxlength="50" />
+                    <span asp-validation-for="TenPhong" class="text-danger small"></span>
+                </div>
+                <div class="col-md-7">
+                    <label asp-for="MaLoaiPhong" class="form-label">Loại phòng <span class="req">*</span></label>
+                    <select asp-for="MaLoaiPhong" class="form-select" asp-items="danhSachLoaiPhong">
+                        <option value="">-- Chọn loại phòng --</option>
+                    </select>
+                    <span asp-validation-for="MaLoaiPhong" class="text-danger small"></span>
+                </div>
+                <div class="col-md-5">
+                    <label asp-for="SoGhe" class="form-label">Số ghế <span class="req">*</span></label>
+                    <input asp-for="SoGhe" type="number" class="form-control" min="1" max="260" placeholder="VD: 30" />
+                    <span asp-validation-for="SoGhe" class="text-danger small"></span>
+                    <div class="hint">Thay đổi số ghế không tự tạo/xóa ghế</div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="SoGhe" class="control-label"></label>
-                <input asp-for="SoGhe" class="form-control" />
-                <span asp-validation-for="SoGhe" class="text-danger"></span>
+
+            <p class="sec-title">📌 Trạng thái</p>
+            <div class="mb-4">
+                <div class="d-flex gap-2 flex-wrap">
+                    <div class="radio-tt">
+                        <input type="radio" name="TrangThai" value="HoatDong" id="tt_hd"
+                               @(Model.TrangThai == "HoatDong" ? "checked" : "") />
+                        <label for="tt_hd" class="hd">✅ Hoạt động</label>
+                    </div>
+                    <div class="radio-tt">
+                        <input type="radio" name="TrangThai" value="BaoDuong" id="tt_bd"
+                               @(Model.TrangThai == "BaoDuong" ? "checked" : "") />
+                        <label for="tt_bd" class="bd">🔧 Bảo dưỡng</label>
+                    </div>
+                    <div class="radio-tt">
+                        <input type="radio" name="TrangThai" value="Dong" id="tt_do"
+                               @(Model.TrangThai == "Dong" ? "checked" : "") />
+                        <label for="tt_do" class="do">🚫 Đóng</label>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="TrangThai" class="control-label"></label>
-                <input asp-for="TrangThai" class="form-control" />
-                <span asp-validation-for="TrangThai" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="DaXoa" /> @Html.DisplayNameFor(model => model.DaXoa)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+
+            <div class="d-flex gap-3 pt-2 border-top">
+                <button type="submit" class="btn btn-save">💾 Lưu thay đổi</button>
+                <a asp-action="Index" asp-area="RapPhim" class="btn-cancel">Hủy</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
-</body>
-</html>
-

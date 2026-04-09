@@ -3,6 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Hangfire;
 using Hangfire.SqlServer;
 using RapChieuPhim.Services;
+using PayOS;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +20,21 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+})
+.AddCookie()
+.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+{
+    // LƯU Ý: Bạn phải thay 2 dòng này bằng Key lấy từ Google Cloud Console nhé!
+    options.ClientId = "xxx";
+    options.ClientSecret = "xxx";
+});
 
 
 builder.Services.AddHangfire(config => config
@@ -27,15 +45,29 @@ builder.Services.AddHangfire(config => config
 builder.Services.AddHangfireServer();
 
 builder.Services.AddControllersWithViews();
+
+// Đăng ký PayOS
+PayOSClient payOSClient = new PayOSClient(
+    builder.Configuration["PayOS:ClientId"] ?? "",
+    builder.Configuration["PayOS:ApiKey"] ?? "",
+    builder.Configuration["PayOS:ChecksumKey"] ?? ""
+);
+builder.Services.AddSingleton(payOSClient);
+
 builder.Services.AddScoped<DatVeService>();
 builder.Services.AddScoped<ThongKeService>();
+builder.Services.AddScoped<DichVuervice>();
 
 //builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<AccountService>();
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
 {
     app.UseExceptionHandler("/NguoiDung/Home/Error");
     app.UseHsts();
@@ -45,6 +77,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
+//GG-------
+app.UseAuthentication();
+app.UseAuthorization();
+//-----------
 app.UseHangfireDashboard(builder.Configuration["Hangfire:DashboardPath"]);
 
 // ── Area Routes — dùng MapAreaControllerRoute ─────────────
@@ -52,10 +88,14 @@ app.MapAreaControllerRoute(
     name: "RapPhim",
     areaName: "RapPhim",
     pattern: "RapPhim/{controller=Dashboard}/{action=Index}/{id?}");
-
+app.MapAreaControllerRoute(
+    name: "RapPhim",
+    areaName: "RapPhim",
+    pattern: "RapPhim/{controller=Dashboard}/{action=Index}/{id?}");
 app.MapAreaControllerRoute(
     name: "NguoiDung",
     areaName: "NguoiDung",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+

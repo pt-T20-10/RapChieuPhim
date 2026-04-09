@@ -1,0 +1,171 @@
+﻿@model List<RapChieuPhim.Models.ViewModels.CartItem>
+
+@{
+    ViewData["Title"] = "Giỏ hàng của bạn";
+    double tongTien = Model?.Sum(x => x.ThanhTien) ?? 0;
+}
+
+<div class="container py-5" style="min-height: 70vh;">
+    <h2 class="fw-bold mb-4" style="color: #034ea2;"><i class="bi bi-cart3 me-2"></i>GIỎ HÀNG BẮP NƯỚC</h2>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="text-center py-5">
+            <img src="/images/default/empty-cart.png" alt="Empty Cart" style="width: 150px; opacity: 0.5;" onerror="this.style.display='none'">
+            <h5 class="text-muted mt-4">Giỏ hàng của bạn đang trống!</h5>
+            <a asp-action="Index" class="btn btn-warning fw-bold mt-3 px-4 rounded-pill">
+                <i class="bi bi-arrow-left me-1"></i> Mua ngay Bắp Nước
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light text-muted small text-uppercase">
+                                    <tr>
+                                        <th class="ps-4">Món ăn / Thức uống</th>
+                                        <th class="text-center">Đơn giá</th>
+                                        <th class="text-center">Số lượng</th>
+                                        <th class="text-end pe-4">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr id="row-@item.MaDichVu">
+                                            <td class="ps-4 py-3">
+                                                <div class="d-flex align-items-center">
+                                                    <img src="@item.DuongDanHinh" class="rounded shadow-sm me-3" style="width: 60px; height: 60px; object-fit: cover;" onerror="this.src='/images/default/no-image.jpg';">
+                                                    <span class="fw-bold">@item.TenDichVu</span>
+                                                </div>
+                                            </td>
+                                            <td class="text-center fw-semibold text-muted">@string.Format("{0:#,##0}", item.GiaBan)đ</td>
+
+                                            <td class="text-center" style="width: 150px;">
+                                                <div class="input-group input-group-sm mx-auto bg-dark border border-secondary rounded" style="width: 100px;">
+                                                    <button class="btn btn-sm btn-dark text-white border-end border-secondary" type="button" onclick="capNhatSL('@item.MaDichVu', -1)"><i class="bi bi-dash"></i></button>
+                                                    <input type="text" class="form-control text-center fw-bold bg-dark text-white border-0" id="sl-@item.MaDichVu" value="@item.SoLuong" readonly>
+                                                    <button class="btn btn-sm btn-dark text-white border-start border-secondary" type="button" onclick="capNhatSL('@item.MaDichVu', 1)"><i class="bi bi-plus"></i></button>
+                                                </div>
+                                            </td>
+
+                                            <td class="text-end pe-4">
+                                                <div class="d-flex justify-content-end align-items-center gap-3">
+                                                    <span class="fw-bold text-danger" id="tt-@item.MaDichVu">@string.Format("{0:#,##0}", item.ThanhTien)đ</span>
+                                                    <button class="btn btn-sm text-danger px-1" onclick="xoaMon('@item.MaDichVu')" title="Xóa món này">
+                                                        <i class="bi bi-trash fs-5"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4 border-bottom pb-2">TỔNG CỘNG</h5>
+
+                        <div class="d-flex justify-content-between mb-3 text-muted">
+                            <span>Tạm tính (@Model.Sum(x => x.SoLuong) món)</span>
+                            <span class="fw-bold">@string.Format("{0:#,##0}", tongTien)đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-4 align-items-center">
+                            <span class="fw-bold fs-5">Thành tiền</span>
+                            <span class="fw-bold fs-3 text-danger">@string.Format("{0:#,##0}", tongTien)đ</span>
+                        </div>
+
+                        <a asp-area="NguoiDung" asp-controller="ThanhToan" asp-action="Index" class="btn btn-lg w-100 fw-bold text-white shadow-sm mb-3" style="background-color: #034ea2; border-radius: 12px;">
+                            TIẾN HÀNH THANH TOÁN <i class="bi bi-credit-card ms-1"></i>
+                        </a>
+
+                        <a asp-action="Index" class="btn btn-outline-secondary w-100 fw-bold" style="border-radius: 12px;">
+                            <i class="bi bi-arrow-left me-1"></i> Chọn thêm đồ ăn
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Khai báo link chuẩn xác bằng C# Razor (Tự động sinh đúng Route)
+        var urlCapNhat = '@Url.Action("CapNhatSoLuong", "DichVu", new { area = "NguoiDung" })';
+        var urlXoa = '@Url.Action("XoaKhoiGio", "DichVu", new { area = "NguoiDung" })';
+
+        // Hàm format tiền tệ VNĐ
+        function formatVND(amount) {
+            return amount.toLocaleString('vi-VN') + 'đ';
+        }
+
+        // Cập nhật số lượng (+ / -)
+        function capNhatSL(maDichVu, kieu) {
+            $.ajax({
+                url: urlCapNhat, // Đã thay đổi
+                type: 'POST',
+                data: { maDichVu: maDichVu, kieuThayDoi: kieu },
+                success: function (res) {
+                    if (res.success) {
+                        if (res.soLuongMoi <= 0) {
+                            // Nếu giảm về 0 -> Ẩn dòng đó đi
+                            $('#row-' + maDichVu).fadeOut();
+                        } else {
+                            // Cập nhật số liệu từng món
+                            $('#sl-' + maDichVu).val(res.soLuongMoi);
+                            $('#tt-' + maDichVu).text(formatVND(res.itemThanhTien));
+                        }
+
+                        // Nếu giỏ hàng trống thì load lại trang để hiện giao diện "Trống"
+                        if (res.tongSoLuong === 0) {
+                            window.location.reload();
+                        } else {
+                            // Cập nhật tổng tiền toàn giỏ
+                            capNhatGiaoDienTong(res.tongSoLuong, res.tongTien);
+                        }
+                    }
+                }
+            });
+        }
+
+        // Xóa hẳn 1 món
+        function xoaMon(maDichVu) {
+            if(confirm("Bạn có chắc muốn xóa món này khỏi giỏ?")) {
+                $.ajax({
+                    url: urlXoa, // Đã thay đổi
+                    type: 'POST',
+                    data: { maDichVu: maDichVu },
+                    success: function (res) {
+                        if (res.success) {
+                            $('#row-' + maDichVu).fadeOut();
+
+                            if (res.tongSoLuong === 0) {
+                                window.location.reload();
+                            } else {
+                                capNhatGiaoDienTong(res.tongSoLuong, res.tongTien);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function capNhatGiaoDienTong(tongSoLuong, tongTien) {
+            // Cập nhật các ô Tạm tính và Thành tiền bên cột phải
+            $('.text-muted:contains("Tạm tính")').text('Tạm tính (' + tongSoLuong + ' món)');
+            $('.fw-bold.fs-3.text-danger').text(formatVND(tongTien));
+            $('.d-flex.justify-content-between.mb-3.text-muted .fw-bold').text(formatVND(tongTien));
+        }
+    </script>
+}

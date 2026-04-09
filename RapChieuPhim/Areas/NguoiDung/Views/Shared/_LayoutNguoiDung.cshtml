@@ -47,10 +47,9 @@
                                asp-action="Index">Trang chủ</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white"
-                               asp-area="NguoiDung"
-                               asp-controller="DatVe"
-                               asp-action="Index">Đặt vé</a>
+                            <a class="nav-link text-white fw-bold" asp-area="NguoiDung" asp-controller="DichVu" asp-action="Index">
+                                🍿 Bắp & Nước
+                            </a>
                         </li>
                     </ul>
 
@@ -156,5 +155,34 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    @if (TempData["PendingOrder"] != null)
+    {
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                Swal.fire({
+                    title: 'Đơn hàng đang chờ!',
+                    html: 'Bạn đang có một đơn đặt vé chưa hoàn tất thanh toán.<br>Bạn có muốn tiếp tục giao dịch này không?',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonColor: '#034ea2',
+                    cancelButtonColor: '#dc3545',
+                    confirmButtonText: 'Có, Tiếp tục',
+                    cancelButtonText: 'Hủy đơn hàng'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '@Url.Action("TiepTucDatVe", "DatVe", new { area = "NguoiDung", maDonHang = TempData["PendingOrder"] })';
+                    } else {
+                        $.post('@Url.Action("HuyDonHangTam", "DatVe", new { area = "NguoiDung" })', { maDonHang: '@TempData["PendingOrder"]' }, function() {
+                            Swal.fire('Đã hủy', 'Giao dịch đã được hủy. Các ghế đã chọn trở lại trạng thái trống.', 'success');
+                        });
+                    }
+                });
+            });
+        </script>
+    }
 </body>
 </html>

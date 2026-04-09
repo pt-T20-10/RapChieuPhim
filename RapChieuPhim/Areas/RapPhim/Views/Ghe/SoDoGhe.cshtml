@@ -1,0 +1,658 @@
+﻿@model IEnumerable<RapChieuPhim.Models.Entities.Ghe>
+@{
+    ViewData["Title"] = "Sơ đồ ghế";
+    var phong = ViewBag.Phong as RapChieuPhim.Models.Entities.PhongChieu;
+
+    // Nhóm ghế theo hàng
+    var gheoTheoHang = Model
+        .GroupBy(g => g.TenHang)
+        .OrderBy(g => g.Key)
+        .ToList();
+
+    // Thống kê
+    int soTrong = Model.Count(g => g.TrangThai == "Trong");
+    int soDaDat = Model.Count(g => g.TrangThai == "DaDat");
+    int soDangGiu = Model.Count(g => g.TrangThai == "DangGiu");
+    int soDangBaoTri = Model.Count(g => g.TrangThai == "DangBaoTri");
+    int soDaKhoa = Model.Count(g => g.TrangThai == "DaKhoa");
+}
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 20px;
+    }
+
+        .page-header h4 {
+            color: #fff;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .page-header p {
+            color: #94a3b8;
+            margin: 4px 0 0;
+            font-size: .85rem;
+        }
+
+    .info-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(255,255,255,.1);
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-size: .78rem;
+        color: #cbd5e1;
+        margin: 3px 4px 0 0;
+    }
+
+    /* Stats */
+    .stats-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .stat-chip {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #fff;
+        border-radius: 10px;
+        padding: 10px 16px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.08);
+        flex: 1;
+        min-width: 100px;
+    }
+
+        .stat-chip .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .stat-chip .lbl {
+            font-size: .75rem;
+            color: #94a3b8;
+        }
+
+        .stat-chip .val {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1;
+        }
+
+    /* Toolbar hàng loạt */
+    .toolbar-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 14px 18px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.08);
+        margin-bottom: 18px;
+    }
+
+        .toolbar-card .toolbar-title {
+            font-size: .8rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-bottom: 10px;
+        }
+
+    /* Sơ đồ */
+    .sodo-wrapper {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+
+    .screen-bar {
+        background: linear-gradient(90deg,#334155,#1e293b);
+        color: #94a3b8;
+        text-align: center;
+        padding: 10px;
+        border-radius: 8px;
+        margin: 0 auto 28px;
+        max-width: 560px;
+        font-size: .8rem;
+        font-weight: 700;
+        letter-spacing: .1em;
+        clip-path: polygon(4% 0%,96% 0%,100% 100%,0% 100%);
+    }
+
+    .hang-section {
+        margin-bottom: 6px;
+    }
+
+    .hang-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .hang-label {
+        font-size: .82rem;
+        font-weight: 700;
+        color: #475569;
+        width: 26px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    /* Ghế button */
+    .ghe-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 7px;
+        border: 2px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .72rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all .15s;
+        position: relative;
+    }
+
+        .ghe-btn:hover {
+            transform: scale(1.12);
+            z-index: 10;
+        }
+
+        .ghe-btn:active {
+            transform: scale(.95);
+        }
+
+    /* Màu theo trạng thái */
+    .tt-Trong {
+        background: #dbeafe;
+        border-color: #93c5fd;
+        color: #1d4ed8;
+    }
+
+    .tt-DaDat {
+        background: #fca5a5;
+        border-color: #f87171;
+        color: #991b1b;
+        cursor: not-allowed;
+    }
+
+        .tt-DaDat:hover {
+            transform: none;
+        }
+
+    .tt-DangGiu {
+        background: #fde68a;
+        border-color: #fbbf24;
+        color: #78350f;
+        cursor: not-allowed;
+    }
+
+        .tt-DangGiu:hover {
+            transform: none;
+        }
+
+    .tt-DangBaoTri {
+        background: #fed7aa;
+        border-color: #fb923c;
+        color: #7c2d12;
+    }
+
+    .tt-DaKhoa {
+        background: #e2e8f0;
+        border-color: #94a3b8;
+        color: #475569;
+    }
+
+    /* Chú thích */
+    .legend {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+        padding: 14px 16px;
+        background: #f8fafc;
+        border-radius: 10px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: .8rem;
+        color: #475569;
+    }
+
+    .legend-dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 5px;
+        border: 2px solid transparent;
+        flex-shrink: 0;
+    }
+
+    /* Toast */
+    .toast-fixed {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.15);
+        animation: slideIn .3s ease;
+    }
+
+    @@keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1
+        }
+    }
+
+    /* Modal */
+    .modal-ghe .modal-header {
+        background: linear-gradient(135deg,#1e3a5f,#2563eb);
+        color: #fff;
+    }
+
+        .modal-ghe .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+    .tt-btn {
+        border: 2px solid;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: 600;
+        font-size: .85rem;
+        cursor: pointer;
+        transition: all .15s;
+        background: #fff;
+        width: 100%;
+        text-align: left;
+        margin-bottom: 8px;
+    }
+
+        .tt-btn:hover {
+            opacity: .85;
+            transform: translateX(3px);
+        }
+
+        .tt-btn.disabled {
+            opacity: .4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+    .tt-btn-baoTri {
+        border-color: #fb923c;
+        color: #7c2d12;
+    }
+
+    .tt-btn-khoa {
+        border-color: #94a3b8;
+        color: #475569;
+    }
+
+    .tt-btn-mo {
+        border-color: #16a34a;
+        color: #15803d;
+    }
+
+    .tt-btn-hoanVe {
+        border-color: #2563eb;
+        color: #1d4ed8;
+    }
+
+    .current-tt {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: .8rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+</style>
+
+@* Toast *@
+@if (ViewBag.Success != null)
+{
+    <div class="toast-fixed alert alert-success d-flex align-items-center gap-2" id="toastMsg">
+        <span>✅</span><span>@ViewBag.Success</span>
+        <button class="btn-close ms-auto" onclick="this.parentElement.remove()"></button>
+    </div>
+}
+@if (ViewBag.Error != null)
+{
+    <div class="toast-fixed alert alert-danger d-flex align-items-center gap-2" id="toastMsg">
+        <span>❌</span><span>@ViewBag.Error</span>
+        <button class="btn-close ms-auto" onclick="this.parentElement.remove()"></button>
+    </div>
+}
+
+<div class="page-header">
+    <h4>🪑 Sơ đồ ghế — @phong?.TenPhong</h4>
+    <p>
+        <span class="info-badge">📍 @phong?.MaPhong</span>
+        <span class="info-badge">🏠 @(phong?.MaLoaiPhongNavigation?.TenLoaiPhong ?? phong?.MaLoaiPhong)</span>
+        <span class="info-badge">💺 @Model.Count() ghế</span>
+    </p>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div></div>
+    <a asp-controller="PhongChieu" asp-action="Index" asp-area="RapPhim"
+       class="btn btn-outline-secondary btn-sm">← Quay lại danh sách phòng</a>
+</div>
+
+@* Thống kê trạng thái *@
+<div class="stats-row">
+    <div class="stat-chip">
+        <div class="dot" style="background:#93c5fd"></div>
+        <div><div class="lbl">Trống</div><div class="val">@soTrong</div></div>
+    </div>
+    <div class="stat-chip">
+        <div class="dot" style="background:#f87171"></div>
+        <div><div class="lbl">Đã đặt</div><div class="val">@soDaDat</div></div>
+    </div>
+    <div class="stat-chip">
+        <div class="dot" style="background:#fbbf24"></div>
+        <div><div class="lbl">Đang giữ</div><div class="val">@soDangGiu</div></div>
+    </div>
+    <div class="stat-chip">
+        <div class="dot" style="background:#fb923c"></div>
+        <div><div class="lbl">Bảo trì</div><div class="val">@soDangBaoTri</div></div>
+    </div>
+    <div class="stat-chip">
+        <div class="dot" style="background:#94a3b8"></div>
+        <div><div class="lbl">Đã khóa</div><div class="val">@soDaKhoa</div></div>
+    </div>
+</div>
+
+@* Toolbar khóa/mở hàng loạt *@
+<div class="toolbar-card">
+    <div class="toolbar-title">⚙️ Thao tác hàng loạt (khóa / mở khóa)</div>
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+        @* Khóa tất cả ghế Trống *@
+        <form asp-controller="Ghe" asp-action="DoiTrangThaiHangLoat" asp-area="RapPhim" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="maPhong" value="@phong?.MaPhong" />
+            <input type="hidden" name="tenHang" value="" />
+            <input type="hidden" name="trangThaiMoi" value="DaKhoa" />
+            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                🔒 Khóa tất cả ghế trống
+            </button>
+        </form>
+
+        @* Mở khóa tất cả *@
+        <form asp-controller="Ghe" asp-action="DoiTrangThaiHangLoat" asp-area="RapPhim" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="maPhong" value="@phong?.MaPhong" />
+            <input type="hidden" name="tenHang" value="" />
+            <input type="hidden" name="trangThaiMoi" value="Trong" />
+            <button type="submit" class="btn btn-sm btn-outline-success">
+                🔓 Mở khóa tất cả
+            </button>
+        </form>
+
+        <span class="text-muted small">hoặc khóa theo hàng:</span>
+
+        @* Khóa/mở theo từng hàng *@
+        @foreach (var hang in gheoTheoHang)
+        {
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                        data-bs-toggle="dropdown">
+                    Hàng @hang.Key
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <form asp-controller="Ghe" asp-action="DoiTrangThaiHangLoat" asp-area="RapPhim" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="maPhong" value="@phong?.MaPhong" />
+                            <input type="hidden" name="tenHang" value="@hang.Key" />
+                            <input type="hidden" name="trangThaiMoi" value="DaKhoa" />
+                            <button class="dropdown-item" type="submit">🔒 Khóa hàng @hang.Key</button>
+                        </form>
+                    </li>
+                    <li>
+                        <form asp-controller="Ghe" asp-action="DoiTrangThaiHangLoat" asp-area="RapPhim" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="maPhong" value="@phong?.MaPhong" />
+                            <input type="hidden" name="tenHang" value="@hang.Key" />
+                            <input type="hidden" name="trangThaiMoi" value="Trong" />
+                            <button class="dropdown-item" type="submit">🔓 Mở khóa hàng @hang.Key</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        }
+    </div>
+</div>
+
+@* Sơ đồ ghế *@
+<div class="sodo-wrapper">
+    <div class="screen-bar">🎬 MÀN HÌNH CHIẾU</div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-4 text-muted">
+            <div style="font-size:2.5rem">🪑</div>
+            <p>Phòng này chưa có ghế nào.</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var hang in gheoTheoHang)
+        {
+            <div class="hang-section">
+                <div class="hang-row">
+                    <span class="hang-label">@hang.Key</span>
+                    @foreach (var ghe in hang.OrderBy(g => int.TryParse(g.SoThu, out int n) ? n : 99))
+                    {
+                        <button type="button"
+                                class="ghe-btn tt-@ghe.TrangThai"
+                                onclick="moModal('@ghe.MaGhe', '@ghe.TenHang@ghe.SoThu', '@ghe.TrangThai', '@(ghe.MaLoaiGheNavigation?.TenLoaiGhe ?? ghe.MaLoaiGhe)')"
+                                title="@ghe.TenHang@ghe.SoThu — @ghe.TrangThai">
+                            @ghe.SoThu
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+    }
+
+    @* Chú thích *@
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-dot" style="background:#dbeafe;border-color:#93c5fd"></div> Trống (có thể thao tác)
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background:#fca5a5;border-color:#f87171"></div> Đã đặt (hệ thống)
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background:#fde68a;border-color:#fbbf24"></div> Đang giữ (hệ thống)
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background:#fed7aa;border-color:#fb923c"></div> Đang bảo trì
+        </div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background:#e2e8f0;border-color:#94a3b8"></div> Đã khóa
+        </div>
+    </div>
+</div>
+
+@* Modal chuyển trạng thái ghế *@
+<div class="modal fade modal-ghe" id="modalGhe" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:380px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title mb-0">💺 Ghế <span id="modal-ten-ghe"></span></h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2 small text-muted">Loại ghế: <span id="modal-loai-ghe" class="fw-semibold text-dark"></span></div>
+                <div class="mb-3">
+                    Trạng thái hiện tại:
+                    <span id="modal-tt-badge" class="current-tt ms-1"></span>
+                </div>
+                <div class="fw-semibold small text-muted mb-2">Chuyển sang trạng thái:</div>
+
+                @* Nút → Đang bảo trì (chỉ từ Trống) *@
+                <form asp-controller="Ghe" asp-action="DoiTrangThai" asp-area="RapPhim"
+                      method="post" class="tt-form" id="form-baoTri">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="maGhe" id="input-maGhe-baoTri" />
+                    <input type="hidden" name="trangThaiMoi" value="DangBaoTri" />
+                    <input type="hidden" name="maPhong" value="@phong?.MaPhong" />
+                    <button type="submit" class="tt-btn tt-btn-baoTri" id="btn-baoTri">
+                        🔧 Chuyển sang Đang bảo trì
+                        <div class="small fw-normal opacity-75">Từ trạng thái: Trống</div>
+                    </button>
+                </form>
+
+                @* Nút → Đã khóa (chỉ từ Trống) *@
+                <form asp-controller="Ghe" asp-action="DoiTrangThai" asp-area="RapPhim"
+                      method="post" class="tt-form" id="form-khoa">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="maGhe" id="input-maGhe-khoa" />
+                    <input type="hidden" name="trangThaiMoi" value="DaKhoa" />
+                    <input type="hidden" name="maPhong" value="@phong?.MaPhong" />
+                    <button type="submit" class="tt-btn tt-btn-khoa" id="btn-khoa">
+                        🔒 Khóa ghế (sự kiện)
+                        <div class="small fw-normal opacity-75">Từ trạng thái: Trống</div>
+                    </button>
+                </form>
+
+                @* Nút → Trống (từ BaoTri, DaKhoa, DaDat) *@
+                <form asp-controller="Ghe" asp-action="DoiTrangThai" asp-area="RapPhim"
+                      method="post" class="tt-form" id="form-trong">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="maGhe" id="input-maGhe-trong" />
+                    <input type="hidden" name="trangThaiMoi" value="Trong" />
+                    <input type="hidden" name="maPhong" value="@phong?.MaPhong" />
+                    <button type="submit" class="tt-btn tt-btn-mo" id="btn-trong">
+                        ✅ Chuyển về Trống
+                        <div class="small fw-normal opacity-75" id="btn-trong-hint"></div>
+                    </button>
+                </form>
+
+                @* Thông báo ghế không thể thao tác *@
+                <div id="msg-khong-the" class="alert alert-warning py-2 small" style="display:none">
+                    ⚠️ Ghế <strong>Đang giữ</strong> hoặc <strong>Đã đặt</strong> được quản lý bởi hệ thống đặt vé, không thể thay đổi thủ công tại đây.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Ánh xạ tên trạng thái tiếng Việt
+        const tenTT = {
+            'Trong':      'Trống',
+            'DaDat':      'Đã đặt',
+            'DangGiu':    'Đang giữ',
+            'DangBaoTri': 'Đang bảo trì',
+            'DaKhoa':     'Đã khóa'
+        };
+        const mauTT = {
+            'Trong':      'background:#dbeafe;color:#1d4ed8',
+            'DaDat':      'background:#fca5a5;color:#991b1b',
+            'DangGiu':    'background:#fde68a;color:#78350f',
+            'DangBaoTri': 'background:#fed7aa;color:#7c2d12',
+            'DaKhoa':     'background:#e2e8f0;color:#475569'
+        };
+
+        function moModal(maGhe, tenGhe, trangThai, loaiGhe) {
+            // Điền thông tin
+            document.getElementById('modal-ten-ghe').textContent  = tenGhe;
+            document.getElementById('modal-loai-ghe').textContent = loaiGhe;
+
+            const badge = document.getElementById('modal-tt-badge');
+            badge.textContent = tenTT[trangThai] || trangThai;
+            badge.style.cssText = (mauTT[trangThai] || '') + ';border-radius:20px;padding:4px 12px;font-size:.8rem;font-weight:600';
+
+            // Gán maGhe cho tất cả form
+            document.getElementById('input-maGhe-baoTri').value = maGhe;
+            document.getElementById('input-maGhe-khoa').value   = maGhe;
+            document.getElementById('input-maGhe-trong').value  = maGhe;
+
+            // Hiển thị/ẩn các nút theo trạng thái hiện tại
+            const btnBaoTri = document.getElementById('btn-baoTri');
+            const btnKhoa   = document.getElementById('btn-khoa');
+            const btnTrong  = document.getElementById('btn-trong');
+            const btnHint   = document.getElementById('btn-trong-hint');
+            const msgKhong  = document.getElementById('msg-khong-the');
+
+            // Reset
+            [btnBaoTri, btnKhoa, btnTrong].forEach(b => b.classList.remove('disabled'));
+            msgKhong.style.display = 'none';
+            document.getElementById('form-baoTri').style.display = 'block';
+            document.getElementById('form-khoa').style.display   = 'block';
+            document.getElementById('form-trong').style.display  = 'block';
+
+            if (trangThai === 'Trong') {
+                // Trống → có thể BaoTri hoặc Khoa
+                btnTrong.classList.add('disabled');
+                document.getElementById('form-trong').style.display = 'none';
+                btnHint.textContent = '';
+
+            } else if (trangThai === 'DangBaoTri') {
+                // BaoTri → chỉ về Trống
+                btnBaoTri.classList.add('disabled');
+                document.getElementById('form-baoTri').style.display = 'none';
+                btnKhoa.classList.add('disabled');
+                document.getElementById('form-khoa').style.display = 'none';
+                btnHint.textContent = 'Hoàn tất sửa chữa';
+
+            } else if (trangThai === 'DaKhoa') {
+                // DaKhoa → chỉ về Trống (mở khóa)
+                btnBaoTri.classList.add('disabled');
+                document.getElementById('form-baoTri').style.display = 'none';
+                btnKhoa.classList.add('disabled');
+                document.getElementById('form-khoa').style.display = 'none';
+                btnHint.textContent = 'Quản lý mở khóa';
+
+            } else if (trangThai === 'DaDat') {
+                // DaDat → chỉ về Trống (hoàn vé/hủy vé)
+                btnBaoTri.classList.add('disabled');
+                document.getElementById('form-baoTri').style.display = 'none';
+                btnKhoa.classList.add('disabled');
+                document.getElementById('form-khoa').style.display = 'none';
+                btnHint.textContent = 'Khách hoàn vé / Rạp hủy vé';
+
+            } else {
+                // DangGiu — hệ thống quản lý, không cho thao tác
+                document.getElementById('form-baoTri').style.display = 'none';
+                document.getElementById('form-khoa').style.display   = 'none';
+                document.getElementById('form-trong').style.display  = 'none';
+                msgKhong.style.display = 'block';
+            }
+
+            new bootstrap.Modal(document.getElementById('modalGhe')).show();
+        }
+
+        // Auto-hide toast
+        setTimeout(() => {
+            const t = document.getElementById('toastMsg');
+            if (t) t.remove();
+        }, 4000);
+    </script>
+}

@@ -1,0 +1,171 @@
+﻿@model List<RapChieuPhim.Models.Entities.DanhMucDichVu>
+@{
+    ViewData["Title"] = "Bán dịch vụ — Chọn món";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">
+        <i class="bi bi-cup-straw me-2 text-warning"></i>Chọn dịch vụ
+    </h4>
+    <a asp-action="Index" asp-controller="BanHang" asp-area="RapPhim"
+       class="btn btn-outline-secondary btn-sm">← Quay lại</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-warning">Hiện không có dịch vụ nào.</div>
+}
+else
+{
+    @* Form submit qua AJAX — không dùng native submit để kiểm soát data *@
+    <div class="row g-4">
+        <div class="col-lg-8">
+            @foreach (var dm in Model)
+            {
+                <h6 class="fw-bold text-muted text-uppercase mb-3 border-bottom pb-2">
+                    @dm.TenDanhMuc
+                </h6>
+                <div class="row g-3 mb-4">
+                    @foreach (var dv in dm.DichVu)
+                    {
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100" id="card-@dv.MaDichVu">
+                                <div class="card-body d-flex align-items-center gap-3 p-3">
+                                    <img src="@(dv.DuongDanHinh ?? "/images/default/no-image.jpg")"
+                                         class="rounded"
+                                         style="width:64px;height:64px;object-fit:cover;"
+                                         onerror="this.src='/images/default/no-image.jpg'">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold">@dv.TenDichVu</div>
+                                        <div class="text-danger fw-semibold small">
+                                            @dv.GiaBan.ToString("N0") ₫
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-secondary px-2"
+                                                onclick="thayDoi('@dv.MaDichVu', -1, @dv.GiaBan)">
+                                            <i class="bi bi-dash"></i>
+                                        </button>
+                                        <input type="number"
+                                               id="sl-@dv.MaDichVu"
+                                               value="0" min="0" max="99"
+                                               class="form-control form-control-sm text-center fw-bold px-1"
+                                               style="width:48px;"
+                                               readonly>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-primary px-2"
+                                                onclick="thayDoi('@dv.MaDichVu', 1, @dv.GiaBan)">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top:20px;">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold border-bottom pb-2 mb-3">Giỏ hàng</h6>
+                    <ul class="list-unstyled small" id="gioHangList">
+                        <li class="text-muted text-center py-2">Chưa chọn món nào</li>
+                    </ul>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold fs-6">
+                        <span>Tổng cộng:</span>
+                        <span class="text-danger" id="tongTien">0 ₫</span>
+                    </div>
+                    <button id="btnXacNhan"
+                            class="btn btn-warning w-100 fw-bold mt-3 disabled"
+                            onclick="xacNhanDon()">
+                        <i class="bi bi-check-circle me-1"></i> Xác nhận đơn hàng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Form ẩn — chỉ chứa dữ liệu đã chọn, được điền bởi JS trước khi submit *@
+    <form id="formXacNhan"
+          asp-action="XacNhanDichVu"
+          asp-controller="BanHang"
+          asp-area="RapPhim"
+          method="post">
+    </form>
+}
+
+@section Scripts {
+    <script>
+        @* gioHang = { maDichVu: { sl, gia, ten } } *@
+        var gioHang = {};
+
+        function fmt(n) { return n.toLocaleString('vi-VN') + ' ₫'; }
+
+        function thayDoi(maDichVu, delta, giaBan) {
+            var input = $('#sl-' + maDichVu);
+            var sl = parseInt(input.val()) + delta;
+            if (sl < 0) sl = 0;
+            input.val(sl);
+
+            var tenDichVu = $('#card-' + maDichVu + ' .fw-bold').first().text().trim();
+
+            if (sl > 0) {
+                gioHang[maDichVu] = { sl: sl, gia: giaBan, ten: tenDichVu };
+                $('#card-' + maDichVu).addClass('border border-warning');
+            } else {
+                delete gioHang[maDichVu];
+                $('#card-' + maDichVu).removeClass('border border-warning');
+            }
+
+            capNhatGioHang();
+        }
+
+        function capNhatGioHang() {
+            var keys = Object.keys(gioHang);
+            var tong = 0;
+            var html = '';
+
+            if (keys.length === 0) {
+                $('#gioHangList').html('<li class="text-muted text-center py-2">Chưa chọn món nào</li>');
+                $('#tongTien').text('0 ₫');
+                $('#btnXacNhan').addClass('disabled');
+                return;
+            }
+
+            keys.forEach(function (ma) {
+                var item = gioHang[ma];
+                var tt = item.sl * item.gia;
+                tong += tt;
+                html += '<li class="d-flex justify-content-between mb-1">' +
+                            '<span>' + item.ten + ' x' + item.sl + '</span>' +
+                            '<span class="fw-semibold">' + fmt(tt) + '</span>' +
+                        '</li>';
+            });
+
+            $('#gioHangList').html(html);
+            $('#tongTien').text(fmt(tong));
+            $('#btnXacNhan').removeClass('disabled');
+        }
+
+        function xacNhanDon() {
+            var keys = Object.keys(gioHang);
+            if (keys.length === 0) return;
+
+            var form = $('#formXacNhan');
+            // Xóa input cũ trước khi thêm mới
+            form.find('input').remove();
+
+            // Điền đúng cặp maDichVu + soLuong theo thứ tự khớp nhau
+            keys.forEach(function (ma) {
+                form.append($('<input>', { type: 'hidden', name: 'dsMaDichVu', value: ma }));
+                form.append($('<input>', { type: 'hidden', name: 'dsSoLuong', value: gioHang[ma].sl }));
+            });
+
+            form.submit();
+        }
+    </script>
+}

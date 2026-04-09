@@ -1,91 +1,110 @@
 ﻿@model IEnumerable<RapChieuPhim.Models.Entities.KhuyenMai>
 
 @{
+    ViewData["Title"] = "Quản lý Khuyến Mãi";
 }
 
-<!DOCTYPE html>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Index</title>
-</head>
-<body>
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.MaCode)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PhanTramGiam)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.GiamToiDa)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TuNgay)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DenNgay)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SoLuongConLai)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DonToiThieu)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TrangThai)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DaXoa)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.MaCode)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PhanTramGiam)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.GiamToiDa)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TuNgay)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DenNgay)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SoLuongConLai)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DonToiThieu)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TrangThai)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DaXoa)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.MaKhuyenMai">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.MaKhuyenMai">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.MaKhuyenMai">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
-</body>
-</html>
+<div class="container mt-4">
 
+    <h2 class="mb-4">🎁 Quản lý Khuyến Mãi</h2>
+
+    <!-- ALERT -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="mb-3 d-flex justify-content-between">
+        <a asp-action="Create" class="btn btn-primary">➕ Thêm khuyến mãi</a>
+        <a asp-action="ExportExcel" class="btn btn-success">📤 Xuất Excel</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Mã Code</th>
+                    <th>% Giảm</th>
+                    <th>Giảm tối đa</th>
+                    <th>Từ ngày</th>
+                    <th>Đến ngày</th>
+                    <th>Số lượng</th>
+                    <th>Đơn tối thiểu</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model.Where(x => !x.DaXoa))
+                {
+                    <tr>
+                        <td><strong>@item.MaCode</strong></td>
+
+                        <td>
+                            <span class="badge bg-success">
+                                @item.PhanTramGiam %
+                            </span>
+                        </td>
+
+                        <td>@item.GiamToiDa</td>
+
+                        <td>@item.TuNgay.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@item.DenNgay.ToString("dd/MM/yyyy HH:mm")</td>
+
+                        <td>@item.SoLuongConLai</td>
+                        <td>@item.DonToiThieu</td>
+
+                        <td>
+                            @{
+                                string badgeClass = item.TrangThai switch
+                                {
+                                    "ChoKichHoat" => "secondary",
+                                    "DangApDung" => "success",
+                                    "DaKetThuc" => "dark",
+                                    _ => "info"
+                                };
+                            }
+                            <span class="badge bg-@badgeClass">
+                                @item.TrangThai
+                            </span>
+                        </td>
+
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.MaKhuyenMai"
+                               class="btn btn-sm btn-warning">Sửa</a>
+
+                            <a asp-action="Details" asp-route-id="@item.MaKhuyenMai"
+                               class="btn btn-sm btn-info">Chi tiết</a>
+
+                            <a href="#" class="btn btn-sm btn-danger"
+                               onclick="confirmDelete('@item.MaKhuyenMai')">
+                                Xóa
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- FORM DELETE -->
+<form id="deleteForm" method="post" asp-action="Delete">
+    <input type="hidden" name="id" id="deleteId" />
+</form>
+
+<script>
+    function confirmDelete(id) {
+        if (confirm("Bạn có chắc muốn xóa khuyến mãi này không?")) {
+            document.getElementById("deleteId").value = id;
+            document.getElementById("deleteForm").submit();
+        }
+    }
+</script>

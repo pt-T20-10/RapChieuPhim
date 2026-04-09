@@ -20,152 +20,259 @@ namespace RapChieuPhim.Areas.RapPhim.Controllers
             _context = context;
         }
 
-        // GET: RapPhim/Ghes
+        // GET: RapPhim/Ghe
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Ghes.Include(g => g.MaLoaiGheNavigation).Include(g => g.MaPhongNavigation);
+            var appDbContext = _context.Ghe
+                .Include(g => g.MaLoaiGheNavigation)
+                .Include(g => g.MaPhongNavigation)
+                .Where(g => !g.DaXoa);
             return View(await appDbContext.ToListAsync());
         }
 
-        // GET: RapPhim/Ghes/Details/5
-        public async Task<IActionResult> Details(string id)
+        // =============================================
+        // GET: RapPhim/Ghe/SoDoGhe?maPhong=PC01
+        // Xem sơ đồ ghế theo phòng
+        // =============================================
+        public async Task<IActionResult> SoDoGhe(string maPhong)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(maPhong))
+                return RedirectToAction("Index", "PhongChieu");
+
+            var phong = await _context.PhongChieu
+                .Include(p => p.MaLoaiPhongNavigation)
+                .FirstOrDefaultAsync(p => p.MaPhong == maPhong && !p.DaXoa);
+
+            if (phong == null) return NotFound();
+
+            var ghes = await _context.Ghe
+                .Include(g => g.MaLoaiGheNavigation)
+                .Where(g => g.MaPhong == maPhong && !g.DaXoa)
+                .OrderBy(g => g.TenHang)
+                .ThenBy(g => g.SoThu.Length)
+                .ThenBy(g => g.SoThu)
+                .ToListAsync();
+
+            if (TempData["Success"] != null) ViewBag.Success = TempData["Success"];
+            if (TempData["Error"] != null) ViewBag.Error = TempData["Error"];
+
+            ViewBag.Phong = phong;
+            return View(ghes);
+        }
+
+        // =============================================
+        // POST: RapPhim/Ghe/DoiTrangThai
+        // Chuyển trạng thái ghế theo sơ đồ trạng thái
+        // Trống → DangBaoTri → Trống
+        // Trống → DaKhoa → Trống (mở khóa)
+        // DaKhoa: khóa/mở khóa hàng loạt
+        // =============================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DoiTrangThai(string maGhe, string trangThaiMoi, string maPhong)
+        {
+            var ghe = await _context.Ghe.FindAsync(maGhe);
+            if (ghe == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy ghế.";
+                return RedirectToAction(nameof(SoDoGhe), new { maPhong });
             }
 
-            var ghe = await _context.Ghes
+            string trangThaiCu = ghe.TrangThai;
+            bool hopLe = false;
+            string thongBao = "";
+
+            // Kiểm tra chuyển trạng thái hợp lệ theo sơ đồ
+            switch (trangThaiMoi)
+            {
+                case "DangBaoTri":
+                    // Trống → Đang bảo trì (lỗi cơ sở vật chất)
+                    if (trangThaiCu == "Trong") { hopLe = true; thongBao = $"Ghế {maGhe} chuyển sang Đang bảo trì."; }
+                    break;
+
+                case "Trong":
+                    // DangBaoTri → Trống (hoàn tất sửa chữa)
+                    // DaKhoa → Trống (quản lý mở khóa)
+                    // DaDat → Trống (khách hoàn vé / rạp hủy vé)
+                    if (trangThaiCu == "DangBaoTri" || trangThaiCu == "DaKhoa" || trangThaiCu == "DaDat")
+                    { hopLe = true; thongBao = $"Ghế {maGhe} đã chuyển về Trống."; }
+                    break;
+
+                case "DaKhoa":
+                    // Trống → Đã khóa (quản lý khóa ghế sự kiện)
+                    if (trangThaiCu == "Trong") { hopLe = true; thongBao = $"Ghế {maGhe} đã được khóa."; }
+                    break;
+
+                default:
+                    thongBao = "Trạng thái không hợp lệ.";
+                    break;
+            }
+
+            if (!hopLe)
+            {
+                TempData["Error"] = $"Không thể chuyển ghế {maGhe} từ '{TenTrangThai(trangThaiCu)}' sang '{TenTrangThai(trangThaiMoi)}'.";
+                return RedirectToAction(nameof(SoDoGhe), new { maPhong });
+            }
+
+            ghe.TrangThai = trangThaiMoi;
+            _context.Update(ghe);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = thongBao;
+            return RedirectToAction(nameof(SoDoGhe), new { maPhong });
+        }
+
+        // =============================================
+        // POST: RapPhim/Ghe/DoiTrangThaiHangLoat
+        // Khóa/mở khóa nhiều ghế cùng lúc (theo hàng hoặc tất cả)
+        // =============================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DoiTrangThaiHangLoat(
+            string maPhong,
+            string? tenHang,        // null = tất cả phòng
+            string trangThaiMoi)
+        {
+            var query = _context.Ghe.Where(g => g.MaPhong == maPhong && !g.DaXoa);
+
+            if (!string.IsNullOrEmpty(tenHang))
+                query = query.Where(g => g.TenHang == tenHang);
+
+            // Chỉ cho phép: Trống → DaKhoa hoặc DaKhoa → Trống
+            if (trangThaiMoi == "DaKhoa")
+                query = query.Where(g => g.TrangThai == "Trong");
+            else if (trangThaiMoi == "Trong")
+                query = query.Where(g => g.TrangThai == "DaKhoa");
+            else
+            {
+                TempData["Error"] = "Thao tác hàng loạt chỉ hỗ trợ khóa/mở khóa ghế.";
+                return RedirectToAction(nameof(SoDoGhe), new { maPhong });
+            }
+
+            var dsGhe = await query.ToListAsync();
+            if (!dsGhe.Any())
+            {
+                TempData["Error"] = "Không có ghế nào phù hợp để thực hiện thao tác.";
+                return RedirectToAction(nameof(SoDoGhe), new { maPhong });
+            }
+
+            foreach (var g in dsGhe)
+            {
+                g.TrangThai = trangThaiMoi;
+                _context.Update(g);
+            }
+            await _context.SaveChangesAsync();
+
+            string phamVi = string.IsNullOrEmpty(tenHang) ? "toàn phòng" : $"hàng {tenHang}";
+            string hanh = trangThaiMoi == "DaKhoa" ? "khóa" : "mở khóa";
+            TempData["Success"] = $"Đã {hanh} {dsGhe.Count} ghế ({phamVi}).";
+            return RedirectToAction(nameof(SoDoGhe), new { maPhong });
+        }
+
+        // =============================================
+        // CRUD cơ bản (giữ nguyên từ bản cũ)
+        // =============================================
+        public async Task<IActionResult> Details(string id)
+        {
+            if (id == null) return NotFound();
+            var ghe = await _context.Ghe
                 .Include(g => g.MaLoaiGheNavigation)
                 .Include(g => g.MaPhongNavigation)
                 .FirstOrDefaultAsync(m => m.MaGhe == id);
-            if (ghe == null)
-            {
-                return NotFound();
-            }
-
+            if (ghe == null) return NotFound();
             return View(ghe);
         }
 
-        // GET: RapPhim/Ghes/Create
         public IActionResult Create()
         {
-            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhes, "MaLoaiGhe", "MaLoaiGhe");
-            ViewData["MaPhong"] = new SelectList(_context.PhongChieus, "MaPhong", "MaPhong");
-            return View();
+            var ghe = new Ghe { TrangThai = "Trong", DaXoa = false };
+            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhe.Where(l => !l.DaXoa), "MaLoaiGhe", "TenLoaiGhe");
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu.Where(p => !p.DaXoa), "MaPhong", "TenPhong");
+            return View(ghe);
         }
 
-        // POST: RapPhim/Ghes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("MaGhe,MaPhong,TenHang,SoThu,MaLoaiGhe,TrangThai,DaXoa")] Ghe ghe)
         {
+            ModelState.Remove("MaLoaiGheNavigation");
+            ModelState.Remove("MaPhongNavigation");
+            ModelState.Remove("ChiTietVe");
             if (ModelState.IsValid)
             {
+                ghe.DaXoa = false;
                 _context.Add(ghe);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhes, "MaLoaiGhe", "MaLoaiGhe", ghe.MaLoaiGhe);
-            ViewData["MaPhong"] = new SelectList(_context.PhongChieus, "MaPhong", "MaPhong", ghe.MaPhong);
+            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhe.Where(l => !l.DaXoa), "MaLoaiGhe", "TenLoaiGhe", ghe.MaLoaiGhe);
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu.Where(p => !p.DaXoa), "MaPhong", "TenPhong", ghe.MaPhong);
             return View(ghe);
         }
 
-        // GET: RapPhim/Ghes/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var ghe = await _context.Ghes.FindAsync(id);
-            if (ghe == null)
-            {
-                return NotFound();
-            }
-            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhes, "MaLoaiGhe", "MaLoaiGhe", ghe.MaLoaiGhe);
-            ViewData["MaPhong"] = new SelectList(_context.PhongChieus, "MaPhong", "MaPhong", ghe.MaPhong);
+            if (id == null) return NotFound();
+            var ghe = await _context.Ghe.FindAsync(id);
+            if (ghe == null) return NotFound();
+            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhe.Where(l => !l.DaXoa), "MaLoaiGhe", "TenLoaiGhe", ghe.MaLoaiGhe);
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu.Where(p => !p.DaXoa), "MaPhong", "TenPhong", ghe.MaPhong);
             return View(ghe);
         }
 
-        // POST: RapPhim/Ghes/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("MaGhe,MaPhong,TenHang,SoThu,MaLoaiGhe,TrangThai,DaXoa")] Ghe ghe)
         {
-            if (id != ghe.MaGhe)
-            {
-                return NotFound();
-            }
-
+            if (id != ghe.MaGhe) return NotFound();
+            ModelState.Remove("MaLoaiGheNavigation");
+            ModelState.Remove("MaPhongNavigation");
+            ModelState.Remove("ChiTietVe");
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(ghe);
-                    await _context.SaveChangesAsync();
-                }
+                try { _context.Update(ghe); await _context.SaveChangesAsync(); }
                 catch (DbUpdateConcurrencyException)
-                {
-                    if (!GheExists(ghe.MaGhe))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                { if (!_context.Ghe.Any(e => e.MaGhe == id)) return NotFound(); throw; }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhes, "MaLoaiGhe", "MaLoaiGhe", ghe.MaLoaiGhe);
-            ViewData["MaPhong"] = new SelectList(_context.PhongChieus, "MaPhong", "MaPhong", ghe.MaPhong);
+            ViewData["MaLoaiGhe"] = new SelectList(_context.LoaiGhe.Where(l => !l.DaXoa), "MaLoaiGhe", "TenLoaiGhe", ghe.MaLoaiGhe);
+            ViewData["MaPhong"] = new SelectList(_context.PhongChieu.Where(p => !p.DaXoa), "MaPhong", "TenPhong", ghe.MaPhong);
             return View(ghe);
         }
 
-        // GET: RapPhim/Ghes/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var ghe = await _context.Ghes
+            if (id == null) return NotFound();
+            var ghe = await _context.Ghe
                 .Include(g => g.MaLoaiGheNavigation)
                 .Include(g => g.MaPhongNavigation)
                 .FirstOrDefaultAsync(m => m.MaGhe == id);
-            if (ghe == null)
-            {
-                return NotFound();
-            }
-
+            if (ghe == null) return NotFound();
+            var coVe = await _context.ChiTietVe.AnyAsync(v => v.MaGhe == id && v.TrangThai == "ChuaSuDung" && !v.DaXoa);
+            ViewBag.CoVe = coVe;
             return View(ghe);
         }
 
-        // POST: RapPhim/Ghes/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var ghe = await _context.Ghes.FindAsync(id);
-            if (ghe != null)
-            {
-                _context.Ghes.Remove(ghe);
-            }
-
+            var ghe = await _context.Ghe.FindAsync(id);
+            if (ghe != null) { ghe.DaXoa = true; _context.Update(ghe); }
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool GheExists(string id)
+        // =============================================
+        // Helper
+        // =============================================
+        private static string TenTrangThai(string tt) => tt switch
         {
-            return _context.Ghes.Any(e => e.MaGhe == id);
-        }
+            "Trong" => "Trống",
+            "DangGiu" => "Đang giữ",
+            "DaDat" => "Đã đặt",
+            "DangBaoTri" => "Đang bảo trì",
+            "DaKhoa" => "Đã khóa",
+            _ => tt
+        };
+
+        private bool GheExists(string id) => _context.Ghe.Any(e => e.MaGhe == id);
     }
 }

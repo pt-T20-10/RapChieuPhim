@@ -1,67 +1,164 @@
 ﻿@model IEnumerable<RapChieuPhim.Models.Entities.PhongChieu>
-
 @{
+    ViewData["Title"] = "Quản lý Phòng chiếu";
 }
 
-<!DOCTYPE html>
+<style>
+    .page-header { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); border-radius: 12px; padding: 22px 28px; margin-bottom: 22px; }
+    .page-header h4 { color: #fff; font-weight: 700; margin: 0; font-size: 1.35rem; }
+    .page-header p  { color: #94a3b8; margin: 4px 0 0; font-size: .85rem; }
+    .btn-them  { background: linear-gradient(135deg,#e50914,#b81d24); border:none; color:#fff; font-weight:600; padding:9px 20px; border-radius:8px; transition:all .2s; text-decoration:none; display:inline-block; }
+    .btn-them:hover  { transform:translateY(-1px); box-shadow:0 4px 15px rgba(229,9,20,.4); color:#fff; }
+    .btn-excel { background: linear-gradient(135deg,#1e7e34,#28a745); border:none; color:#fff; font-weight:600; padding:9px 20px; border-radius:8px; transition:all .2s; text-decoration:none; display:inline-block; }
+    .btn-excel:hover { transform:translateY(-1px); box-shadow:0 4px 15px rgba(40,167,69,.4); color:#fff; }
+    .stats-bar { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+    .stat-item { background:#fff; border-radius:10px; padding:14px 18px; flex:1; min-width:140px; box-shadow:0 1px 4px rgba(0,0,0,.08); display:flex; align-items:center; gap:12px; }
+    .stat-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+    .stat-label { font-size:.75rem; color:#94a3b8; font-weight:500; }
+    .stat-value { font-size:1.3rem; font-weight:700; color:#1e293b; line-height:1; }
+    .table-card { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.08); overflow:hidden; }
+    .table thead th { background:#f8fafc; color:#475569; font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; border-bottom:2px solid #e2e8f0; padding:13px 16px; white-space:nowrap; }
+    .table tbody td { padding:13px 16px; vertical-align:middle; border-bottom:1px solid #f1f5f9; }
+    .table tbody tr:hover { background:#fafbff; }
+    .table tbody tr:last-child td { border-bottom:none; }
+    .badge-tt { padding:5px 12px; border-radius:20px; font-size:.75rem; font-weight:600; }
+    .badge-HoatDong { background:#dcfce7; color:#15803d; }
+    .badge-BaoDuong  { background:#fef9c3; color:#854d0e; }
+    .badge-Dong      { background:#f1f5f9; color:#64748b; }
+    .btn-act { padding:5px 10px; border-radius:6px; font-size:.78rem; font-weight:500; border:none; transition:all .15s; text-decoration:none; display:inline-block; }
+    .btn-sua  { background:#eff6ff; color:#2563eb; }
+    .btn-sua:hover  { background:#2563eb; color:#fff; }
+    .btn-xoa  { background:#fef2f2; color:#dc2626; }
+    .btn-xoa:hover  { background:#dc2626; color:#fff; }
+    .btn-sodo { background:#f0fdf4; color:#15803d; }
+    .btn-sodo:hover { background:#15803d; color:#fff; }
+    .toast-fixed { position:fixed; top:20px; right:20px; z-index:9999; min-width:320px; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.15); animation:slideIn .3s ease; }
+    @@keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+    .capacity-bar { height:5px; background:#e2e8f0; border-radius:3px; margin-top:4px; }
+    .capacity-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#3b82f6,#1d4ed8); }
+</style>
 
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Index</title>
-</head>
-<body>
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.TenPhong)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SoGhe)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TrangThai)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DaXoa)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MaLoaiPhongNavigation)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.TenPhong)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SoGhe)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TrangThai)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DaXoa)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MaLoaiPhongNavigation.MaLoaiPhong)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.MaPhong">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.MaPhong">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.MaPhong">Delete</a>
-            </td>
-        </tr>
+@* Toast thông báo *@
+@if (ViewBag.Success != null)
+{
+    <div class="toast-fixed alert alert-success d-flex align-items-center gap-2" id="toastMsg">
+        <span>✅</span><span>@ViewBag.Success</span>
+        <button type="button" class="btn-close ms-auto" onclick="document.getElementById('toastMsg').remove()"></button>
+    </div>
 }
-    </tbody>
-</table>
-</body>
-</html>
+@if (ViewBag.Error != null)
+{
+    <div class="toast-fixed alert alert-danger d-flex align-items-center gap-2" id="toastMsg">
+        <span>❌</span><span>@ViewBag.Error</span>
+        <button type="button" class="btn-close ms-auto" onclick="document.getElementById('toastMsg').remove()"></button>
+    </div>
+}
 
+<div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+        <h4>🏠 Quản lý Phòng chiếu</h4>
+        <p>Quản lý danh sách phòng chiếu tại rạp</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="ExportExcel" asp-area="RapPhim" class="btn-excel">📊 Xuất Excel</a>
+        <a asp-action="Create" asp-area="RapPhim" class="btn-them">＋ Thêm phòng</a>
+    </div>
+</div>
+
+@* Thống kê *@
+@{
+    int maxGhe = Model.Any() ? Model.Max(p => p.SoGhe) : 1;
+}
+<div class="stats-bar">
+    <div class="stat-item">
+        <div class="stat-icon" style="background:#dbeafe">🏠</div>
+        <div><div class="stat-label">Tổng phòng</div><div class="stat-value">@Model.Count()</div></div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-icon" style="background:#dcfce7">✅</div>
+        <div><div class="stat-label">Hoạt động</div><div class="stat-value">@Model.Count(p => p.TrangThai == "HoatDong")</div></div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-icon" style="background:#fef9c3">🔧</div>
+        <div><div class="stat-label">Bảo dưỡng</div><div class="stat-value">@Model.Count(p => p.TrangThai == "BaoDuong")</div></div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-icon" style="background:#f1f5f9">💺</div>
+        <div><div class="stat-label">Tổng ghế</div><div class="stat-value">@Model.Sum(p => p.SoGhe)</div></div>
+    </div>
+</div>
+
+<div class="table-card">
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 text-muted">
+            <div style="font-size:3rem">🏠</div>
+            <h6 class="mt-2">Chưa có phòng chiếu nào</h6>
+            <a asp-action="Create" asp-area="RapPhim" class="btn-them mt-2">＋ Thêm phòng mới</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Tên phòng</th>
+                        <th>Loại phòng</th>
+                        <th>Số ghế</th>
+                        <th>Trạng thái</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int stt = 1; }
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-muted small">@(stt++)</td>
+                            <td>
+                                <div class="fw-semibold">@item.TenPhong</div>
+                                <div class="text-muted small">@item.MaPhong</div>
+                            </td>
+                            <td class="small">@(item.MaLoaiPhongNavigation?.TenLoaiPhong ?? item.MaLoaiPhong)</td>
+                            <td>
+                                <div class="fw-semibold">@item.SoGhe <span class="text-muted fw-normal small">ghế</span></div>
+                                <div class="capacity-bar">
+                                    <div class="capacity-fill" style="width:@(maxGhe > 0 ? item.SoGhe * 100 / maxGhe : 0)%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge-tt badge-@item.TrangThai">
+                                    @(item.TrangThai switch {
+                                        "HoatDong" => "Hoạt động",
+                                        "BaoDuong" => "Bảo dưỡng",
+                                        "Dong"     => "Đóng",
+                                        _          => item.TrangThai
+                                    })
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex gap-1 justify-content-center flex-wrap">
+                                    <a asp-controller="Ghe" asp-action="SoDoGhe"
+                                       asp-route-maPhong="@item.MaPhong" asp-area="RapPhim"
+                                       class="btn-act btn-sodo" title="Xem sơ đồ ghế">🪑 Sơ đồ</a>
+                                    <a asp-action="Edit" asp-route-id="@item.MaPhong" asp-area="RapPhim"
+                                       class="btn-act btn-sua" title="Cập nhật">✏️ Sửa</a>
+                                    <a asp-action="Delete" asp-route-id="@item.MaPhong" asp-area="RapPhim"
+                                       class="btn-act btn-xoa" title="Xóa">🗑️ Xóa</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        setTimeout(() => { const t = document.getElementById('toastMsg'); if (t) t.remove(); }, 4000);
+    </script>
+}

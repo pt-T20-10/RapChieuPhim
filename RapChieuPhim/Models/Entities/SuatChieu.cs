@@ -21,7 +21,7 @@ public partial class SuatChieu
 
     public bool DaXoa { get; set; }
 
-    public virtual ICollection<ChiTietVe> ChiTietVes { get; set; } = new List<ChiTietVe>();
+    public virtual ICollection<ChiTietVe> ChiTietVe { get; set; } = new List<ChiTietVe>();
 
     public virtual Phim MaPhimNavigation { get; set; } = null!;
 

@@ -11,5 +11,5 @@ public partial class LoaiPhong
 
     public bool DaXoa { get; set; }
 
-    public virtual ICollection<PhongChieu> PhongChieus { get; set; } = new List<PhongChieu>();
+    public virtual ICollection<PhongChieu> PhongChieu { get; set; } = new List<PhongChieu>();
 }

@@ -1,0 +1,345 @@
+﻿@{
+    ViewData["Title"] = "Chọn suất chiếu & Ghế";
+    var phim = ViewBag.Phim as RapChieuPhim.Models.Entities.Phim;
+    var SuatChieuNhomTheoNgay = ViewBag.SuatChieu as List<IGrouping<DateTime, RapChieuPhim.Models.Entities.SuatChieu>>;
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    /* Khu vực màn hình cong */
+    .screen-curve {
+        height: 60px;
+        width: 100%;
+        margin: 20px auto 40px auto;
+        background: linear-gradient(to bottom, #e0e0e0, #f8f9fa);
+        border-top: 5px solid #034ea2;
+        border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+        font-weight: bold;
+        color: #aaa;
+        letter-spacing: 5px;
+    }
+
+    /* CSS cho Từng Ghế */
+    .seat {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px 8px 4px 4px;
+        margin: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+        border: 2px solid transparent;
+        user-select: none;
+    }
+
+        /* 1. Trống (Màu trắng) */
+        .seat.status-1 {
+            background-color: #ffffff;
+            border: 2px solid #adb5bd;
+            color: #495057;
+        }
+
+            .seat.status-1:hover {
+                border-color: #fd7e14;
+                transform: scale(1.1);
+            }
+
+        /* 2. Đã đặt (Màu xám) */
+        .seat.status-2 {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+            cursor: not-allowed;
+        }
+
+        /* 3. Đang giữ (Màu vàng) */
+        .seat.status-3 {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: white;
+            cursor: not-allowed;
+        }
+
+        /* 4. Bảo trì (Màu đỏ) */
+        .seat.status-4 {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+            cursor: not-allowed;
+        }
+
+        /* 5. Đang chọn (Màu cam) - Được Add bằng JS */
+        .seat.selected {
+            background-color: #fd7e14 !important;
+            border-color: #fd7e14 !important;
+            color: white !important;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(253, 126, 20, 0.5);
+        }
+
+    /* Nút ngày giờ */
+    .time-btn {
+        border: 1px solid #034ea2;
+        color: #034ea2;
+        font-weight: bold;
+    }
+
+        .time-btn.active {
+            background-color: #034ea2;
+            color: white;
+        }
+</style>
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <h3 class="fw-bold mb-4" style="color: #034ea2;">@phim?.TenPhim</h3>
+
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-calendar-event me-2"></i>CHỌN SUẤT CHIẾU</h6>
+                    @if (SuatChieuNhomTheoNgay != null && SuatChieuNhomTheoNgay.Any())
+                    {
+                        <ul class="nav nav-pills mb-3" id="dateTab" role="tablist">
+                            @{
+                                int index = 0;
+                            }
+                            @foreach (var group in SuatChieuNhomTheoNgay)
+                            {
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link @(index == 0 ? "active" : "") fw-bold px-4" data-bs-toggle="tab" data-bs-target="#date-@index" type="button">
+                                        @group.Key.ToString("dd/MM")
+                                    </button>
+                                </li>
+                                index++;
+                            }
+                        </ul>
+                        <div class="tab-content" id="dateTabContent">
+                            @{
+                                int idx = 0;
+                            }
+                            @foreach (var group in SuatChieuNhomTheoNgay)
+                            {
+                                <div class="tab-pane fade @(idx == 0 ? "show active" : "")" id="date-@idx">
+                                    <div class="d-flex flex-wrap gap-2 mt-3">
+                                        @foreach (var suat in group)
+                                        {
+                                            <button class="btn time-btn px-4 py-2 rounded-3" data-date="@group.Key.ToString("dd/MM/yyyy")" onclick="chonSuatChieu('@suat.MaSuatChieu', this)">
+                                                @suat.ThoiGianBatDau.ToString("HH:mm")
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                                idx++;
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-danger">Hiện tại chưa có suất chiếu nào cho phim này.</p>
+                    }
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-4 mb-4 d-none" id="khuVucGhe">
+                <div class="card-body p-4 text-center">
+                    <h6 class="fw-bold text-start mb-0"><i class="bi bi-tv me-2"></i>SƠ ĐỒ PHÒNG CHIẾU: <span id="lblTenPhong" class="text-danger"></span></h6>
+
+                    <div class="screen-curve">MÀN HÌNH</div>
+
+                    <div id="seatMapContainer" class="mb-5 px-3">
+                    </div>
+
+                    <div class="d-flex justify-content-center flex-wrap gap-4 pt-3 border-top small fw-bold">
+                        <div><span class="seat status-1" style="width:20px;height:20px;pointer-events:none;"></span> Trống</div>
+                        <div><span class="seat" style="width:20px;height:20px;background:#fd7e14;pointer-events:none;"></span> Đang chọn</div>
+                        <div><span class="seat status-3" style="width:20px;height:20px;pointer-events:none;"></span> Đang giữ</div>
+                        <div><span class="seat status-2" style="width:20px;height:20px;pointer-events:none;"></span> Đã đặt</div>
+                        <div><span class="seat status-4" style="width:20px;height:20px;pointer-events:none;"></span> Bảo trì</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 rounded-4 sticky-top" style="top: 20px;">
+                <div class="card-body p-4">
+                    <img src="@(phim?.DuongDanAnh ?? "/images/default/no-poster.jpg")" class="w-100 rounded-3 mb-3 shadow-sm" style="height: 200px; object-fit: cover;">
+                    <h5 class="fw-bold text-uppercase mb-3">@phim?.TenPhim</h5>
+
+                    <div class="d-flex justify-content-between mb-2 small border-bottom pb-2">
+                        <span class="text-muted">Suất chiếu:</span>
+                        <strong id="infoSuatChieu" class="text-danger">Vui lòng chọn</strong>
+                    </div>
+
+                    <div class="mb-3 mt-3">
+                        <span class="text-muted small d-block mb-1">Ghế đã chọn:</span>
+                        <div id="infoDanhSachGhe" class="fw-bold text-dark" style="min-height: 25px;">Chưa chọn ghế</div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4 mt-4 pt-3 border-top">
+                        <span class="fw-bold fs-5">Tạm tính:</span>
+                        <span class="fw-bold fs-3 text-danger" id="infoTongTien">0đ</span>
+                    </div>
+
+                    <button id="btnThanhToan" class="btn btn-lg w-100 fw-bold text-white disabled" style="background-color: #034ea2; border-radius: 12px;" onclick="tienHanhDatVe()">
+                        ĐẶT VÉ NGAY <i class="bi bi-arrow-right-circle ms-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Các biến toàn cục lưu trữ trạng thái
+        var currentSuatChieu = '';
+        var selectedSeats = []; // Mảng chứa ID ghế đã chọn
+        var selectedSeatNames = []; // Mảng chứa tên ghế để hiển thị
+        var totalAmount = 0;
+
+        function formatVND(amount) { return amount.toLocaleString('vi-VN') + 'đ'; }
+
+        // 1. KHI KHÁCH BẤM CHỌN 1 SUẤT CHIẾU
+        function chonSuatChieu(maSuatChieu, btnElement) {
+            // Đổi màu nút
+            $('.time-btn').removeClass('active');
+            $(btnElement).addClass('active');
+
+            // Cập nhật thông tin cột phải
+            $('#infoSuatChieu').text($(btnElement).text() + ' - ' + $(btnElement).data('date'));
+
+            // Reset giỏ hàng ghế khi đổi suất chiếu
+            selectedSeats = []; selectedSeatNames = []; totalAmount = 0;
+            updateCartUI();
+
+            currentSuatChieu = maSuatChieu;
+
+            // Gọi AJAX lấy sơ đồ ghế
+            $.ajax({
+                url: '@Url.Action("LaySoDoGhe", "DatVe", new { area = "NguoiDung" })',
+                type: 'GET',
+                data: { maSuatChieu: maSuatChieu },
+                success: function (res) {
+                    if (res.success) {
+                        $('#lblTenPhong').text(res.tenPhong);
+                        renderSeatMap(res.dsGhe);
+                        $('#khuVucGhe').removeClass('d-none').hide().fadeIn(500); // Hiệu ứng mờ dần
+                    }
+                }
+            });
+        }
+
+        // 2. VẼ SƠ ĐỒ GHẾ TỪ JSON
+        function renderSeatMap(dsGhe) {
+            var html = '';
+            // Giả định ghế có tên kiểu A1, A2... ta gom nhóm theo ký tự đầu (A, B, C...) để chia hàng
+            var currentObj = null;
+            var currentRow = '';
+
+            html += '<div class="d-flex flex-column align-items-center gap-2">';
+
+            $.each(dsGhe, function (index, ghe) {
+                var rowChar = ghe.tenGhe.charAt(0);
+                if (rowChar !== currentRow) {
+                    if (currentRow !== '') html += '</div>'; // Đóng hàng cũ
+                    html += '<div class="d-flex justify-content-center gap-2">'; // Mở hàng mới
+                    currentRow = rowChar;
+                }
+
+                // Nếu là ghế trống (status-1), ta mới add sự kiện onclick
+                var onclickAttr = ghe.trangThai === 1 ? `onclick="toggleSeat('${ghe.maGhe}', '${ghe.tenGhe}', ${ghe.giaVeTong}, this)"` : '';
+
+                html += `<div class="seat status-${ghe.trangThai}" id="seat-${ghe.maGhe}" ${onclickAttr} title="${ghe.loaiGhe} - ${formatVND(ghe.giaVeTong)}">
+                            ${ghe.tenGhe}
+                         </div>`;
+            });
+            html += '</div></div>'; // Đóng hàng cuối và container
+            $('#seatMapContainer').html(html);
+        }
+
+        // 3. SỰ KIỆN CLICK CHỌN/BỎ CHỌN GHẾ (Chỉ dành cho ghế Trống)
+        function toggleSeat(maGhe, tenGhe, giaVe, element) {
+            var $seat = $(element);
+
+            if ($seat.hasClass('selected')) {
+                // Nếu đang chọn -> Bỏ chọn
+                $seat.removeClass('selected');
+                selectedSeats = selectedSeats.filter(id => id !== maGhe);
+                selectedSeatNames = selectedSeatNames.filter(name => name !== tenGhe);
+                totalAmount -= giaVe;
+            } else {
+                // Nếu chưa chọn -> Kiểm tra giới hạn (Vd: Tối đa 8 ghế)
+                if (selectedSeats.length >= 8) {
+                    Swal.fire({ icon: 'warning', title: 'Giới hạn', text: 'Bạn chỉ được mua tối đa 8 vé trong 1 lần giao dịch.' });
+                    return;
+                }
+                // Add vào mảng và đổi màu cam
+                $seat.addClass('selected');
+                selectedSeats.push(maGhe);
+                selectedSeatNames.push(tenGhe);
+                totalAmount += giaVe;
+            }
+            updateCartUI();
+        }
+
+        // Cập nhật Cột phải
+        function updateCartUI() {
+            if (selectedSeats.length > 0) {
+                $('#infoDanhSachGhe').text(selectedSeatNames.join(', '));
+                $('#infoTongTien').text(formatVND(totalAmount));
+                $('#btnThanhToan').removeClass('disabled');
+            } else {
+                $('#infoDanhSachGhe').text('Chưa chọn ghế');
+                $('#infoTongTien').text('0đ');
+                $('#btnThanhToan').addClass('disabled');
+            }
+        }
+
+        // 4. BẤM TIẾN HÀNH ĐẶT VÉ -> HIỆN POPUP 5 PHÚT
+        function tienHanhDatVe() {
+            if (selectedSeats.length === 0) return;
+
+            Swal.fire({
+                title: 'Xác nhận đặt vé?',
+                html: 'Bạn sẽ có <b>5 PHÚT</b> để hoàn tất thanh toán. Quá thời gian, ghế sẽ tự động bị hủy.<br><br>Đồng ý tiếp tục?',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#034ea2',
+                cancelButtonColor: '#dc3545',
+                confirmButtonText: 'ĐỒNG Ý',
+                cancelButtonText: 'HỦY BỎ'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Nếu bấm Đồng Ý, gửi Post data qua Controller để sang trang XacNhan (Có popup Bắp Nước)
+                    // (Đoạn này sẽ dùng form ẩn để Post mảng ghế sang Action XacNhan)
+                    submitToXacNhan();
+                }
+            });
+        }
+
+        function submitToXacNhan() {
+            var form = $('<form>', { action: '@Url.Action("XacNhan", "DatVe", new { area = "NguoiDung" })', method: 'POST' });
+            form.append($('<input>', { type: 'hidden', name: 'maSuatChieu', value: currentSuatChieu }));
+
+            // Post mảng ID ghế
+            $.each(selectedSeats, function(i, val) {
+                form.append($('<input>', { type: 'hidden', name: 'selectedSeats', value: val }));
+            });
+
+            $('body').append(form);
+            form.submit();
+        }
+    </script>
+}

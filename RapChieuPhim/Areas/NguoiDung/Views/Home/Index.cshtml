@@ -5,7 +5,7 @@
 
     // Phân loại danh sách phim
     var phimDangChieu = Model?.Where(p => p.TrangThai == "DangChieu").ToList() ?? new List<RapChieuPhim.Models.Entities.Phim>();
-    var phimSapChieu = Model?.Where(p => p.TrangThai == "SapChieu").ToList() ?? new List<RapChieuPhim.Models.Entities.Phim>();
+    var PhimapChieu = Model?.Where(p => p.TrangThai == "SapChieu").ToList() ?? new List<RapChieuPhim.Models.Entities.Phim>();
 
     // Lấy 5 phim mới nhất cho Banner dựa trên Ngày phát hành
     var bannerMovies = Model?.OrderByDescending(p => p.NgayPhatHanh).Take(5).ToList() ?? new List<RapChieuPhim.Models.Entities.Phim>();
@@ -207,7 +207,8 @@
 
                                 <div class="mt-auto d-flex gap-2">
                                     <a asp-area="NguoiDung" asp-controller="DatVe" asp-action="ChiTietPhim" asp-route-maPhim="@phim.MaPhim" class="btn beta-blue-outline w-50 fw-bold py-2">CHI TIẾT</a>
-                                    <a asp-area="NguoiDung" asp-controller="DatVe" asp-action="ChonSuatChieu" asp-route-maPhim="@phim.MaPhim" class="btn beta-blue-bg w-50 fw-bold py-2">MUA VÉ</a>
+
+                                    <a asp-area="NguoiDung" asp-controller="DatVe" asp-action="ChonGhe" asp-route-maPhim="@phim.MaPhim" class="btn beta-blue-bg w-50 fw-bold py-2 text-white">MUA VÉ</a>
                                 </div>
                             </div>
                         </div>
@@ -218,7 +219,7 @@
 
         <div class="tab-pane fade" id="sapchieu" role="tabpanel">
             <div class="row g-4">
-                @foreach (var phim in phimSapChieu)
+                @foreach (var phim in PhimapChieu)
                 {
                     var imgUrl = string.IsNullOrEmpty(phim.DuongDanAnh) ? "/images/default/no-image.jpg" : phim.DuongDanAnh;
                     var bgColor = phim.PhanLoaiDoTuoi == "T18" ? "bg-t18" : (phim.PhanLoaiDoTuoi == "T16" ? "bg-t16" : "bg-p");

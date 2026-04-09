@@ -12,41 +12,41 @@ public partial class AppDbContext : DbContext
     {
     }
 
-    public virtual DbSet<ChiTietDichVu> ChiTietDichVus { get; set; }
+    public virtual DbSet<ChiTietDichVu> ChiTietDichVu { get; set; }
 
-    public virtual DbSet<ChiTietVe> ChiTietVes { get; set; }
+    public virtual DbSet<ChiTietVe> ChiTietVe { get; set; }
 
-    public virtual DbSet<DanhMucDichVu> DanhMucDichVus { get; set; }
+    public virtual DbSet<DanhMucDichVu> DanhMucDichVu { get; set; }
 
-    public virtual DbSet<DichVu> DichVus { get; set; }
+    public virtual DbSet<DichVu> DichVu { get; set; }
 
-    public virtual DbSet<DonHang> DonHangs { get; set; }
+    public virtual DbSet<DonHang> DonHang { get; set; }
 
-    public virtual DbSet<Ghe> Ghes { get; set; }
+    public virtual DbSet<Ghe> Ghe { get; set; }
 
-    public virtual DbSet<KhachHang> KhachHangs { get; set; }
+    public virtual DbSet<KhachHang> KhachHang { get; set; }
 
-    public virtual DbSet<KhuyenMai> KhuyenMais { get; set; }
+    public virtual DbSet<KhuyenMai> KhuyenMai { get; set; }
 
-    public virtual DbSet<LoaiGhe> LoaiGhes { get; set; }
+    public virtual DbSet<LoaiGhe> LoaiGhe { get; set; }
 
-    public virtual DbSet<LoaiKhachHang> LoaiKhachHangs { get; set; }
+    public virtual DbSet<LoaiKhachHang> LoaiKhachHang { get; set; }
 
-    public virtual DbSet<LoaiPhong> LoaiPhongs { get; set; }
+    public virtual DbSet<LoaiPhong> LoaiPhong { get; set; }
 
-    public virtual DbSet<NhanVien> NhanViens { get; set; }
+    public virtual DbSet<NhanVien> NhanVien { get; set; }
 
-    public virtual DbSet<Phim> Phims { get; set; }
+    public virtual DbSet<Phim> Phim { get; set; }
 
-    public virtual DbSet<PhongChieu> PhongChieus { get; set; }
+    public virtual DbSet<PhongChieu> PhongChieu { get; set; }
 
-    public virtual DbSet<SuatChieu> SuatChieus { get; set; }
+    public virtual DbSet<SuatChieu> SuatChieu { get; set; }
 
-    public virtual DbSet<TaiKhoan> TaiKhoans { get; set; }
+    public virtual DbSet<TaiKhoan> TaiKhoan { get; set; }
 
-    public virtual DbSet<ThanhToan> ThanhToans { get; set; }
+    public virtual DbSet<ThanhToan> ThanhToan { get; set; }
 
-    public virtual DbSet<TheLoaiPhim> TheLoaiPhims { get; set; }
+    public virtual DbSet<TheLoaiPhim> TheLoaiPhim { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -64,12 +64,12 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.SoLuong).HasDefaultValue(1);
             entity.Property(e => e.ThanhTien).HasComputedColumnSql("([SoLuong]*[DonGia])", true);
 
-            entity.HasOne(d => d.MaDichVuNavigation).WithMany(p => p.ChiTietDichVus)
+            entity.HasOne(d => d.MaDichVuNavigation).WithMany(p => p.ChiTietDichVu)
                 .HasForeignKey(d => d.MaDichVu)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ChiTietDichVu_DichVu");
 
-            entity.HasOne(d => d.MaDonHangNavigation).WithMany(p => p.ChiTietDichVus)
+            entity.HasOne(d => d.MaDonHangNavigation).WithMany(p => p.ChiTietDichVu)
                 .HasForeignKey(d => d.MaDonHang)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ChiTietDichVu_DonHang");
@@ -96,17 +96,17 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(20)
                 .HasDefaultValue("ChuaSuDung");
 
-            entity.HasOne(d => d.MaDonHangNavigation).WithMany(p => p.ChiTietVes)
+            entity.HasOne(d => d.MaDonHangNavigation).WithMany(p => p.ChiTietVe)
                 .HasForeignKey(d => d.MaDonHang)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ChiTietVe_DonHang");
 
-            entity.HasOne(d => d.MaGheNavigation).WithMany(p => p.ChiTietVes)
+            entity.HasOne(d => d.MaGheNavigation).WithMany(p => p.ChiTietVe)
                 .HasForeignKey(d => d.MaGhe)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ChiTietVe_Ghe");
 
-            entity.HasOne(d => d.MaSuatChieuNavigation).WithMany(p => p.ChiTietVes)
+            entity.HasOne(d => d.MaSuatChieuNavigation).WithMany(p => p.ChiTietVe)
                 .HasForeignKey(d => d.MaSuatChieu)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ChiTietVe_SuatChieu");
@@ -133,7 +133,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.MaDanhMuc).HasMaxLength(10);
             entity.Property(e => e.TenDichVu).HasMaxLength(100);
 
-            entity.HasOne(d => d.MaDanhMucNavigation).WithMany(p => p.DichVus)
+            entity.HasOne(d => d.MaDanhMucNavigation).WithMany(p => p.DichVu)
                 .HasForeignKey(d => d.MaDanhMuc)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DichVu_DanhMuc");
@@ -158,15 +158,15 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(20)
                 .HasDefaultValue("ChoThanhToan");
 
-            entity.HasOne(d => d.MaKhachHangNavigation).WithMany(p => p.DonHangs)
+            entity.HasOne(d => d.MaKhachHangNavigation).WithMany(p => p.DonHang)
                 .HasForeignKey(d => d.MaKhachHang)
                 .HasConstraintName("FK_DonHang_KhachHang");
 
-            entity.HasOne(d => d.MaKhuyenMaiNavigation).WithMany(p => p.DonHangs)
+            entity.HasOne(d => d.MaKhuyenMaiNavigation).WithMany(p => p.DonHang)
                 .HasForeignKey(d => d.MaKhuyenMai)
                 .HasConstraintName("FK_DonHang_KhuyenMai");
 
-            entity.HasOne(d => d.MaNhanVienNavigation).WithMany(p => p.DonHangs)
+            entity.HasOne(d => d.MaNhanVienNavigation).WithMany(p => p.DonHang)
                 .HasForeignKey(d => d.MaNhanVien)
                 .HasConstraintName("FK_DonHang_NhanVien");
         });
@@ -188,12 +188,12 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(20)
                 .HasDefaultValue("Trong");
 
-            entity.HasOne(d => d.MaLoaiGheNavigation).WithMany(p => p.Ghes)
+            entity.HasOne(d => d.MaLoaiGheNavigation).WithMany(p => p.Ghe)
                 .HasForeignKey(d => d.MaLoaiGhe)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Ghe_LoaiGhe");
 
-            entity.HasOne(d => d.MaPhongNavigation).WithMany(p => p.Ghes)
+            entity.HasOne(d => d.MaPhongNavigation).WithMany(p => p.Ghe)
                 .HasForeignKey(d => d.MaPhong)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Ghe_PhongChieu");
@@ -218,7 +218,7 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("MaLoaiKH");
             entity.Property(e => e.SoDienThoai).HasMaxLength(15);
 
-            entity.HasOne(d => d.MaLoaiKhNavigation).WithMany(p => p.KhachHangs)
+            entity.HasOne(d => d.MaLoaiKhNavigation).WithMany(p => p.KhachHang)
                 .HasForeignKey(d => d.MaLoaiKh)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_KhachHang_LoaiKH");
@@ -308,7 +308,7 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(20)
                 .HasDefaultValue("DangChieu");
 
-            entity.HasOne(d => d.MaTheLoaiNavigation).WithMany(p => p.Phims)
+            entity.HasOne(d => d.MaTheLoaiNavigation).WithMany(p => p.Phim)
                 .HasForeignKey(d => d.MaTheLoai)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Phim_TheLoai");
@@ -327,7 +327,7 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(20)
                 .HasDefaultValue("HoatDong");
 
-            entity.HasOne(d => d.MaLoaiPhongNavigation).WithMany(p => p.PhongChieus)
+            entity.HasOne(d => d.MaLoaiPhongNavigation).WithMany(p => p.PhongChieu)
                 .HasForeignKey(d => d.MaLoaiPhong)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PhongChieu_LoaiPhong");
@@ -352,12 +352,12 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(20)
                 .HasDefaultValue("DaLenLich");
 
-            entity.HasOne(d => d.MaPhimNavigation).WithMany(p => p.SuatChieus)
+            entity.HasOne(d => d.MaPhimNavigation).WithMany(p => p.SuatChieu)
                 .HasForeignKey(d => d.MaPhim)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SuatChieu_Phim");
 
-            entity.HasOne(d => d.MaPhongNavigation).WithMany(p => p.SuatChieus)
+            entity.HasOne(d => d.MaPhongNavigation).WithMany(p => p.SuatChieu)
                 .HasForeignKey(d => d.MaPhong)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SuatChieu_PhongChieu");
@@ -382,11 +382,11 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(20)
                 .HasDefaultValue("KhachHang");
 
-            entity.HasOne(d => d.MaKhachHangNavigation).WithMany(p => p.TaiKhoans)
+            entity.HasOne(d => d.MaKhachHangNavigation).WithMany(p => p.TaiKhoan)
                 .HasForeignKey(d => d.MaKhachHang)
                 .HasConstraintName("FK_TaiKhoan_KhachHang");
 
-            entity.HasOne(d => d.MaNhanVienNavigation).WithMany(p => p.TaiKhoans)
+            entity.HasOne(d => d.MaNhanVienNavigation).WithMany(p => p.TaiKhoan)
                 .HasForeignKey(d => d.MaNhanVien)
                 .HasConstraintName("FK_TaiKhoan_NhanVien");
         });
@@ -408,7 +408,7 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(20)
                 .HasDefaultValue("ChoXuLy");
 
-            entity.HasOne(d => d.MaDonHangNavigation).WithMany(p => p.ThanhToans)
+            entity.HasOne(d => d.MaDonHangNavigation).WithMany(p => p.ThanhToan)
                 .HasForeignKey(d => d.MaDonHang)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ThanhToan_DonHang");
