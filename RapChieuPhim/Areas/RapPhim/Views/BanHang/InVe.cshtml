@@ -157,12 +157,8 @@
                     </div>
                 </div>
                 <div class="qr-area">
-                    @if (!string.IsNullOrEmpty(ve.MaQr))
-                    {
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=@ve.MaQr"
-                             alt="QR" width="100" />
-                        <div class="small text-muted font-monospace mt-1">@ve.MaQr</div>
-                    }
+                    <div class="small text-muted">Mã quét vé:</div>
+                    <div class="fw-bold font-monospace small">@ve.MaQr</div>
                 </div>
             </div>
         }
